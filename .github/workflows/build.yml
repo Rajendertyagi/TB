@@ -21,27 +21,31 @@ jobs:
       with:
         dotnet-version: '10.0.x'
 
-    - name: Restore dependencies
-      run: dotnet restore
-
     - name: Build in Short Path (Avoid XamlCompiler long path issues)
       run: |
         $buildDir = "C:\build"
         New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
-        
+
         # Copy all project files explicitly
-        Get-ChildItem -Path . -Exclude .git, .github | Copy-Item -Destination $buildDir -Recurse -Force
-        
+        Copy-Item -Path .\MinimalBrowser.csproj -Destination $buildDir -Force
+        Copy-Item -Path .\App.xaml -Destination $buildDir -Force
+        Copy-Item -Path .\App.xaml.cs -Destination $buildDir -Force
+        Copy-Item -Path .\MainWindow.xaml -Destination $buildDir -Force
+        Copy-Item -Path .\MainWindow.xaml.cs -Destination $buildDir -Force
+        Copy-Item -Path .\app.manifest -Destination $buildDir -Force
+        if (Test-Path ".\Assets") { Copy-Item -Path .\Assets -Destination $buildDir -Recurse -Force }
+
         # Verify project file exists
         if (!(Test-Path "$buildDir\MinimalBrowser.csproj")) {
           Write-Error "Project file not found in build directory!"
           Get-ChildItem $buildDir
           exit 1
         }
-        
+
         Push-Location $buildDir
         try {
-          dotnet build --configuration Release --no-restore
+          dotnet restore
+          dotnet build --configuration Release
         } finally {
           Pop-Location
         }
