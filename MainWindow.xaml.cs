@@ -135,8 +135,8 @@ namespace MinimalBrowser
             tabPanel.Children.Add(closeBtn);
             tabBorder.Child = tabPanel;
 
-            // Tab selection
-            var mouseHandler = new MouseButtonEventHandler((s, e) => SelectTab(tabBorder), true);
+            // Tab selection - Fixed: Pass method reference, not call
+            var mouseHandler = new MouseButtonEventHandler(Tab_MouseLeftButtonDown);
             tabBorder.AddHandler(MouseLeftButtonDownEvent, mouseHandler);
             headerText.AddHandler(MouseLeftButtonDownEvent, mouseHandler);
 
@@ -149,6 +149,14 @@ namespace MinimalBrowser
             
             SelectTab(tabBorder);
             InitializeWebViewAsync(webView, headerText);
+        }
+
+        private void Tab_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border)
+            {
+                SelectTab(border);
+            }
         }
 
         private void SelectTab(Border selectedTabBorder)
