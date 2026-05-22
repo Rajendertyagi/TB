@@ -178,7 +178,9 @@ namespace MinimalBrowser
 
         private void NavigateToHome()
         {
-            GetCurrentWebView()?.Navigate("https://www.google.com");
+            var webView = GetCurrentWebView();
+            if (webView?.CoreWebView2 != null)
+                webView.CoreWebView2.Navigate("https://www.google.com");
         }
 
         private void AddressBar_KeyDown(object sender, KeyEventArgs e)
@@ -191,7 +193,9 @@ namespace MinimalBrowser
                     if (!url.StartsWith("http://") && !url.StartsWith("https://"))
                         url = "https://" + url;
                     
-                    GetCurrentWebView()?.Navigate(url);
+                    var webView = GetCurrentWebView();
+                    if (webView?.CoreWebView2 != null)
+                        webView.CoreWebView2.Navigate(url);
                 }
             }
         }
