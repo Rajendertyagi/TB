@@ -38,6 +38,19 @@ namespace MinimalBrowser
             AddNewTab();
         }
 
+        private void NewTabButton_Click(object sender, RoutedEventArgs e)
+        {
+            AddNewTab();
+        }
+
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TabControl.SelectedItem is Border selectedBorder)
+            {
+                SelectTab(selectedBorder);
+            }
+        }
+
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             this.WindowState = WindowState.Minimized;
