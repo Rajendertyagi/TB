@@ -13,34 +13,112 @@
         <!-- Dark Chrome-like Toolbar -->
         <Border Grid.Row="0" Background="#292a2d" BorderBrush="#3c4043" BorderThickness="0,0,0,1">
             <Grid Margin="5">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 
-                <!-- Navigation Buttons -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="BackButton" Content="◀" Width="30" Height="30" 
-                            Background="Transparent" Foreground="#9aa0a6" 
-                            BorderThickness="0" FontSize="14" Margin="0,0,5,0"/>
-                    <Button x:Name="ForwardButton" Content="▶" Width="30" Height="30" 
-                            Background="Transparent" Foreground="#9aa0a6" 
-                            BorderThickness="0" FontSize="14" Margin="0,0,5,0"/>
-                    <Button x:Name="RefreshButton" Content="⟳" Width="30" Height="30" 
-                            Background="Transparent" Foreground="#9aa0a6" 
-                            BorderThickness="0" FontSize="14" Margin="0,0,10,0"/>
-                </StackPanel>
+                <!-- Top Bar: Tabs + Window Controls -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Tab Control -->
+                    <TabControl x:Name="TabControl" Grid.Column="0" 
+                                Background="Transparent" BorderThickness="0"
+                                SelectionChanged="TabControl_SelectionChanged">
+                        <TabControl.Template>
+                            <ControlTemplate TargetType="TabControl">
+                                <ItemsPresenter/>
+                            </ControlTemplate>
+                        </TabControl.Template>
+                        <TabControl.ItemContainerStyle>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Background" Value="#35363a"/>
+                                <Setter Property="Foreground" Value="#9aa0a6"/>
+                                <Setter Property="BorderThickness" Value="0"/>
+                                <Setter Property="Padding" Value="10,5"/>
+                                <Setter Property="Margin" Value="0,0,2,0"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TabItem">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    Padding="{TemplateBinding Padding}"
+                                                    CornerRadius="4,4,0,0">
+                                                <ContentPresenter ContentSource="Header"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="#202124"/>
+                                        <Setter Property="Foreground" Value="#e8eaed"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TabControl.ItemContainerStyle>
+                    </TabControl>
+                    
+                    <!-- New Tab Button -->
+                    <Button Grid.Column="0" Content="+" Width="28" Height="28" 
+                            HorizontalAlignment="Right" VerticalAlignment="Center"
+                            Background="#35363a" Foreground="#9aa0a6" 
+                            BorderThickness="0" FontSize="16" Margin="0,0,5,0"
+                            Click="NewTabButton_Click"/>
+                    
+                    <!-- Window Controls -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+                        <Button x:Name="MinimizeButton" Content="─" Width="30" Height="28" 
+                                Background="Transparent" Foreground="#9aa0a6" 
+                                BorderThickness="0" FontSize="16"/>
+                        <Button x:Name="MaximizeButton" Content="□" Width="30" Height="28" 
+                                Background="Transparent" Foreground="#9aa0a6" 
+                                BorderThickness="0" FontSize="14"/>
+                        <Button x:Name="CloseButton" Content="✕" Width="40" Height="28" 
+                                Background="Transparent" Foreground="#9aa0a6" 
+                                BorderThickness="0" FontSize="14"/>
+                    </StackPanel>
+                </Grid>
                 
-                <!-- Address Bar -->
-                <Border Grid.Column="1" Background="#35363a" CornerRadius="20" Padding="10,5">
-                    <TextBox x:Name="AddressBar" Background="Transparent" BorderThickness="0" 
-                             Foreground="#e8eaed" FontSize="14" VerticalContentAlignment="Center"
-                             TextChanged="AddressBar_TextChanged" KeyDown="AddressBar_KeyDown"/>
-                </Border>
+                <!-- Navigation Bar -->
+                <Grid Grid.Row="1" Margin="0,5,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <!-- Navigation Buttons -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Button x:Name="HomeButton" Content="⌂" Width="30" Height="30" 
+                                Background="Transparent" Foreground="#9aa0a6" 
+                                BorderThickness="0" FontSize="16" Margin="0,0,5,0"/>
+                        <Button x:Name="BackButton" Content="◀" Width="30" Height="30" 
+                                Background="Transparent" Foreground="#9aa0a6" 
+                                BorderThickness="0" FontSize="14" Margin="0,0,5,0"/>
+                        <Button x:Name="ForwardButton" Content="▶" Width="30" Height="30" 
+                                Background="Transparent" Foreground="#9aa0a6" 
+                                BorderThickness="0" FontSize="14" Margin="0,0,5,0"/>
+                        <Button x:Name="RefreshButton" Content="⟳" Width="30" Height="30" 
+                                Background="Transparent" Foreground="#9aa0a6" 
+                                BorderThickness="0" FontSize="14" Margin="0,0,10,0"/>
+                    </StackPanel>
+                    
+                    <!-- Address Bar -->
+                    <Border Grid.Column="1" Background="#35363a" CornerRadius="20" Padding="10,5">
+                        <TextBox x:Name="AddressBar" Background="Transparent" BorderThickness="0" 
+                                 Foreground="#e8eaed" FontSize="14" VerticalContentAlignment="Center"
+                                 KeyDown="AddressBar_KeyDown"/>
+                    </Border>
+                </Grid>
             </Grid>
         </Border>
         
         <!-- WebView2 Control -->
-        <wv2:WebView2 x:Name="webView" Grid.Row="1" DefaultBackgroundColor="#202124"/>
+        <Border Grid.Row="1" Background="#202124">
+            <Grid x:Name="WebViewContainer"/>
+        </Border>
     </Grid>
 </Window>
