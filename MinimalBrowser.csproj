@@ -1,28 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
-    <UseWinUI>true</UseWinUI>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <WindowsPackageType>None</WindowsPackageType>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    
+    <!-- Single File Publish Settings -->
+    <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
-    <!-- Single-file publishing is incompatible with WinUI 3 XAML compilation. 
-         Output will be MinimalBrowser.exe + dependencies (~5-10MB total). 
-         Still portable (no installer), just requires copying the folder. -->
-    <PublishSingleFile>false</PublishSingleFile>
-    <EnableMsixTooling>false</EnableMsixTooling>
-    <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-    <AppxPackage>False</AppxPackage>
-    <IsPackable>false</IsPackable>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    
+    <!-- Build Settings -->
+    <AssemblyName>MinimalBrowser</AssemblyName>
+    <RootNamespace>MinimalBrowser</RootNamespace>
+    <Version>1.0.0</Version>
+    <Authors>MinimalBrowser</Authors>
+    <Company>MinimalBrowser</Company>
+    <Product>MinimalBrowser</Product>
+    <Description>A minimal dark Chrome-like browser using WPF and WebView2</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.7.250310001" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3065.39" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.1742" />
   </ItemGroup>
 </Project>
