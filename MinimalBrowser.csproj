@@ -13,7 +13,7 @@
          Output will be MinimalBrowser.exe + dependencies (~5-10MB total). 
          Still portable (no installer), just requires copying the folder. -->
     <PublishSingleFile>false</PublishSingleFile>
-    <EnableMsixTooling>true</EnableMsixTooling>
+    <EnableMsixTooling>false</EnableMsixTooling>
     <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackage>False</AppxPackage>
