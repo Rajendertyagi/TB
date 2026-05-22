@@ -28,7 +28,17 @@ jobs:
       run: |
         $buildDir = "C:\build"
         New-Item -ItemType Directory -Force -Path $buildDir | Out-Null
-        Copy-Item -Recurse -Force . $buildDir
+        
+        # Copy all project files explicitly
+        Get-ChildItem -Path . -Exclude .git, .github | Copy-Item -Destination $buildDir -Recurse -Force
+        
+        # Verify project file exists
+        if (!(Test-Path "$buildDir\MinimalBrowser.csproj")) {
+          Write-Error "Project file not found in build directory!"
+          Get-ChildItem $buildDir
+          exit 1
+        }
+        
         Push-Location $buildDir
         try {
           dotnet build --configuration Release --no-restore
