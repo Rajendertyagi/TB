@@ -11,8 +11,7 @@
     <SelfContained>false</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <SingleFile>true</SingleFile>
-    <SingleFileBundle>false</SingleFileBundle>
+    <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
 
   <ItemGroup>
