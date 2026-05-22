@@ -1,0 +1,60 @@
+name: Build Minimal Browser
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  CONFIGURATION: 'Release'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: dotnet restore MinimalBrowser/MinimalBrowser.csproj
+
+    - name: Build
+      run: dotnet build MinimalBrowser/MinimalBrowser.csproj -c ${{ env.CONFIGURATION }} --no-restore
+
+    - name: Publish Portable EXE (Framework Dependent)
+      run: |
+        dotnet publish MinimalBrowser/MinimalBrowser.csproj `
+          -c ${{ env.CONFIGURATION }} `
+          -r win-x64 `
+          --self-contained false `
+          -p:PublishSingleFile=true `
+          -p:EnableCompressionInSingleFile=true `
+          -p:DebugType=None `
+          -p:DebugSymbols=false `
+          -o published `
+          /p:DefineConstants=PORTABLE
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: MinimalBrowser-Portable
+        path: published/MinimalBrowser.exe
+        retention-days: 30
+
+    - name: Create Release (on tag)
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: published/MinimalBrowser.exe
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
