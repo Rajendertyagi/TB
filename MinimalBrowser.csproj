@@ -9,8 +9,10 @@
     <WindowsPackageType>None</WindowsPackageType>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SelfContained>false</SelfContained>
-    <PublishSingleFile>true</PublishSingleFile>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <!-- Single-file publishing is incompatible with WinUI 3 XAML compilation. 
+         Output will be MinimalBrowser.exe + dependencies (~5-10MB total). 
+         Still portable (no installer), just requires copying the folder. -->
+    <PublishSingleFile>false</PublishSingleFile>
     <EnableMsixTooling>true</EnableMsixTooling>
   </PropertyGroup>
 
