@@ -18,16 +18,9 @@ namespace MinimalBrowser
         {
             InitializeComponent();
             
-            // Window control buttons
-            MinimizeBtn.Click += (s, e) => this.WindowState = WindowState.Minimized;
-            MaximizeBtn.Click += (s, e) => this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-            CloseBtn.Click += (s, e) => this.Close();
+            // Window control buttons are handled by Click events in XAML
             
-            // Navigation buttons
-            HomeBtn.Click += (s, e) => NavigateToHome();
-            BackBtn.Click += (s, e) => { if (GetCurrentWebView()?.CanGoBack == true) GetCurrentWebView().GoBack(); };
-            ForwardBtn.Click += (s, e) => { if (GetCurrentWebView()?.CanGoForward == true) GetCurrentWebView().GoForward(); };
-            RefreshBtn.Click += (s, e) => GetCurrentWebView()?.Reload();
+            // Navigation buttons are handled by Click events in XAML
             
             // Add first tab
             AddNewTab();
@@ -43,6 +36,43 @@ namespace MinimalBrowser
         private void AddTab_Click(object sender, RoutedEventArgs e)
         {
             AddNewTab();
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = this.WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void HomeButton_Click(object sender, RoutedEventArgs e)
+        {
+            NavigateToHome();
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetCurrentWebView()?.CanGoBack == true)
+                GetCurrentWebView().GoBack();
+        }
+
+        private void ForwardButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetCurrentWebView()?.CanGoForward == true)
+                GetCurrentWebView().GoForward();
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            GetCurrentWebView()?.Reload();
         }
 
         private void AddNewTab()
@@ -98,11 +128,11 @@ namespace MinimalBrowser
             headerText.AddHandler(MouseLeftButtonDownEvent, mouseHandler);
 
             tabs.Add((tabBorder, webView, headerText));
-            TabStrip.Items.Add(tabBorder);
+            TabControl.Items.Add(tabBorder);
             
             // Add WebView to host
-            WebViewHost.Children.Clear();
-            WebViewHost.Children.Add(webView);
+            WebViewContainer.Children.Clear();
+            WebViewContainer.Children.Add(webView);
             
             SelectTab(tabBorder);
             InitializeWebViewAsync(webView, headerText);
@@ -120,8 +150,8 @@ namespace MinimalBrowser
                     tabs[i].headerText.Foreground = new SolidColorBrush(Color.FromRgb(0xE8, 0xEA, 0xED));
                     
                     // Show the selected webview
-                    WebViewHost.Children.Clear();
-                    WebViewHost.Children.Add(tabs[i].webView);
+                    WebViewContainer.Children.Clear();
+                    WebViewContainer.Children.Add(tabs[i].webView);
                     
                     AddressBar.Text = tabs[i].webView.Source?.ToString() ?? "";
                 }
@@ -148,7 +178,7 @@ namespace MinimalBrowser
             if (index >= 0)
             {
                 tabs[index].webView?.Dispose();
-                TabStrip.Items.Remove(tabBorderToClose);
+                TabControl.Items.Remove(tabBorderToClose);
                 tabs.RemoveAt(index);
 
                 if (tabs.Count == 0)
