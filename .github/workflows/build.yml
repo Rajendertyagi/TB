@@ -3,25 +3,31 @@ name: Build Portable WinUI3 Browser
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Allows you to manually trigger the build from the GitHub UI
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
+    # 1. Download the source code from your repository into the runner environment
     - name: Checkout Source Code
       uses: actions/checkout@v4
 
+    # 2. Setup the .NET 8 Environment required for compilation
     - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
+    # 3. Compile, optimize, and bundle all native WinUI 3 binaries into a local directory
     - name: Publish Self-Contained Release Artifacts
       run: |
-        dotnet publish MyPortableBrowser.csproj -c Release -r win-x64 --self-contained true -p:PublishReadyToRun=true -o ./publish
+        dotnet publish MyPortableBrowser.csproj -c Release -r win-x64 -p:Platform=x64 --self-contained true -p:PublishReadyToRun=true -o ./publish
 
+    # 4. Grab the completed directory and upload it as a downloadable ZIP package
     - name: Package Portable Zip Archive
       uses: actions/upload-artifact@v4
       with:
