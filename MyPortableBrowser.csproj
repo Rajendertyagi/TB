@@ -8,17 +8,15 @@
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 
-    <!-- CRITICAL FOR PORTABILITY: Tells Windows this is an unpackaged, standalone app -->
+    <!-- CRITICAL FOR PORTABILITY -->
     <WindowsPackageType>None</WindowsPackageType>
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-    
-    <!-- CRITICAL FOR PORTABILITY: Bundles WinUI 3 & .NET runtimes inside the folder -->
     <SelfContained>true</SelfContained>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240312000" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2420.47" />
+    <!-- We ONLY need this package. It includes its own matched WebView2 engine! -->
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240404000" />
   </ItemGroup>
 </Project>
