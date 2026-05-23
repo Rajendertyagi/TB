@@ -13,10 +13,14 @@
     <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
     <SelfContained>true</SelfContained>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
+    <!-- FIX: Forces the compiler to use cross-platform independent CLI tooling tools -->
+    <!-- This stops the engine from looking for deep Visual Studio installation dependencies -->
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <EnablePreviewMsixTooling>true</EnablePreviewMsixTooling>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- We ONLY need this package. It includes its own matched WebView2 engine! -->
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240404000" />
   </ItemGroup>
 </Project>
