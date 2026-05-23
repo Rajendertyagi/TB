@@ -9,20 +9,15 @@ namespace MyPortableBrowser
 
         public App()
         {
-            this.InitializeComponent();
+            // This method is auto-generated behind the scenes by WinUI 3 compiler.
+            // Forcing platform x64 in the workflow will guarantee it compiles correctly!
+            this.InitializeComponent(); 
         }
 
-        /// <summary>
-        /// Invoked when the application is launched normally by the end user.
-        /// </summary>
         protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
             m_window = new MainWindow();
-            
-            // Adjusting initial window frame size to mirror a default browser state
             m_window.Title = "Portable Chrome Lite";
-            
-            // Activate and display the window layout
             m_window.Activate();
         }
     }
