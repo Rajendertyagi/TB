@@ -15,13 +15,16 @@ namespace MyPortableBrowser
 
         private async void InitializeBrowser()
         {
-            // Portable isolation strategy: Save cookies and cache relative to the executable directory
+            // 1. Establish the portable cache directory location
             string localFolder = AppDomain.CurrentDomain.BaseDirectory;
             string userDataFolder = Path.Combine(localFolder, "BrowserProfileData");
             
-            // FIX: Explicitly use the WinUI namespace version of CoreWebView2Environment to stop the naming fight
-            var environment = await Microsoft.Web.WebView2.Core.CoreWebView2Environment.CreateAsync(null, userDataFolder);
-            await WebView.EnsureCoreWebView2Async(environment);
+            // 2. STOPS COMPILER ERRORS: Explicitly set the location using WebView2's design configuration variable
+            // This forces the browser engine to use our local folder instead of the host machine's AppData.
+            Environment.SetEnvironmentVariable("WEBVIEW2_USER_DATA_FOLDER", userDataFolder);
+
+            // 3. Fire up the browser using the parameterless WinUI 3 signature
+            await WebView.EnsureCoreWebView2Async();
         }
 
         private void GoButton_Click(object sender, RoutedEventArgs e) => NavigateToUrl();
