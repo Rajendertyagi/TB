@@ -7,17 +7,20 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <Grid Background="#1C1B1F" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid Background="#1C1B22" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="44"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1F1F1F" Padding="0,0,140,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1F1F1F" Padding="0,4,140,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <controls:TabView x:Name="MainBrowserTabs" 
                               VerticalAlignment="Bottom" 
                               HorizontalAlignment="Stretch"
+                              IsAddTabButtonVisible="True"
+                              AllowDropTabs="True"
+                              CanReorderTabs="True"
                               Background="Transparent">
                 <controls:TabView.TabItems>
                     <controls:TabViewItem Header="New Tab" Visibility="Collapsed"/>
@@ -25,16 +28,16 @@
             </controls:TabView>
         </Grid>
 
-        <Grid Grid.Row="1" Background="#2E2E2E" Padding="8,0,8,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid Grid.Row="1" Background="#2B2A33" Padding="8,4,8,4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderBrush="#1F1F1F" BorderThickness="0,0,0,1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="0,0,8,0">
-                <Button x:Name="BackButton" Content="" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14"/>
-                <Button x:Name="ForwardButton" Content="" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14"/>
-                <Button x:Name="RefreshButton" Content="" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14"/>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="6" Margin="4,0,12,0">
+                <Button x:Name="BackButton" Content="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14" FontSize="12"/>
+                <Button x:Name="ForwardButton" Content="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14" FontSize="12"/>
+                <Button x:Name="RefreshButton" Content="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14" FontSize="12"/>
             </StackPanel>
 
             <AutoSuggestBox x:Name="Omnibox" 
@@ -43,14 +46,14 @@
                             HorizontalAlignment="Stretch"
                             PlaceholderText="Search Google or type a URL" 
                             QueryIcon="Find" 
-                            Background="#1F1F1F" 
+                            Background="#1C1B22" 
                             Foreground="White" 
                             BorderThickness="0"
-                            CornerRadius="16"
-                            Padding="12,3,12,3"/>
+                            CornerRadius="14"
+                            Padding="14,4,14,4"/>
         </Grid>
 
-        <Grid x:Name="TabContentDisplayGrid" Grid.Row="2" Background="#1C1B1F" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <Grid x:Name="TabContentDisplayGrid" Grid.Row="2" Background="#1C1B22" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Canvas Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
         </Grid>
     </Grid>
