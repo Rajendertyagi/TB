@@ -14,30 +14,26 @@ namespace TradingBrowser
         private readonly DatabaseService _dbService;
         private readonly NavigationController _inputController;
 
-        // The View-Model acts as the central data state for the UI
         public BrowserViewModel ViewModel { get; } = new BrowserViewModel();
 
         public MainWindow()
         {
             this.InitializeComponent();
             
-            // 1. Initialize UI Frame
             InitializeCustomTitleBar();
 
-            // 2. Initialize Services
             _dbService = new DatabaseService();
             _inputController = new NavigationController(ViewModel);
 
-            // 3. Register Event Handlers
+            // Register input routing
             this.Content.PreviewKeyDown += _inputController.HandleGlobalKeyboardShortcuts;
             this.Content.PointerPressed += (s, e) => _inputController.HandleMouseAuxiliaryInputs(e);
             
-            // AUTOMATIC UI UPDATER: Whenever the ActiveTab changes in the ViewModel, refresh the View
             ViewModel.PropertyChanged += (s, e) => { 
                 if (e.PropertyName == nameof(BrowserViewModel.ActiveTab)) UpdateActiveBrowserDisplay(); 
             };
             
-            // 4. Start Non-Blocking Session Load
+            LoggerService.Info("System: UI components initialized. Loading session data...");
             _ = LoadPreviousSessionAsync();
         }
 
@@ -59,13 +55,16 @@ namespace TradingBrowser
 
         private async Task LoadPreviousSessionAsync()
         {
-            // Perform DB I/O on background thread to keep UI interactive
-            var savedTabs = await Task.Run(() => _dbService.LoadWorkspaceLayout());
+            var savedTabs = await Task.Run(() => {
+                LoggerService.Info("Database: Fetching saved workspace...");
+                return _dbService.LoadWorkspaceLayout();
+            });
 
             this.DispatcherQueue.TryEnqueue(() =>
             {
                 if (savedTabs != null && savedTabs.Any())
                 {
+                    LoggerService.Info($"System: Restoring {savedTabs.Count} active workspaces.");
                     foreach (var tab in savedTabs) 
                         ViewModel.OpenTabs.Add(new TabContext(tab.Title, tab.Url));
                     
@@ -73,6 +72,7 @@ namespace TradingBrowser
                 }
                 else
                 {
+                    LoggerService.Info("System: No saved session found. Opening default workspace.");
                     ViewModel.OpenNewTab();
                 }
             });
@@ -87,14 +87,15 @@ namespace TradingBrowser
             {
                 if (tab.BrowserInstance == null)
                 {
+                    LoggerService.Info($"Engine: Warming up Chromium for workspace: {tab.Title}");
                     var webView = new Microsoft.UI.Xaml.Controls.WebView2();
                     
-                    // Lazy-initialize the browser engine asynchronously
                     await webView.EnsureCoreWebView2Async();
                     
                     tab.BrowserInstance = webView;
                     webView.NavigationStarting += (s, args) => { tab.CurrentUrl = args.Uri?.ToString() ?? ""; };
                     webView.Source = new Uri(tab.CurrentUrl);
+                    LoggerService.Info("Engine: Browser control successfully mounted.");
                 }
                 BrowserGrid.Children.Add(tab.BrowserInstance);
             }
