@@ -1,35 +1,47 @@
-name: Build Portable WinUI3 Browser
+name: Cloud Native Portable Build Pipeline
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch: # Allows you to manually trigger the build from the GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-    # 1. Download the source code from your repository into the runner environment
-    - name: Checkout Source Code
+    - name: Clone Code Repository
       uses: actions/checkout@v4
 
-    # 2. Setup the .NET 8 Environment required for compilation
-    - name: Setup .NET SDK
+    - name: Setup .NET 10 Cutting Edge Environment
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
+        include-prerelease: true
 
-    # 3. Compile, optimize, and bundle all native WinUI 3 binaries into a local directory
-    - name: Publish Self-Contained Release Artifacts
+    - name: Restore NuGet Project Dependencies
+      run: dotnet restore TradingBrowser.csproj
+
+    - name: Compile Ultra-Lightweight Binary (Framework Dependent)
+      run: >
+        dotnet publish TradingBrowser.csproj
+        -c Release
+        -r win-x64
+        --self-contained false
+        -p:PublishTrimmed=true
+        -p:TrimMode=partial
+        -p:InvariantGlobalization=true
+        -p:DisableEmbeddedSignature=true
+        -o ./PublishOutput
+
+    - name: Purge Residual WinAppSDK Localizations
       run: |
-        dotnet publish MyPortableBrowser.csproj -c Release -r win-x64 -p:Platform=x64 --self-contained true -p:PublishReadyToRun=true -o ./publish
+        Get-ChildItem -Path ./PublishOutput -Recurse -Directory | 
+        Where-Object { $_.Name -ne "en-US" -and $_.Name -match "^[a-z]{2}(-[A-Z]{2})?$" } | 
+        Remove-Item -Recurse -Force
 
-    # 4. Grab the completed directory and upload it as a downloadable ZIP package
-    - name: Package Portable Zip Archive
+    - name: Compress into Standalone Portable ZIP Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Portable-ChromeLite-Browser
-        path: ./publish/
+        name: PortableTradingBrowser-Win11-x64
+        path: ./PublishOutput/
