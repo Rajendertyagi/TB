@@ -10,6 +10,8 @@
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+
+    <TrimmerRootAssembly Include="TradingBrowser" />
   </PropertyGroup>
 
   <ItemGroup>
