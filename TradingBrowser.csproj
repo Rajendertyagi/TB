@@ -9,11 +9,8 @@
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
   </PropertyGroup>
-
-  <ItemGroup>
-    <Compile Include="**\*.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
