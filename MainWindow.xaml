@@ -3,7 +3,19 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="TB">
-    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <TextBlock Text="Hello, WinUI 3!" />
+    
+    <StackPanel Orientation="Vertical" 
+                HorizontalAlignment="Center" 
+                VerticalAlignment="Center" 
+                Spacing="20">
+        
+        <TextBlock Text="{x:Bind ViewModel.Status, Mode=OneWay}" 
+                   FontSize="20" 
+                   HorizontalAlignment="Center" />
+        
+        <Button Content="Update Status" 
+                Command="{x:Bind ViewModel.UpdateStatusCommand}" 
+                HorizontalAlignment="Center" />
+        
     </StackPanel>
 </Window>
