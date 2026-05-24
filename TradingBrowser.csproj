@@ -15,7 +15,7 @@
     <!-- Extreme Footprint Pruning & Invariant Compression -->
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
-    <InvariantGlobalization=true></InvariantGlobalization=true>
+    <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <IlcGenerateCompleteTypeMetadata>false</IlcGenerateCompleteTypeMetadata>
   </PropertyGroup>
