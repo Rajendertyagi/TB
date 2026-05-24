@@ -42,7 +42,7 @@ namespace ModernWpfApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Initialization error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Initialization error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -98,7 +98,7 @@ namespace ModernWpfApp
         }
 
         /// <summary>
-        /// Saves navigation history or tracking metrics directly to the local database.
+                /// Saves navigation history or tracking metrics directly to the local database.
         /// </summary>
         private void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
         {
