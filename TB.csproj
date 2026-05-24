@@ -8,9 +8,10 @@
     
     <EnableMsixTooling>true</EnableMsixTooling>
     <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
-    
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    
+    <PublishTrimmed>false</PublishTrimmed>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
