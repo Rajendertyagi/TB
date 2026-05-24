@@ -8,10 +8,15 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-    <UseWinUI>true</UseWinUI>
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
-    
     <AppxPackage>false</AppxPackage>
+
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <EnableMsixTooling>true</EnableMsixTooling> 
+    
+    <SelfContained>false</SelfContained> 
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages> 
   </PropertyGroup>
 
   <ItemGroup>
