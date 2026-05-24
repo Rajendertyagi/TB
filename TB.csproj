@@ -13,21 +13,7 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <PublishTrimmed>false</PublishTrimmed>
-    
-    <EnableCoreCompileOnBuild>true</EnableCoreCompileOnBuild>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="**\.git\**" />
-    <None Remove="**\.github\**" />
-    <None Remove="**\.tb_data\**" />
-    <Compile Remove="**\.git\**" />
-    <Compile Remove="**\.github\**" />
-    <Compile Remove="**\.tb_data\**" />
-    
-    <Compile Remove="bin\**;obj\**" />
-    <None Remove="bin\**;obj\**" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.1.3" />
