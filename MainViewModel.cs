@@ -1,24 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Serilog;
+using System.Collections.ObjectModel;
 
 namespace TB
 {
     public partial class MainViewModel : ObservableObject
     {
+        public ObservableCollection<BrowserTab> Tabs { get; } = new ObservableCollection<BrowserTab>();
+
         [ObservableProperty]
-        private string _status = "Application is initialized and ready.";
-
-        public MainViewModel()
-        {
-            Log.Information("MainViewModel initialized.");
-        }
-
-        [RelayCommand]
-        public void UpdateStatus()
-        {
-            Status = $"Status updated at {System.DateTime.Now:HH:mm:ss}";
-            Log.Information("Status updated by user.");
-        }
+        private string _status = "Browser Ready";
     }
 }
