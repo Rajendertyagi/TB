@@ -2,11 +2,10 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.26100.0</TargetFramework>
+    <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
     <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <UseWinUI>true</UseWinUI>
-    <EnablePackages>true</EnablePackages>
-    
     <EnableMsixTooling>true</EnableMsixTooling>
     <SelfContained>true</SelfContained>
     <PublishSingleFile>true</PublishSingleFile>
@@ -19,14 +18,5 @@
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3719.77" />
     <PackageReference Include="Dapper" Version="2.1.35" />
     <PackageReference Include="Serilog" Version="4.1.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ApplicationDefinition Include="App.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </ApplicationDefinition>
-    <Page Include="MainWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
   </ItemGroup>
 </Project>
