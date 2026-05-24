@@ -12,8 +12,9 @@
     <WindowsPackageType>None</WindowsPackageType>
     <SelfContained>false</SelfContained>
     <PublishReadyToRun>true</PublishReadyToRun>
+    
     <WarningsNotAsErrors>NU1605</WarningsNotAsErrors>
-    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <XamlCompilerUseReflectionBasedTypeLookup>False</XamlCompilerUseReflectionBasedTypeLookup>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,4 +27,8 @@
     <PackageReference Include="Serilog" Version="4.3.1" />
     <PackageReference Include="Serilog.Sinks.Debug" Version="3.0.0" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)GeneratedFiles</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
 </Project>
