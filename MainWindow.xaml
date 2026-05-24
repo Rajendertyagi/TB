@@ -32,7 +32,7 @@
                      AddTabButtonCommand="{x:Bind ViewModel.OpenNewTabCommand}"
                      Background="Transparent">
                 <TabView.TabItemTemplate>
-                    <DataTemplate x:DataType="local/TabContext">
+                    <DataTemplate x:DataType="local:TabContext">
                         <TabViewItem Header="{x:Bind Title, Mode=OneWay}">
                             <TabViewItem.IconSource>
                                 <SymbolIconSource Symbol="Globe"/>
@@ -60,13 +60,8 @@
                             Text="{x:Bind ViewModel.ActiveTab.CurrentUrl, Mode=OneWay}"
                             PlaceholderText="Search or enter web address..." 
                             QueryIcon="Find" Background="#1E1E1E" Foreground="#FFFFFF" VerticalAlignment="Center"/>
-
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0">
-                <Button Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Background="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
-            </StackPanel>
         </Grid>
 
-        <Grid x:Name="BrowserGrid" Grid.Row="2" Background="#121212">
-            </Grid>
+        <Grid x:Name="BrowserGrid" Grid.Row="2" Background="#121212"/>
     </Grid>
 </Window>
