@@ -7,27 +7,25 @@
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     
-    <!-- Complete Decoupling from MSIX Packaging Systems -->
+    <!-- Strict Unpackaged Standalone Footprint Definitions -->
     <WindowsPackageType>None</WindowsPackageType>
-    <EnableMsixTooling>false</EnableMsixTooling>
     <AppxPackage>false</AppxPackage>
     
-    <!-- Self-Contained Deployment Configuration -->
+    <!-- Self-Contained Binary Compilation Requirements -->
     <SelfContained>true</SelfContained>
     <PublishSelfContained>true</PublishSelfContained>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     
-    <!-- Strategic Trimming Profiles -->
+    <!-- Modern .NET CLI Build Redirectors (Fixes MSB4062/ExpandPriContent errors) -->
+    <EnableMsixTooling>true</EnableMsixTooling>
+    <EnableCoreMrtTooling Condition="'$(BuildingInsideVisualStudio)' != 'true'">false</EnableCoreMrtTooling>
+    
+    <!-- Size Optimization and Trimming Infrastructure Profile -->
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
     <OptimizationPreference>Size</OptimizationPreference>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-
-    <!-- Overrides to Bypass Missing SDK Packaging Assembly Dependencies -->
-    <EnableAppxPackaging>false</EnableAppxPackaging>
-    <EnablePriGen>false</EnablePriGen>
-    <MrtBuildPriFiles>false</MrtBuildPriFiles>
     <EnableXamlCompilerTrimOptimization>false</EnableXamlCompilerTrimOptimization>
     <EnableCoreMrtTrimOptimization>false</EnableCoreMrtTrimOptimization>
   </PropertyGroup>
