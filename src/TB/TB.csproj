@@ -12,6 +12,13 @@
     <DISABLE_XAML_GENERATED_MAIN>true</DISABLE_XAML_GENERATED_MAIN>
     
     <WindowsPackageType>None</WindowsPackageType>
+  <EnableMsixTooling>true</EnableMsixTooling> 
+    
+    <!-- Portability & Size Optimization -->
+    <!-- Framework Dependent (Requires .NET 10 Desktop Runtime on host) -->
+    <SelfContained>false</SelfContained> 
+    <!-- Strips all non-English resource DLLs to minimize size -->
+    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages> 
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
