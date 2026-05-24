@@ -69,11 +69,20 @@ namespace TradingBrowser
             {
                 try
                 {
-                    var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(_rootPortablePath, "WebViewCache"));
-                    await webView.EnsureCoreWebView2Async(env);
+                    string cachePath = Path.Combine(_rootPortablePath, "WebViewCache");
+                    var options = new CoreWebView2EnvironmentOptions();
                     
-                    DispatcherQueue.TryEnqueue(() =>
+                    // Correct WinUI 3 API Call signature for targeting custom file storage runtimes
+                    var env = await CoreWebView2Environment.CreateWithOptionsAsync(
+                        browserExecutableFolder: string.Empty, 
+                        userDataFolder: cachePath, 
+                        options: options
+                    );
+                    
+                    DispatcherQueue.TryEnqueue(async () =>
                     {
+                        await webView.EnsureCoreWebView2Async(env);
+                        
                         // Disable multi-window background power constraints
                         webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
                         
