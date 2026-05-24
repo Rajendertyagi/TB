@@ -77,29 +77,29 @@ namespace TradingBrowser
             TabContentDisplayGrid.Children.Clear();
             TabContentDisplayGrid.Children.Add(_activeBrowserInstance);
 
-            Task.Run(async () =>
+            // RUNNER ROOT FIX: Execute natively on the Main STA UI loop directly 
+            // rather than spawning a detached background Task worker context.
+            DispatcherQueue.TryEnqueue(async () =>
             {
                 try
                 {
                     string cachePath = Path.Combine(_rootPortablePath, "WebViewCache");
                     var options = new CoreWebView2EnvironmentOptions();
                     
+                    // Setup unmanaged variables on exact current executing thread alignment
                     var env = await CoreWebView2Environment.CreateWithOptionsAsync(
                         browserExecutableFolder: string.Empty, 
                         userDataFolder: cachePath, 
                         options: options
                     );
                     
-                    DispatcherQueue.TryEnqueue(async () =>
-                    {
-                        await _activeBrowserInstance.EnsureCoreWebView2Async(env);
-                        _activeBrowserInstance.CoreWebView2.Settings.IsWebMessageEnabled = true;
-                        
-                        _activeBrowserInstance.CoreWebView2.NavigationStarting += (s, e) => WriteLog("Navigation Loop", $"Routing: {e.Uri}");
-                        _activeBrowserInstance.CoreWebView2.NavigationCompleted += (s, e) => WriteLog("Navigation Loop", $"Loaded. Status: {e.IsSuccess}");
-                        
-                        _activeBrowserInstance.Source = new Uri(targetUrl);
-                    });
+                    await _activeBrowserInstance.EnsureCoreWebView2Async(env);
+                    _activeBrowserInstance.CoreWebView2.Settings.IsWebMessageEnabled = true;
+                    
+                    _activeBrowserInstance.CoreWebView2.NavigationStarting += (s, e) => WriteLog("Navigation Loop", $"Routing: {e.Uri}");
+                    _activeBrowserInstance.CoreWebView2.NavigationCompleted += (s, e) => WriteLog("Navigation Loop", $"Loaded. Status: {e.IsSuccess}");
+                    
+                    _activeBrowserInstance.Source = new Uri(targetUrl);
                 }
                 catch (Exception ex)
                 {
