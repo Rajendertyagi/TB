@@ -1,24 +1,20 @@
 using System;
 using System.IO;
-using System.Windows;
 using Microsoft.UI.Xaml;
 
 namespace TradingBrowser
 {
-    /// <summary>
-    /// Provides application-specific behavior to supplement the default Application class.
-    /// </summary>
     public partial class App : Application
     {
         private Window m_window;
 
         public App()
         {
-            // 1. Catch absolute earliest .NET runtime failures (Native DLL issues, missing paths)
+            // Catch absolute earliest .NET runtime failures
             AppDomain.CurrentDomain.UnhandledException += (s, e) => 
                 WritePanicLog("AppDomain_UnhandledException", e.ExceptionObject as Exception);
 
-            // 2. Catch Task background multi-threaded lock crashes
+            // Catch Task background multi-threaded lock crashes
             System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (s, e) => {
                 WritePanicLog("TaskScheduler_UnobservedTaskException", e.Exception);
                 e.SetObserved();
@@ -26,10 +22,10 @@ namespace TradingBrowser
 
             this.InitializeComponent();
 
-            // 3. Catch XAML parser / UI loop failures
+            // Catch XAML parser / UI loop failures
             this.UnhandledException += (s, e) => {
                 WritePanicLog("WinUI_UnhandledException", e.Exception);
-                e.Handled = true; // Attempt override suppression to observe state
+                e.Handled = true; 
             };
         }
 
@@ -47,9 +43,6 @@ namespace TradingBrowser
             }
         }
 
-        /// <summary>
-        /// Emergency disk-write routine bypassing all custom configuration managers.
-        /// </summary>
         private static void WritePanicLog(string failurePoint, Exception ex)
         {
             try
@@ -68,9 +61,6 @@ Message:
 Source: 
 {ex?.Source}
 
-Target Site: 
-{ex?.TargetSite}
-
 Stack Trace:
 {ex?.StackTrace}
 
@@ -79,12 +69,11 @@ Inner Exception:
 {ex?.InnerException?.StackTrace}
 =================================================={Environment.NewLine}";
 
-                // Absolute fallback atomic write
                 File.AppendAllText(panicFilePath, errorBlock);
             }
             catch
             {
-                // Unpreventable low-level system memory locks
+                // Unpreventable low-level system locks protection anchor
             }
         }
     }
