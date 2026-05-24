@@ -28,7 +28,7 @@ namespace TradingBrowser
 
             Directory.CreateDirectory(_logDirectory);
             
-            WriteLog("Startup Engine", "Initializing Portable Core Web UI Canvas Engine.");
+            WriteLog("Startup Engine", "Initializing Dext Professional UI Trading Canvas Workspace Engine.");
             ExtendsContentIntoTitleBar = true;
             
             // Explicitly hook layout events via pure C# compilation roots
@@ -45,7 +45,8 @@ namespace TradingBrowser
             if (!_isWebViewInitialized)
             {
                 _isWebViewInitialized = true;
-                InitializeBrowserEngine("https://www.tradingview.com/chart/");
+                // Launches right into TradingView multi-charts search parameters directly on startup
+                InitializeBrowserEngine("https://www.google.com/search?q=tradingview+lightweight+charts+multiple+charts");
             }
         }
 
@@ -73,12 +74,9 @@ namespace TradingBrowser
                 VerticalAlignment = VerticalAlignment.Stretch
             };
 
-            // Inject instance explicitly inside structural Grid container tree framework
             TabContentDisplayGrid.Children.Clear();
             TabContentDisplayGrid.Children.Add(_activeBrowserInstance);
 
-            // RUNNER ROOT FIX: Execute natively on the Main STA UI loop directly 
-            // rather than spawning a detached background Task worker context.
             DispatcherQueue.TryEnqueue(async () =>
             {
                 try
@@ -86,7 +84,6 @@ namespace TradingBrowser
                     string cachePath = Path.Combine(_rootPortablePath, "WebViewCache");
                     var options = new CoreWebView2EnvironmentOptions();
                     
-                    // Setup unmanaged variables on exact current executing thread alignment
                     var env = await CoreWebView2Environment.CreateWithOptionsAsync(
                         browserExecutableFolder: string.Empty, 
                         userDataFolder: cachePath, 
@@ -96,8 +93,11 @@ namespace TradingBrowser
                     await _activeBrowserInstance.EnsureCoreWebView2Async(env);
                     _activeBrowserInstance.CoreWebView2.Settings.IsWebMessageEnabled = true;
                     
-                    _activeBrowserInstance.CoreWebView2.NavigationStarting += (s, e) => WriteLog("Navigation Loop", $"Routing: {e.Uri}");
-                    _activeBrowserInstance.CoreWebView2.NavigationCompleted += (s, e) => WriteLog("Navigation Loop", $"Loaded. Status: {e.IsSuccess}");
+                    _activeBrowserInstance.CoreWebView2.NavigationStarting += (s, e) => {
+                        WriteLog("Navigation Loop", $"Routing destination tracking anchor update: {e.Uri}");
+                        // Automatically update the sleek omnibox text field display to match active browser location
+                        Omnibox.Text = e.Uri;
+                    };
                     
                     _activeBrowserInstance.Source = new Uri(targetUrl);
                 }
