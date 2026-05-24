@@ -31,12 +31,38 @@ namespace TB.ViewModels
 
         private void InitializeSession()
         {
-            // TODO: In a full implementation, query _dbService for the last session's tabs.
-            // For now, we boot with a fresh tab to ensure the UI has something to render.
-            CreateTab();
+            _dbService.PurgeOldHistory();
+
+            var savedTabs = _dbService.GetSavedTabs();
+            TabState activeTabToRestore = null;
+
+            foreach (var tab in savedTabs)
+            {
+                if (!tab.IsActive && !tab.IsPinned)
+                {
+                    tab.IsSuspended = true;
+                }
+
+                _tabLookup[tab.TabId] = tab;
+                Tabs.Add(tab);
+
+                if (tab.IsActive)
+                {
+                    activeTabToRestore = tab;
+                }
+            }
+
+            if (Tabs.Count > 0)
+            {
+                CurrentTab = activeTabToRestore ?? Tabs.First();
+                OmniboxText = CurrentTab.Url;
+            }
+            else
+            {
+                CreateTab();
+            }
         }
 
-        // Triggered automatically by CommunityToolkit when CurrentTab changes
         partial void OnCurrentTabChanged(TabState value)
         {
             if (value != null)
@@ -61,7 +87,6 @@ namespace TB.ViewModels
         {
             if (!_tabLookup.TryGetValue(tabId, out var tabToRemove)) return;
 
-            // Determine fallback tab if we are closing the active one
             if (CurrentTab?.TabId == tabId)
             {
                 int index = Tabs.IndexOf(tabToRemove);
@@ -73,7 +98,6 @@ namespace TB.ViewModels
                 }
                 else
                 {
-                    // Don't leave the browser empty, spawn a new tab
                     CreateTab();
                 }
             }
@@ -81,7 +105,7 @@ namespace TB.ViewModels
             Tabs.Remove(tabToRemove);
             _tabLookup.Remove(tabId);
             
-            // TODO: Instruct _dbService to delete this tab from SQLite
+            _dbService.DeleteTabState(tabId); 
         }
 
         [RelayCommand]
@@ -90,7 +114,6 @@ namespace TB.ViewModels
             if (!_tabLookup.TryGetValue(tabId, out var incomingTab) || CurrentTab?.TabId == tabId) 
                 return;
 
-            // 1. Suspend outgoing tab
             if (CurrentTab != null)
             {
                 CurrentTab.IsActive = false;
@@ -101,13 +124,9 @@ namespace TB.ViewModels
                 _dbService.SaveTabState(CurrentTab);
             }
 
-            // 2. Activate incoming tab
             incomingTab.IsActive = true;
             incomingTab.IsSuspended = false;
             CurrentTab = incomingTab;
-            
-            // Note: The actual WebView2 DOM injection/extraction will be handled in the View's code-behind,
-            // reacting to the CurrentTab change, because ViewModels should not directly touch UI controls.
         }
 
         [RelayCommand]
@@ -115,7 +134,6 @@ namespace TB.ViewModels
         {
             if (CurrentTab == null) return;
             
-            // Basic URL formatting fallback
             if (!url.StartsWith("http") && !url.StartsWith("about:"))
             {
                 url = $"https://{url}";
@@ -125,24 +143,25 @@ namespace TB.ViewModels
             OmniboxText = url;
             
             _dbService.SaveTabState(CurrentTab);
+            
+            if (!url.StartsWith("about:"))
+            {
+                _dbService.AddToHistory(url, CurrentTab.Title);
+            }
         }
 
         [RelayCommand]
         public void ProcessFailed()
         {
-            // If WebView2 crashes, we preserve the state and signal the UI to respawn the control
             if (CurrentTab != null)
             {
                 _dbService.SaveTabState(CurrentTab);
             }
-            
-            // In a production app, we would log this to Serilog here
         }
 
         [RelayCommand]
         public void SaveSession()
         {
-            // Flush all current states to SQLite before teardown
             foreach (var tab in _tabLookup.Values)
             {
                 _dbService.SaveTabState(tab);
