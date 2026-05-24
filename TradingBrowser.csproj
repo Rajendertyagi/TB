@@ -1,39 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.22621.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <RootNamespace>TradingBrowser</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
-    
-    <!-- Strict Unpackaged Standalone Footprint Definitions -->
-    <WindowsPackageType>None</WindowsPackageType>
-    <AppxPackage>false</AppxPackage>
-    
-    <!-- Self-Contained Binary Compilation Requirements -->
-    <SelfContained>true</SelfContained>
-    <PublishSelfContained>true</PublishSelfContained>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    
-    <!-- Modern .NET CLI Build Redirectors (Fixes MSB4062/ExpandPriContent errors) -->
-    <EnableMsixTooling>true</EnableMsixTooling>
-    <EnableCoreMrtTooling Condition="'$(BuildingInsideVisualStudio)' != 'true'">false</EnableCoreMrtTooling>
-    
-    <!-- Size Optimization and Trimming Infrastructure Profile -->
-    <PublishTrimmed>true</PublishTrimmed>
-    <TrimMode>partial</TrimMode>
-    <OptimizationPreference>Size</OptimizationPreference>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-    <EnableXamlCompilerTrimOptimization>false</EnableXamlCompilerTrimOptimization>
-    <EnableCoreMrtTrimOptimization>false</EnableCoreMrtTrimOptimization>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="**\*.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250205002" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.2" />
-    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.10" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
   </ItemGroup>
+
 </Project>
