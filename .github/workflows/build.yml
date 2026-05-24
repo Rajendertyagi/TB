@@ -1,0 +1,11 @@
+name: TB Terminal Build
+on: [push]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: dotnet publish -c Release -r win-x64 --self-contained false 
+             /p:PublishSingleFile=true /p:EnableCompressionInSingleFile=true 
+             /p:SatelliteResourceLanguages=en-US
