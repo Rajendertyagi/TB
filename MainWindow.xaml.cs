@@ -1,41 +1,51 @@
 using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
 using WinRT.Interop;
-using System.Linq;
+using Microsoft.UI.Dispatching;
 
 namespace TradingBrowser
 {
     public sealed partial class MainWindow : Window
     {
         private AppWindow _appWindow;
-        private DatabaseService _dbService;
-        private NavigationController _inputController;
+        private readonly DatabaseService _dbService;
+        private readonly NavigationController _inputController;
 
+        // The View-Model acts as the central data state for the UI
         public BrowserViewModel ViewModel { get; } = new BrowserViewModel();
 
         public MainWindow()
         {
             this.InitializeComponent();
+            
+            // 1. Initialize UI Frame
             InitializeCustomTitleBar();
 
+            // 2. Initialize Services
             _dbService = new DatabaseService();
             _inputController = new NavigationController(ViewModel);
 
-            // Hook input events to the isolated controller
+            // 3. Register Event Handlers
             this.Content.PreviewKeyDown += _inputController.HandleGlobalKeyboardShortcuts;
             this.Content.PointerPressed += (s, e) => _inputController.HandleMouseAuxiliaryInputs(e);
-
-            ViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(BrowserViewModel.ActiveTab)) UpdateActiveBrowserDisplay(); };
             
-            LoadPreviousSession();
+            ViewModel.PropertyChanged += (s, e) => { 
+                if (e.PropertyName == nameof(BrowserViewModel.ActiveTab)) UpdateActiveBrowserDisplay(); 
+            };
+            
+            // 4. Start Non-Blocking Session Load
+            _ = LoadPreviousSessionAsync();
         }
 
         private void InitializeCustomTitleBar()
         {
             IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+            var windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
             _appWindow = AppWindow.GetFromWindowId(windowId);
+
             if (AppWindowTitleBar.IsCustomizationSupported())
             {
                 var titleBar = _appWindow.TitleBar;
@@ -46,30 +56,46 @@ namespace TradingBrowser
             }
         }
 
-        private void LoadPreviousSession()
+        private async Task LoadPreviousSessionAsync()
         {
-            var savedTabs = _dbService.LoadWorkspaceLayout();
-            if (savedTabs != null && savedTabs.Any())
+            // Perform DB I/O on background thread to keep UI interactive
+            var savedTabs = await Task.Run(() => _dbService.LoadWorkspaceLayout());
+
+            this.DispatcherQueue.TryEnqueue(() =>
             {
-                foreach (var tab in savedTabs) ViewModel.OpenTabs.Add(new TabContext(tab.Title, tab.Url));
-                ViewModel.ActiveTab = ViewModel.OpenTabs.FirstOrDefault();
-            }
-            else ViewModel.OpenNewTab();
+                if (savedTabs != null && savedTabs.Any())
+                {
+                    foreach (var tab in savedTabs) 
+                        ViewModel.OpenTabs.Add(new TabContext(tab.Title, tab.Url));
+                    
+                    ViewModel.ActiveTab = ViewModel.OpenTabs.FirstOrDefault();
+                }
+                else
+                {
+                    ViewModel.OpenNewTab();
+                }
+            });
         }
 
-        private void UpdateActiveBrowserDisplay()
+        private async void UpdateActiveBrowserDisplay()
         {
             BrowserGrid.Children.Clear();
-            if (ViewModel.ActiveTab != null)
+            var tab = ViewModel.ActiveTab;
+
+            if (tab != null)
             {
-                if (ViewModel.ActiveTab.BrowserInstance == null)
+                if (tab.BrowserInstance == null)
                 {
                     var webView = new Microsoft.UI.Xaml.Controls.WebView2();
-                    ViewModel.ActiveTab.BrowserInstance = webView;
-                    webView.NavigationStarting += (s, args) => { ViewModel.ActiveTab.CurrentUrl = args.Uri?.ToString() ?? ""; };
-                    webView.Source = new Uri(ViewModel.ActiveTab.CurrentUrl);
+                    
+                    // Lazy-initialize the browser engine asynchronously
+                    await webView.EnsureCoreWebView2Async();
+                    
+                    tab.BrowserInstance = webView;
+                    webView.NavigationStarting += (s, args) => { tab.CurrentUrl = args.Uri?.ToString() ?? ""; };
+                    webView.Source = new Uri(tab.CurrentUrl);
                 }
-                BrowserGrid.Children.Add(ViewModel.ActiveTab.BrowserInstance);
+                BrowserGrid.Children.Add(tab.BrowserInstance);
             }
         }
     }
