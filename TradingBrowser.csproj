@@ -9,6 +9,7 @@
     <Platforms>x64</Platforms>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    
     <AppxPackage>false</AppxPackage>
 
     <UseWinUI>true</UseWinUI>
@@ -23,6 +24,7 @@
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="2.1.3" />
     <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3967.48" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="10.0.8" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
   </ItemGroup>
 
   <ItemGroup>
