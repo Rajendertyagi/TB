@@ -7,24 +7,27 @@
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     
-    <!-- Strict Portability & Zero-Installer Overrides -->
+    <!-- Complete Decoupling from MSIX Packaging Systems -->
     <WindowsPackageType>None</WindowsPackageType>
     <EnableMsixTooling>false</EnableMsixTooling>
     <AppxPackage>false</AppxPackage>
     
-    <!-- Self-Contained Deployment overrides required by .NET 10 for size optimization -->
+    <!-- Self-Contained Deployment Configuration -->
     <SelfContained>true</SelfContained>
     <PublishSelfContained>true</PublishSelfContained>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     
-    <!-- Targeted structural pruning settings to prevent XAML Reflection breakage -->
+    <!-- Strategic Trimming Profiles -->
     <PublishTrimmed>true</PublishTrimmed>
     <TrimMode>partial</TrimMode>
     <OptimizationPreference>Size</OptimizationPreference>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
 
-    <!-- Fixes the WMC9999 / WMC1509 Compiler Loop bugs during aggressive publish optimization passes -->
+    <!-- Overrides to Bypass Missing SDK Packaging Assembly Dependencies -->
+    <EnableAppxPackaging>false</EnableAppxPackaging>
+    <EnablePriGen>false</EnablePriGen>
+    <MrtBuildPriFiles>false</MrtBuildPriFiles>
     <EnableXamlCompilerTrimOptimization>false</EnableXamlCompilerTrimOptimization>
     <EnableCoreMrtTrimOptimization>false</EnableCoreMrtTrimOptimization>
   </PropertyGroup>
