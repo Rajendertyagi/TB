@@ -32,6 +32,7 @@ namespace TradingBrowser
             this.Content.PreviewKeyDown += _inputController.HandleGlobalKeyboardShortcuts;
             this.Content.PointerPressed += (s, e) => _inputController.HandleMouseAuxiliaryInputs(e);
             
+            // AUTOMATIC UI UPDATER: Whenever the ActiveTab changes in the ViewModel, refresh the View
             ViewModel.PropertyChanged += (s, e) => { 
                 if (e.PropertyName == nameof(BrowserViewModel.ActiveTab)) UpdateActiveBrowserDisplay(); 
             };
