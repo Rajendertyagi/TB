@@ -9,9 +9,10 @@
     
     <EnableMsixTooling>true</EnableMsixTooling>
     
+    <SelfContained>true</SelfContained>
+    
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <SelfContained>false</SelfContained>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
   </PropertyGroup>
 
