@@ -7,7 +7,8 @@ namespace TB.Data;
 
 public static class DatabaseHelper
 {
-    private static readonly string DbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ".tb_data", "TB.db");
+    // FIX: Removed the leading period from the folder name
+    private static readonly string DbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "tb_data", "TB.db");
     public static string ConnectionString => $"Data Source={DbPath}";
 
     public static void Initialize()
