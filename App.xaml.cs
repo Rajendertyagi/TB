@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Serilog;
+using System;
 
 namespace TB
 {
@@ -10,17 +11,16 @@ namespace TB
 
         public App()
         {
+            // Set required env variable for SingleFile deployment
+            Environment.SetEnvironmentVariable("MICROSOFT_WINDOWSAPPRUNTIME_BASE_DIRECTORY", AppContext.BaseDirectory);
+
             this.InitializeComponent();
 
-            // Initialize Logging
             Log.Logger = new LoggerConfiguration()
                 .WriteTo.Debug()
                 .WriteTo.File("logs/app-.txt", rollingInterval: RollingInterval.Day)
                 .CreateLogger();
 
-            Log.Information("Application starting up.");
-
-            // Initialize Database
             DbService = new DatabaseService();
             DbService.Initialize();
         }
