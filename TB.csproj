@@ -11,6 +11,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
@@ -28,6 +29,9 @@
     <Compile Include="App.xaml.cs" />
     <Compile Include="MainWindow.xaml.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="BrowserTab.cs" />
+    <Compile Include="MainViewModel.cs" />
+    <Compile Include="DatabaseService.cs" />
     
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
