@@ -4,57 +4,67 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <Grid Background="#1C1B22" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+    <Grid Background="#1E1E1E">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40"/>
-            <RowDefinition Height="44"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1F1F1F" Padding="0,4,140,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <controls:TabView x:Name="MainBrowserTabs" 
-                              VerticalAlignment="Bottom" 
-                              HorizontalAlignment="Stretch"
-                              IsAddTabButtonVisible="True"
-                              AllowDropTabs="True"
-                              CanReorderTabs="True"
-                              Background="Transparent">
-                <controls:TabView.TabItems>
-                    <controls:TabViewItem Header="New Tab" Visibility="Collapsed"/>
-                </controls:TabView.TabItems>
-            </controls:TabView>
-        </Grid>
-
-        <Grid Grid.Row="1" Background="#2B2A33" Padding="8,4,8,4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderBrush="#1F1F1F" BorderThickness="0,0,0,1">
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="48" Background="#1A1A1A">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="140" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="6" Margin="4,0,12,0">
-                <Button x:Name="BackButton" Content="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14" FontSize="12"/>
-                <Button x:Name="ForwardButton" Content="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14" FontSize="12"/>
-                <Button x:Name="RefreshButton" Content="" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14" FontSize="12"/>
+            <StackPanel Grid.Column0 Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,8,0">
+                <FontIcon Glyph="&#xE774;" FontSize="14" Foreground="#00E676" FontFamily="Segoe MDL2 Assets"/>
+                <TextBlock Text="TB" FontWeight="Bold" Foreground="#FFFFFF" Margin="8,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <AutoSuggestBox x:Name="Omnibox" 
-                            Grid.Column="1" 
-                            VerticalAlignment="Center" 
-                            HorizontalAlignment="Stretch"
-                            PlaceholderText="Search Google or type a URL" 
-                            QueryIcon="Find" 
-                            Background="#1C1B22" 
-                            Foreground="White" 
-                            BorderThickness="0"
-                            CornerRadius="14"
-                            Padding="14,4,14,4"/>
+            <TabView x:Name="MainTabs" Grid.Column="1" VerticalAlignment="Bottom" AddTabButtonCommand="{x:Bind NewTabCommand}"
+                     Background="Transparent" IsAddTabButtonVisible="True">
+                <TabView.TabItems>
+                    </TabView.TabItems>
+                <TabView.TabItemTemplate>
+                    <DataTemplate>
+                        <TabViewItem Header="{Binding Header}" ContextFlyout="{StaticResource TabContextMenu}">
+                            <TabViewItem.IconSource>
+                                <SymbolIconSource Symbol="Globe"/>
+                            </TabViewItem.IconSource>
+                        </TabViewItem>
+                    </DataTemplate>
+                </TabView.TabItemTemplate>
+            </TabView>
         </Grid>
 
-        <Grid x:Name="TabContentDisplayGrid" Grid.Row="2" Background="#1C1B22" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <Canvas Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <Grid Grid.Row="1" Background="#252526" Padding="8,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/> <ColumnDefinition Width="*"/>    <ColumnDefinition Width="Auto"/> </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" Margin="0,0,8,0">
+                <Button x:Name="BackButton" Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+                <Button x:Name="ForwardButton" Content="&#xE72A;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+                <Button x:Name="RefreshButton" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+            </StackPanel>
+
+            <AutoSuggestBox x:Name="Omnibox" Grid.Column="1" 
+                            PlaceholderText="Search or enter web address..." 
+                            QueryIcon="Find"
+                            Background="#1E1E1E" 
+                            Foreground="#FFFFFF"
+                            VerticalAlignment="Center"
+                            UpdateTextOnSelect="False"/>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0" Spacing="4">
+                <Button Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+            </StackPanel>
         </Grid>
+
+        <Grid x:Name="BrowserGrid" Grid.Row="2" Background="#121212">
+            </Grid>
     </Grid>
 </Window>
