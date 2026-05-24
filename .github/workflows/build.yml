@@ -1,8 +1,10 @@
-name: Cloud Native Portable Build Pipeline
+name: Build and Publish Trading Browser
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
@@ -10,38 +12,39 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Clone Code Repository
+    - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Setup .NET 10 Cutting Edge Environment
+    - name: Setup .NET SDK
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '10.0.x'
-        include-prerelease: true
 
-    - name: Restore NuGet Project Dependencies
+    - name: Restore Dependencies
       run: dotnet restore TradingBrowser.csproj
 
-    - name: Compile Ultra-Lightweight Binary (Self Contained Mode)
-      run: >
-        dotnet publish TradingBrowser.csproj
-        -c Release
-        -r win-x64
-        --self-contained true
-        -p:PublishTrimmed=true
-        -p:TrimMode=partial
-        -p:InvariantGlobalization=true
-        -p:DisableEmbeddedSignature=true
-        -o ./PublishOutput
-
-    - name: Purge Residual WinAppSDK Localizations
+    - name: Compile and Publish Standalone Binary
       run: |
-        Get-ChildItem -Path ./PublishOutput -Recurse -Directory | 
-        Where-Object { $_.Name -ne "en-US" -and $_.Name -match "^[a-z]{2}(-[A-Z]{2})?$" } | 
-        Remove-Item -Recurse -Force
+        dotnet publish TradingBrowser.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -p:PublishTrimmed=true `
+          -p:TrimMode=partial `
+          -p:InvariantGlobalization=true `
+          -p:DisableEmbeddedSignature=true `
+          -p:PublishReadyToRun=false `
+          -p:WindowsPackageType=None `
+          -o ./PublishOutput
 
-    - name: Compress into Standalone Portable ZIP Artifact
+    - name: Compress Build Artifacts
+      shell: pwsh
+      run: |
+        Compress-Archive -Path ./PublishOutput/* -DestinationPath ./TradingBrowser-win-x64.zip
+
+    - name: Upload Finished Browser Release
       uses: actions/upload-artifact@v4
       with:
-        name: PortableTradingBrowser-Win11-x64
-        path: ./PublishOutput/
+        name: TradingBrowser-Executable
+        path: ./TradingBrowser-win-x64.zip
+        if-no-files-found: error
