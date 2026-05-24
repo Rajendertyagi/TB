@@ -142,11 +142,17 @@ namespace TradingBrowser
 
         // Framework Stubs for Chrome style UX Window Control Operations 
         private void SetupCaptionButtons() => WriteLog("Startup Engine", "Caption button color matching optimization executed.");
+        
         private void OnNewTabRequested(TabView sender, object args) {
-            var newTab = new TabViewItem { Header = "New Dashboard Pane" };
+            var newTab = new TabViewItem 
+            { 
+                Header = "New Dashboard Pane",
+                IconSource = new SymbolIconSource { Symbol = Symbol.Document }
+            };
             sender.TabItems.Add(newTab);
             InitializeWebViewForTab(newTab, "https://www.tradingview.com/chart/");
         }
+        
         private void OnTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args) => sender.TabItems.Remove(args.Tab);
         private void MenuNewTab(object sender, RoutedEventArgs e) => OnNewTabRequested(MainBrowserTabs, null);
         private void MenuReloadTab(object sender, RoutedEventArgs e) { if (MainBrowserTabs.SelectedItem is TabViewItem t && t.Content is WebView2 w) w.CoreWebView2?.Reload(); }
