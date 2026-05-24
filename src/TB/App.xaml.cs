@@ -1,17 +1,20 @@
 using Microsoft.UI.Xaml;
-using System;
-using TB.Data;
 
-namespace TB;
-
-public partial class App : Application
+namespace TB
 {
-    public App()
+    public partial class App : Application
     {
-        // Essential: Locate WinUI 3 binaries in Single-File mode
-        Environment.SetEnvironmentVariable("MICROSOFT_WINDOWSAPPRUNTIME_BASE_DIRECTORY", AppContext.BaseDirectory);
-        
-        DatabaseHelper.Initialize();
-        this.InitializeComponent();
+        private Window m_window;
+
+        public App()
+        {
+            this.InitializeComponent();
+        }
+
+        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        {
+            m_window = new MainWindow();
+            m_window.Activate();
+        }
     }
 }
