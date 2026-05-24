@@ -1,108 +1,82 @@
-using System;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Windowing;
-using WinRT.Interop;
-using System.Linq;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Input;
+using Windows.System;
+using Microsoft.Web.WebView2.Core;
+using Microsoft.UI.Xaml.Controls;
 
 namespace TradingBrowser
 {
-    public partial class MainWindow : Window
+    public class NavigationController
     {
-        private AppWindow _appWindow;
-        private DatabaseService _dbService;
-        
-        // Expose the ViewModel for high-performance {x:Bind} data streaming
-        public BrowserViewModel ViewModel { get; } = new BrowserViewModel();
+        private readonly BrowserViewModel _viewModel;
 
-        public MainWindow()
+        public NavigationController(BrowserViewModel viewModel)
         {
-            this.InitializeComponent();
-            
-            // 1. Initialize native DWM frame decorations
-            InitializeCustomTitleBar();
-
-            // 2. Initialize high-performance Dapper SQLite service
-            _dbService = new DatabaseService();
-
-            // 3. Setup interaction listeners for workspace state management
-            RegisterWindowShellEvents();
-
-            // 4. Restore previous session state or launch default
-            LoadPreviousSession();
+            _viewModel = viewModel;
         }
 
-        private void InitializeCustomTitleBar()
+        /// <summary>
+        /// Global Keyboard Hook: Processes application-wide hotkeys.
+        /// Attach this to your MainWindow's PreviewKeyDown event.
+        /// </summary>
+        public void HandleGlobalKeyboardShortcuts(object sender, KeyRoutedEventArgs e)
         {
-            IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-            _appWindow = AppWindow.GetFromWindowId(windowId);
+            var ctrl = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+            var shift = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+            var alt = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Menu).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
 
-            if (AppWindowTitleBar.IsCustomizationSupported())
+            if (ProcessShortcutLogic(e.Key, ctrl, shift, alt))
             {
-                var titleBar = _appWindow.TitleBar;
-                titleBar.ExtendsContentIntoTitleBar = true;
-                titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
-                titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
-                titleBar.ButtonForegroundColor = Microsoft.UI.Colors.White;
+                e.Handled = true;
             }
         }
 
-        private void RegisterWindowShellEvents()
+        private bool ProcessShortcutLogic(VirtualKey key, bool ctrl, bool shift, bool alt)
         {
-            // Dynamic UI Re-mounting: When active tab changes in VM, update the UI canvas
-            ViewModel.PropertyChanged += (s, e) =>
+            // 1. Tab Management
+            if (ctrl && !shift && !alt && key == VirtualKey.T)
             {
-                if (e.PropertyName == nameof(BrowserViewModel.ActiveTab))
-                {
-                    UpdateActiveBrowserDisplay();
-                }
-            };
+                _viewModel.OpenNewTabCommand.Execute(null);
+                return true;
+            }
 
-            // Hook into window closing to auto-save session state via Dapper
-            this.Closed += (s, e) =>
+            // 2. Navigation
+            if (alt && key == VirtualKey.Left)
             {
-                var savedTabs = ViewModel.OpenTabs.Select(t => new SavedTabItem 
-                { 
-                    Title = t.Title, 
-                    Url = t.CurrentUrl, 
-                    LastAccessedTicks = DateTime.UtcNow.Ticks 
-                });
-                _dbService.SaveWorkspaceLayout(savedTabs);
-            };
+                _viewModel.ActiveTab?.BrowserInstance?.CoreWebView2?.GoBack();
+                return true;
+            }
+            if (alt && key == VirtualKey.Right)
+            {
+                _viewModel.ActiveTab?.BrowserInstance?.CoreWebView2?.GoForward();
+                return true;
+            }
+            if (key == VirtualKey.F5 || (ctrl && key == VirtualKey.R))
+            {
+                _viewModel.ActiveTab?.BrowserInstance?.CoreWebView2?.Reload();
+                return true;
+            }
+
+            return false;
         }
 
-        private void LoadPreviousSession()
+        /// <summary>
+        /// Hardware Auxiliary Input: Processes Mouse 4/5 (Back/Forward).
+        /// Attach to PointerPressed event.
+        /// </summary>
+        public void HandleMouseAuxiliaryInputs(PointerRoutedEventArgs e)
         {
-            var savedTabs = _dbService.LoadWorkspaceLayout();
-            if (savedTabs != null && savedTabs.Any())
+            var props = e.GetCurrentPoint(null).Properties;
+            if (props.IsXButton1Pressed) // Mouse 4: Back
             {
-                foreach (var tab in savedTabs)
-                {
-                    ViewModel.OpenTabs.Add(new TabContext(tab.Title, tab.Url));
-                }
-                ViewModel.ActiveTab = ViewModel.OpenTabs.FirstOrDefault();
+                _viewModel.ActiveTab?.BrowserInstance?.CoreWebView2?.GoBack();
+                e.Handled = true;
             }
-            else
+            else if (props.IsXButton2Pressed) // Mouse 5: Forward
             {
-                ViewModel.OpenNewTab();
-            }
-        }
-
-        private void UpdateActiveBrowserDisplay()
-        {
-            BrowserGrid.Children.Clear();
-            if (ViewModel.ActiveTab != null)
-            {
-                if (ViewModel.ActiveTab.BrowserInstance == null)
-                {
-                    var webView = new Microsoft.UI.Xaml.Controls.WebView2();
-                    ViewModel.ActiveTab.BrowserInstance = webView;
-                    
-                    // Route URL updates back to MVVM model
-                    webView.NavigationStarting += (s, args) => { ViewModel.ActiveTab.CurrentUrl = args.Uri; };
-                    webView.Source = new Uri(ViewModel.ActiveTab.CurrentUrl);
-                }
-                BrowserGrid.Children.Add(ViewModel.ActiveTab.BrowserInstance);
+                _viewModel.ActiveTab?.BrowserInstance?.CoreWebView2?.GoForward();
+                e.Handled = true;
             }
         }
     }
