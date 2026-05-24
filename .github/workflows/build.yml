@@ -21,10 +21,11 @@ jobs:
       with:
         dotnet-version: 10.0.x
 
+    # CRITICAL: This step generates the package reference map
     - name: Restore Dependencies
-      # Explicit restore ensures Dapper is pulled before compilation starts
-      run: dotnet restore TradingBrowser.csproj
+      run: dotnet restore TradingBrowser.csproj --force
 
+    # CRITICAL: This step builds only the project with a clean state
     - name: Build and Compile
       run: dotnet build TradingBrowser.csproj --configuration Release --no-incremental
 
