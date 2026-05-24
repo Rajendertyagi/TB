@@ -14,6 +14,7 @@ namespace TradingBrowser
         private readonly DatabaseService _dbService;
         private readonly NavigationController _inputController;
 
+        // Public property required for x:Bind resolution
         public BrowserViewModel ViewModel { get; } = new BrowserViewModel();
 
         public MainWindow()
@@ -29,6 +30,7 @@ namespace TradingBrowser
             this.Content.PreviewKeyDown += _inputController.HandleGlobalKeyboardShortcuts;
             this.Content.PointerPressed += (s, e) => _inputController.HandleMouseAuxiliaryInputs(e);
             
+            // Event listener for tab changes
             ViewModel.PropertyChanged += (s, e) => { 
                 if (e.PropertyName == nameof(BrowserViewModel.ActiveTab)) UpdateActiveBrowserDisplay(); 
             };
