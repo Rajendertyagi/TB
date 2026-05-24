@@ -6,7 +6,7 @@ namespace TradingBrowser
 {
     public sealed partial class MainWindow : Window
     {
-        private readonly BrowserManager _browserManager;
+        private readonly TradingBrowser.BrowserManager _browserManager;
 
         public MainWindow()
         {
@@ -16,10 +16,10 @@ namespace TradingBrowser
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
 
-            // Initialize the modular standalone files
-            PersistenceEngine.Initialize();
+            // Explicit namespace resolution ensures the compiler finds the initialization sequence cleanly
+            TradingBrowser.PersistenceEngine.Initialize();
             
-            _browserManager = new BrowserManager(
+            _browserManager = new TradingBrowser.BrowserManager(
                 MainBrowserTabs, 
                 TabContentDisplayGrid, 
                 Omnibox, 
@@ -31,7 +31,7 @@ namespace TradingBrowser
             MainBrowserTabs.SelectionChanged += (s, e) => _browserManager.HandleTabSelectionChanged();
             MainBrowserTabs.TabCloseRequested += (s, e) => _browserManager.HandleTabCloseRequested(e, () => this.Close());
             
-            Omnibox.QuerySubmitted += (s, e) => NavigationController.ProcessOmniboxQuery(s, _browserManager.GetActiveBrowserInstance());
+            Omnibox.QuerySubmitted += (s, e) => TradingBrowser.NavigationController.ProcessOmniboxQuery(s, _browserManager.GetActiveBrowserInstance());
             
             BackButton.Click += (s, e) => _browserManager.GetActiveBrowserInstance()?.GoBack();
             ForwardButton.Click += (s, e) => _browserManager.GetActiveBrowserInstance()?.GoForward();
