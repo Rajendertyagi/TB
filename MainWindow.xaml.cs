@@ -1,45 +1,55 @@
-using System;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Windowing;
+using WinRT.Interop;
+using System;
 
 namespace TradingBrowser
 {
-    public sealed partial class MainWindow : Window
+    public partial class MainWindow : Window
     {
-        private readonly TradingBrowser.BrowserManager _browserManager;
+        private AppWindow _appWindow;
 
         public MainWindow()
         {
             this.InitializeComponent();
+            InitializeCustomTitleBar();
+        }
 
-            // Set up borderless dragging hooks tied directly to Row 0
-            ExtendsContentIntoTitleBar = true;
-            SetTitleBar(AppTitleBar);
+        private void InitializeCustomTitleBar()
+        {
+            // Get the window handle (HWND)
+            IntPtr hWnd = WindowNative.GetWindowHandle(this);
+            Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
+            _appWindow = AppWindow.GetFromWindowId(windowId);
 
-            // Explicit namespace resolution ensures the compiler finds the initialization sequence cleanly
-            TradingBrowser.PersistenceEngine.Initialize();
-            
-            _browserManager = new TradingBrowser.BrowserManager(
-                MainBrowserTabs, 
-                TabContentDisplayGrid, 
-                Omnibox, 
-                this.DispatcherQueue
-            );
+            // Check if AppWindowTitleBar custom extension is supported on host system
+            if (AppWindowTitleBar.IsCustomizationSupported())
+            {
+                var titleBar = _appWindow.TitleBar;
+                titleBar.ExtendsContentIntoTitleBar = true;
 
-            // Hook up UI Action event bindings
-            MainBrowserTabs.AddTabButtonClick += (s, e) => _browserManager.CreateNewTabContext("New Tab", "https://www.tradingview.com/chart/");
-            MainBrowserTabs.SelectionChanged += (s, e) => _browserManager.HandleTabSelectionChanged();
-            MainBrowserTabs.TabCloseRequested += (s, e) => _browserManager.HandleTabCloseRequested(e, () => this.Close());
-            
-            Omnibox.QuerySubmitted += (s, e) => TradingBrowser.NavigationController.ProcessOmniboxQuery(s, _browserManager.GetActiveBrowserInstance());
-            
-            BackButton.Click += (s, e) => _browserManager.GetActiveBrowserInstance()?.GoBack();
-            ForwardButton.Click += (s, e) => _browserManager.GetActiveBrowserInstance()?.GoForward();
-            RefreshButton.Click += (s, e) => _browserManager.GetActiveBrowserInstance()?.CoreWebView2?.Reload();
+                // Explicitly set native caption button themes to match Chrome Dark Mode
+                titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
+                titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
+                titleBar.ButtonForegroundColor = Microsoft.UI.Colors.White;
+                titleBar.ButtonHoverBackgroundColor = System.Drawing.Color.FromArgb(40, 255, 255, 255).ToColor();
+                titleBar.ButtonPressedBackgroundColor = System.Drawing.Color.FromArgb(60, 255, 255, 255).ToColor();
 
-            // Drop the pre-compiler placeholder and load your workspace chart layout
-            MainBrowserTabs.TabItems.Clear();
-            _browserManager.CreateNewTabContext("TradingView", "https://www.tradingview.com/chart/");
+                // Connect window drag manager to the XAML top menu container
+                this.Activated += (s, e) =>
+                {
+                    // Forces layout updates to recalculate sizing rules upon interaction change
+                    AppTitleBar.Opacity = e.WindowActivationState == WindowActivationState.Deactivated ? 0.6 : 1.0;
+                };
+            }
+        }
+    }
+
+    public static class ColorExtensions
+    {
+        public static Windows.UI.Color ToColor(this System.Drawing.Color color)
+        {
+            return Windows.UI.Color.FromArgb(color.A, color.R, color.G, color.B);
         }
     }
 }
