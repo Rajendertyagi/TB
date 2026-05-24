@@ -7,55 +7,31 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <!-- Primary window layout wrapper -->
     <Grid Background="#121212">
         <Grid.RowDefinitions>
-            <!-- Fixed header height for your tabs and address entry omnibox -->
-            <RowDefinition Height="48"/>
-            <!-- Star sizing forces the remaining screen layout to go to the web viewport -->
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Chrome Native Borderless Layout Top Bar Navigation Container -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1C1C1C">
+        <!-- Dynamic Header Control Strip Wrapper -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1C1C1C" Height="48">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="300"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Chrome Style Tab Management Engine -->
-            <controls:TabView x:Name="MainBrowserTabs" Grid.Column="0" VerticalAlignment="Bottom" Margin="0,0,0,0" AddTabButtonClick="OnNewTabRequested" TabCloseRequested="OnTabCloseRequested" Background="Transparent">
+            <!-- Navigation Controls Block -->
+            <controls:TabView x:Name="MainBrowserTabs" Grid.Column="0" VerticalAlignment="Bottom" Background="Transparent">
                 <controls:TabView.TabItems>
-                    <!-- Initial Workspace Shell Tab with explicitly declared IconSource block -->
-                    <controls:TabViewItem Header="TradingView Workspace" IsSelected="True">
-                        <controls:TabViewItem.IconSource>
-                            <controls:SymbolIconSource Symbol="Document"/>
-                        </controls:TabViewItem.IconSource>
-                        <controls:TabViewItem.ContextFlyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Text="New Tab" Click="MenuNewTab"/>
-                                <MenuFlyoutItem Text="Reload Tab" Click="MenuReloadTab"/>
-                                <MenuFlyoutItem Text="Duplicate Tab" Click="MenuDuplicateTab"/>
-                                <MenuFlyoutSeparator/>
-                                <MenuFlyoutItem Text="Close Tab" Click="MenuCloseTab"/>
-                                <MenuFlyoutItem Text="Close Other Tabs" Click="MenuCloseOtherTabs"/>
-                                <MenuFlyoutItem Text="Close Tabs to the Right" Click="MenuCloseRightTabs"/>
-                            </MenuFlyout>
-                        </controls:TabViewItem.ContextFlyout>
-                    </controls:TabViewItem>
+                    <controls:TabViewItem Header="TradingView Workspace" IsSelected="True" />
                 </controls:TabView.TabItems>
             </controls:TabView>
 
-            <!-- Embedded Smart Omnibox URL Parsing Bar -->
-            <AutoSuggestBox x:Name="Omnibox" Grid.Column="1" Height="32" Margin="10,0,10,0" VerticalAlignment="Center" PlaceholderText="Enter Ticker or Search URL..." QueryIcon="Find" QuerySubmitted="OnOmniboxSubmitted" Background="#2A2A2A" Foreground="White" BorderThickness="0"/>
+            <!-- Dynamic Direct Input Omnibox -->
+            <AutoSuggestBox x:Name="Omnibox" Grid.Column="1" Height="32" Margin="10,0,10,0" VerticalAlignment="Center" PlaceholderText="Enter Ticker or Search URL..." QueryIcon="Find" Background="#2A2A2A" Foreground="White" BorderThickness="0"/>
         </Grid>
 
-        <!-- Main Display Container: Statically hosts the active tracking control -->
-        <Grid Grid.Row="1" Background="#121212">
-            <controls:WebView2 
-                x:Name="MainWebView" 
-                HorizontalAlignment="Stretch" 
-                VerticalAlignment="Stretch"/>
-        </Grid>
+        <!-- Standard Empty Canvas Root Container Window -->
+        <Grid x:Name="TabContentDisplayGrid" Grid.Row="1" Background="#121212" />
     </Grid>
 </Window>
