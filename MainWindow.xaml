@@ -7,15 +7,17 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <!-- WinUI 3 background applied here to the root layout element instead of the Window tag -->
+    <!-- Primary window layout wrapper -->
     <Grid Background="#121212">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <!-- Fixed header height for your tabs and address entry omnibox -->
+            <RowDefinition Height="48"/>
+            <!-- Star sizing forces the remaining screen layout to go to the web viewport -->
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Chrome Native Borderless Layout Top Bar -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1C1C1C" Height="48">
+        <!-- Chrome Native Borderless Layout Top Bar Navigation Container -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1C1C1C">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="300"/>
@@ -48,9 +50,12 @@
             <AutoSuggestBox x:Name="Omnibox" Grid.Column="1" Height="32" Margin="10,0,10,0" VerticalAlignment="Center" PlaceholderText="Enter Ticker or Search URL..." QueryIcon="Find" QuerySubmitted="OnOmniboxSubmitted" Background="#2A2A2A" Foreground="White" BorderThickness="0"/>
         </Grid>
 
-        <!-- Full View Fluid Responsive Grid Container (Eliminates dead space) -->
-        <Grid x:Name="TabContentDisplayGrid" Grid.Row="1" Background="#121212">
-            <!-- Active Tab's WebView2 instance is dynamically attached here via backend -->
+        <!-- Main Display Container: Statically hosts the active tracking control -->
+        <Grid Grid.Row="1" Background="#121212">
+            <controls:WebView2 
+                x:Name="MainWebView" 
+                HorizontalAlignment="Stretch" 
+                VerticalAlignment="Stretch"/>
         </Grid>
     </Grid>
 </Window>
