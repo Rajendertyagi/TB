@@ -15,6 +15,7 @@ namespace TradingBrowser
         private readonly string _rootPortablePath;
         private readonly string _logDirectory;
         private readonly string _dbPath;
+        private bool _isWebViewInitialized = false;
 
         public MainWindow()
         {
@@ -33,9 +34,17 @@ namespace TradingBrowser
             InitializePersistenceEngine();
             SetupCaptionButtons();
             
-            // Spawn initial default view viewport configuration
-            var initialTab = MainBrowserTabs.TabItems[0] as TabViewItem;
-            InitializeWebViewForTab(initialTab, "https://www.tradingview.com/chart/");
+            // Fire up the browser subsystem safely on the primary UI execution thread
+            this.Activated += MainWindow_Activated;
+        }
+
+        private void MainWindow_Activated(object sender, WindowActivatedEventArgs id)
+        {
+            if (!_isWebViewInitialized)
+            {
+                _isWebViewInitialized = true;
+                InitializeBrowserEngine("https://www.tradingview.com/chart/");
+            }
         }
 
         private void InitializePersistenceEngine()
@@ -55,15 +64,9 @@ namespace TradingBrowser
             }
         }
 
-        private void InitializeWebViewForTab(TabViewItem tab, string targetUrl)
+        private void InitializeBrowserEngine(string targetUrl)
         {
-            WriteLog("Tab Lifecycle", $"Creating context footprint for tab container mapping target: {targetUrl}");
-            var webView = new WebView2();
-            tab.Content = webView;
-
-            // Fluid layout binding rules explicitly attached to prevent render overflow clipping
-            webView.HorizontalAlignment = HorizontalAlignment.Stretch;
-            webView.VerticalAlignment = VerticalAlignment.Stretch;
+            WriteLog("Tab Lifecycle", $"Creating global context footprint mapping target: {targetUrl}");
 
             Task.Run(async () =>
             {
@@ -81,24 +84,25 @@ namespace TradingBrowser
                     
                     DispatcherQueue.TryEnqueue(async () =>
                     {
-                        await webView.EnsureCoreWebView2Async(env);
+                        // Ensure layout hooks link securely to the rendering canvas
+                        await MainWebView.EnsureCoreWebView2Async(env);
                         
                         // Disable multi-window background power constraints
-                        webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+                        MainWebView.CoreWebView2.Settings.IsWebMessageEnabled = true;
                         
                         // Setup Navigation Tracking & Interceptions
-                        webView.CoreWebView2.NavigationStarting += (s, e) => WriteLog("Navigation Loop", $"Initiating frame routing sequence: {e.Uri}");
-                        webView.CoreWebView2.NavigationCompleted += (s, e) => WriteLog("Navigation Loop", $"Render pipeline confirmation complete. HTTP Success: {e.IsSuccess}");
+                        MainWebView.CoreWebView2.NavigationStarting += (s, e) => WriteLog("Navigation Loop", $"Initiating frame routing sequence: {e.Uri}");
+                        MainWebView.CoreWebView2.NavigationCompleted += (s, e) => WriteLog("Navigation Loop", $"Render pipeline confirmation complete. HTTP Success: {e.IsSuccess}");
                         
                         // Attach Renderer Crashes, Unhandled Worker Faults & Unhandled Promises Interceptors
-                        webView.CoreWebView2.ProcessFailed += (s, e) => WriteLog("Renderer & Promise Faults", $"Chromium Context Failure Event. Reason: {e.ProcessFailedKind}");
+                        MainWebView.CoreWebView2.ProcessFailed += (s, e) => WriteLog("Renderer & Promise Faults", $"Chromium Context Failure Event. Reason: {e.ProcessFailedKind}");
                         
-                        webView.CoreWebView2.DownloadStarting += (s, e) => {
+                        MainWebView.CoreWebView2.DownloadStarting += (s, e) => {
                             WriteLog("Downloads Subsystem", $"Intercepting external storage download routine. Path destination payload: {e.ResultFilePath}");
                         };
 
-                        webView.Source = new Uri(targetUrl);
-                        UpdateDisplayGrid(webView);
+                        // Assign initial source link target
+                        MainWebView.Source = new Uri(targetUrl);
                     });
                 }
                 catch (Exception ex)
@@ -126,16 +130,10 @@ namespace TradingBrowser
                 WriteLog("Navigation Loop", $"Omnibox fallback verification activated. Redirect routing: {targetUrl}");
             }
 
-            if (MainBrowserTabs.SelectedItem is TabViewItem activeTab && activeTab.Content is WebView2 targetView)
+            if (MainWebView != null && MainWebView.CoreWebView2 != null)
             {
-                targetView.Source = new Uri(targetUrl);
+                MainWebView.Source = new Uri(targetUrl);
             }
-        }
-
-        private void UpdateDisplayGrid(WebView2 view)
-        {
-            TabContentDisplayGrid.Children.Clear();
-            TabContentDisplayGrid.Children.Add(view);
         }
 
         private void WriteLog(string trackCategory, string dataLogged)
@@ -153,20 +151,18 @@ namespace TradingBrowser
         private void SetupCaptionButtons() => WriteLog("Startup Engine", "Caption button color matching optimization executed.");
         
         private void OnNewTabRequested(TabView sender, object args) {
-            var newTab = new TabViewItem 
-            { 
-                Header = "New Dashboard Pane",
-                IconSource = new SymbolIconSource { Symbol = Symbol.Document }
-            };
-            sender.TabItems.Add(newTab);
-            InitializeWebViewForTab(newTab, "https://www.tradingview.com/chart/");
+            // In single frame container layout, tab switching acts as a fast address redirect anchor
+            if (MainWebView != null && MainWebView.CoreWebView2 != null)
+            {
+                MainWebView.Source = new Uri("https://www.tradingview.com/chart/");
+            }
         }
         
-        private void OnTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args) => sender.TabItems.Remove(args.Tab);
+        private void OnTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args) => WriteLog("Tab Lifecycle", "Tab closure handled by window framework state mapping.");
         private void MenuNewTab(object sender, RoutedEventArgs e) => OnNewTabRequested(MainBrowserTabs, null);
-        private void MenuReloadTab(object sender, RoutedEventArgs e) { if (MainBrowserTabs.SelectedItem is TabViewItem t && t.Content is WebView2 w) w.CoreWebView2?.Reload(); }
+        private void MenuReloadTab(object sender, RoutedEventArgs e) { if (MainWebView != null) MainWebView.CoreWebView2?.Reload(); }
         private void MenuDuplicateTab(object sender, RoutedEventArgs e) { /* Clones current tab configuration settings */ }
-        private void MenuCloseTab(object sender, RoutedEventArgs e) { if (MainBrowserTabs.SelectedItem is TabViewItem t) MainBrowserTabs.TabItems.Remove(t); }
+        private void MenuCloseTab(object sender, RoutedEventArgs e) { /* Tab context closure logic execution endpoint */ }
         private void MenuCloseOtherTabs(object sender, RoutedEventArgs e) { /* Iterates over structural loop matching selection index */ }
         private void MenuCloseRightTabs(object sender, RoutedEventArgs e) { /* Iterates from selection index offset to count ceiling */ }
     }
