@@ -1,6 +1,7 @@
 using Dapper;
 using Microsoft.Data.Sqlite;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using TB.Models;
 
@@ -12,7 +13,6 @@ namespace TB.Services
 
         public DatabaseService()
         {
-            // Fulfilling the requirement: Local /Downloads directory at executable root
             string baseDir = AppDomain.CurrentDomain.BaseDirectory;
             string downloadsDir = Path.Combine(baseDir, "Downloads");
             
@@ -32,7 +32,6 @@ namespace TB.Services
             using var connection = new SqliteConnection(_connectionString);
             connection.Open();
 
-            // Tabs Table (For restoring active sessions)
             connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS Tabs (
                     TabId TEXT PRIMARY KEY,
@@ -48,7 +47,6 @@ namespace TB.Services
                     NavigationStack TEXT
                 )");
 
-            // History Table (For 30-day rolling history)
             connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS History (
                     Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,7 +55,6 @@ namespace TB.Services
                     VisitDate DATETIME
                 )");
 
-            // Settings Table (Key-Value store for preferences)
             connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS Settings (
                     Key TEXT PRIMARY KEY,
@@ -65,7 +62,6 @@ namespace TB.Services
                 )");
         }
 
-        // Upsert method: Inserts a new tab or updates an existing one
         public void SaveTabState(TabState tab)
         {
             using var connection = new SqliteConnection(_connectionString);
@@ -85,6 +81,34 @@ namespace TB.Services
                     NavigationStack = excluded.NavigationStack;";
             
             connection.Execute(sql, tab);
+        }
+
+        public IEnumerable<TabState> GetSavedTabs()
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            return connection.Query<TabState>("SELECT * FROM Tabs");
+        }
+
+        public void DeleteTabState(Guid tabId)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Execute("DELETE FROM Tabs WHERE TabId = @TabId", new { TabId = tabId });
+        }
+
+        public void AddToHistory(string url, string title)
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            connection.Execute(@"
+                INSERT INTO History (Url, Title, VisitDate) 
+                VALUES (@Url, @Title, @VisitDate)", 
+                new { Url = url, Title = title, VisitDate = DateTime.UtcNow });
+        }
+
+        public void PurgeOldHistory()
+        {
+            using var connection = new SqliteConnection(_connectionString);
+            var cutoffDate = DateTime.UtcNow.AddDays(-30);
+            connection.Execute("DELETE FROM History WHERE VisitDate < @Cutoff", new { Cutoff = cutoffDate });
         }
     }
 }
