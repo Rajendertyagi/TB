@@ -7,6 +7,8 @@
     <UseWinUI>true</UseWinUI>
     <EnablePackages>true</EnablePackages>
     
+    <EnableMsixTooling>true</EnableMsixTooling>
+    
     <PublishSingleFile>true</PublishSingleFile>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <SelfContained>false</SelfContained>
