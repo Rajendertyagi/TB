@@ -9,6 +9,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
     - name: Checkout Repository
@@ -20,12 +22,11 @@ jobs:
         dotnet-version: 10.0.x
 
     - name: Restore Dependencies
+      # Explicit restore ensures Dapper is pulled before compilation starts
       run: dotnet restore TradingBrowser.csproj
 
     - name: Build and Compile
-      # Explicitly targeting TradingBrowser.csproj resolves MSB1011
       run: dotnet build TradingBrowser.csproj --configuration Release --no-incremental
 
     - name: Publish Standalone
-      # Creates the portable x64 output you requested
       run: dotnet publish TradingBrowser.csproj --configuration Release -r win-x64 --self-contained false --no-build
