@@ -1,11 +1,45 @@
-name: TB Terminal Build
-on: [push]
+name: .NET 10 WinUI 3 CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: windows-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Build
-        run: dotnet publish -c Release -r win-x64 --self-contained false 
-             /p:PublishSingleFile=true /p:EnableCompressionInSingleFile=true 
-             /p:SatelliteResourceLanguages=en-US
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup .NET 10
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore Dependencies
+      # Pointing directly to the TB project file
+      run: dotnet restore src/TB/TB.csproj
+
+    - name: Publish Single File Executable
+      # Added src/TB/TB.csproj right after dotnet publish
+      run: >
+        dotnet publish src/TB/TB.csproj 
+        -c Release 
+        -r win-x64 
+        --self-contained false 
+        -p:PublishSingleFile=true 
+        -p:EnableCompressionInSingleFile=true 
+        -p:IncludeNativeLibrariesForSelfExtract=true 
+        -p:SatelliteResourceLanguages=en-US
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: TB-Browser-Win11-x64
+        # Updated path to match the exact output directory of the TB project
+        path: src/TB/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/TB.exe
+        if-no-files-found: error
