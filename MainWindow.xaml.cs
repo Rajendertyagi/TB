@@ -1,8 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Web.UI2.Core;
 using System;
-using System.Collections.ObjectModel;
 
 namespace TB
 {
@@ -14,7 +12,6 @@ namespace TB
         {
             this.InitializeComponent();
             ExtendsContentIntoTitleBar = true;
-            // Add a default tab
             AddNewTab("https://www.google.com");
         }
 
@@ -26,7 +23,7 @@ namespace TB
 
         private void BrowserTabs_AddTabButtonClick(TabView sender, object args) => AddNewTab("https://www.bing.com");
 
-        private void BrowserTabs_TabItemClosed(TabView sender, TabViewTabCloseEventArgs args) => ViewModel.Tabs.Remove((BrowserTab)args.Tab.DataContext);
+        private void BrowserTabs_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args) => ViewModel.Tabs.Remove((BrowserTab)args.Tab.DataContext);
 
         private void Go_Click(object sender, RoutedEventArgs e) => NavigateTo(UrlTextBox.Text);
 
