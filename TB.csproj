@@ -4,6 +4,7 @@
     <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWinUI>true</UseWinUI>
+    
     <EnableMsixTooling>true</EnableMsixTooling>
     <WindowsAppSDKSelfContained>false</WindowsAppSDKSelfContained>
     <PublishSingleFile>true</PublishSingleFile>
@@ -12,11 +13,20 @@
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <PublishTrimmed>false</PublishTrimmed>
+    
+    <EnableCoreCompileOnBuild>true</EnableCoreCompileOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove=".tb_data\**" />
-    <Compile Remove=".tb_data\**" />
+    <None Remove="**\.git\**" />
+    <None Remove="**\.github\**" />
+    <None Remove="**\.tb_data\**" />
+    <Compile Remove="**\.git\**" />
+    <Compile Remove="**\.github\**" />
+    <Compile Remove="**\.tb_data\**" />
+    
+    <Compile Remove="bin\**;obj\**" />
+    <None Remove="bin\**;obj\**" />
   </ItemGroup>
 
   <ItemGroup>
