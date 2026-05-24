@@ -60,7 +60,6 @@ namespace TradingBrowser
                     await webBrowserInstance.EnsureCoreWebView2Async(env);
                     webBrowserInstance.CoreWebView2.Settings.IsWebMessageEnabled = true;
                     
-                    // OPTION A POPUP ROUTING ENGINE
                     webBrowserInstance.CoreWebView2.NewWindowRequested += (s, e) =>
                     {
                         e.Handled = true; 
@@ -72,7 +71,8 @@ namespace TradingBrowser
 
                     webBrowserInstance.CoreWebView2.SourceChanged += (s, e) =>
                     {
-                        if (_tabViewControl.SelectedItem == newTabItem)
+                        // FIX: Cast SelectedItem safely as a TabViewItem to resolve CS0252
+                        if (_tabViewControl.SelectedItem is TabViewItem currentlySelected && currentlySelected == newTabItem)
                         {
                             _omniboxControl.Text = webBrowserInstance.Source.ToString();
                         }
