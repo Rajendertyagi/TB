@@ -1,7 +1,8 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
+using Microsoft.Web.UI2.Core;
 using System;
+using System.Collections.ObjectModel;
 
 namespace TB
 {
@@ -12,21 +13,39 @@ namespace TB
         public MainWindow()
         {
             this.InitializeComponent();
-
-            // Setup custom title bar
             ExtendsContentIntoTitleBar = true;
-            SetTitleBar(AppTitleBar); // Optional: Define a UI element as the drag region if needed
+            // Add a default tab
+            AddNewTab("https://www.google.com");
         }
 
-        private void NavView_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void AddNewTab(string url)
         {
-            var selectedItem = (NavigationViewItem)args.SelectedItem;
-            string tag = selectedItem.Tag.ToString();
-
-            // Logic to switch pages goes here
-            // e.g., if (tag == "Dashboard") ContentFrame.Navigate(typeof(DashboardPage));
-            
-            ViewModel.Status = $"Navigated to {tag}";
+            var tab = new BrowserTab { Title = "New Tab", Url = url };
+            ViewModel.Tabs.Add(tab);
         }
+
+        private void BrowserTabs_AddTabButtonClick(TabView sender, object args) => AddNewTab("https://www.bing.com");
+
+        private void BrowserTabs_TabItemClosed(TabView sender, TabViewTabCloseEventArgs args) => ViewModel.Tabs.Remove((BrowserTab)args.Tab.DataContext);
+
+        private void Go_Click(object sender, RoutedEventArgs e) => NavigateTo(UrlTextBox.Text);
+
+        private void UrlTextBox_KeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter) NavigateTo(UrlTextBox.Text);
+        }
+
+        private void NavigateTo(string url)
+        {
+            if (BrowserTabs.SelectedItem is BrowserTab tab)
+            {
+                tab.Url = url.StartsWith("http") ? url : "https://" + url;
+                tab.WebView.Source = new Uri(tab.Url);
+            }
+        }
+        
+        private void Back_Click(object sender, RoutedEventArgs e) => (BrowserTabs.SelectedItem as BrowserTab)?.WebView.GoBack();
+        private void Forward_Click(object sender, RoutedEventArgs e) => (BrowserTabs.SelectedItem as BrowserTab)?.WebView.GoForward();
+        private void Refresh_Click(object sender, RoutedEventArgs e) => (BrowserTabs.SelectedItem as BrowserTab)?.WebView.Reload();
     }
 }
