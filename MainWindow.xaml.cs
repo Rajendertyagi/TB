@@ -16,7 +16,7 @@ namespace TradingBrowser
         private readonly string _logDirectory;
         private readonly string _dbPath;
         
-        // Dictionary records pair mapping hooks to match TabItems directly with individual WebView2 browser frames
+        // Dictionary tracking pairs to match TabItems directly with individual WebView2 browser frames
         private readonly Dictionary<TabViewItem, WebView2> _tabBrowserMapping = new Dictionary<TabViewItem, WebView2>();
         private TabViewItem _currentActiveTabItem = null;
 
@@ -29,7 +29,7 @@ namespace TradingBrowser
             _dbPath = Path.Combine(_rootPortablePath, "userdata.db");
             Directory.CreateDirectory(_logDirectory);
             
-            // FIX 1: Turn on borderless layout mapping and designate Tier 1 as the draggable track handle
+            // Turn on borderless layout mapping and designate Tier 1 as the draggable track handle
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
 
@@ -44,6 +44,9 @@ namespace TradingBrowser
             RefreshButton.Click += (s, e) => { GetActiveBrowser()?.CoreWebView2?.Reload(); };
 
             InitializePersistenceEngine();
+            
+            // Clear out the pre-compiler placeholder tab safely before initializing real tabs
+            MainBrowserTabs.TabItems.Clear();
             
             // Create your very first startup workspace tab automatically on boot
             CreateNewTabContext("TradingView Workspace", "https://www.tradingview.com/chart/");
@@ -67,7 +70,7 @@ namespace TradingBrowser
 
         private void CreateNewTabContext(string tabTitle, string targetUrl)
         {
-            // FIX 2: Create a real, visible visual tab pill item in the TabView control bar
+            // Create a real, visible visual tab pill item in the TabView control bar
             var newTabItem = new TabViewItem
             {
                 Header = tabTitle,
@@ -104,7 +107,7 @@ namespace TradingBrowser
                     await webBrowserInstance.EnsureCoreWebView2Async(env);
                     webBrowserInstance.CoreWebView2.Settings.IsWebMessageEnabled = true;
                     
-                    // FIX 3: Capture internal frame routes to dynamically sync the wide address bar text
+                    // Capture internal frame routes to dynamically sync the wide address bar text
                     webBrowserInstance.CoreWebView2.SourceChanged += (s, e) =>
                     {
                         if (MainBrowserTabs.SelectedItem == newTabItem)
