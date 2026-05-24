@@ -7,31 +7,44 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <Grid Background="#121212">
+    <Grid Background="#13111c">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="64"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Dynamic Header Control Strip Wrapper -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1C1C1C" Height="48">
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1e1b29" Padding="16,0,16,0">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Navigation Controls Block -->
-            <controls:TabView x:Name="MainBrowserTabs" Grid.Column="0" VerticalAlignment="Bottom" Background="Transparent">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
+                <TextBlock Text="X" Foreground="#ff9f43" FontSize="22" FontWeight="Bold" FontFamily="Segoe UI Symbol"/>
+                <TextBlock Text=" Dext" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="4,0,0,0"/>
+            </StackPanel>
+
+            <controls:TabView x:Name="MainBrowserTabs" Grid.Column="1" VerticalAlignment="Bottom" Margin="0,0,8,0" Background="Transparent">
                 <controls:TabView.TabItems>
-                    <controls:TabViewItem Header="TradingView Workspace" IsSelected="True" />
+                    <controls:TabViewItem Header="Workspace: Qwen Studio" IsSelected="True" Height="36"/>
                 </controls:TabView.TabItems>
             </controls:TabView>
 
-            <!-- Dynamic Direct Input Omnibox -->
-            <AutoSuggestBox x:Name="Omnibox" Grid.Column="1" Height="32" Margin="10,0,10,0" VerticalAlignment="Center" PlaceholderText="Enter Ticker or Search URL..." QueryIcon="Find" Background="#2A2A2A" Foreground="White" BorderThickness="0"/>
+            <Grid Grid.Column="2" MaxWidth="520" Height="38" VerticalAlignment="Center">
+                <AutoSuggestBox x:Name="Omnibox" 
+                                PlaceholderText="Advanced: tradingview lightweight charts multi-chart setup" 
+                                QueryIcon="Find" 
+                                Background="#2d293d" 
+                                Foreground="White" 
+                                BorderThickness="0"
+                                VerticalAlignment="Center"
+                                CornerRadius="19"
+                                Padding="16,4,16,4"/>
+            </Grid>
         </Grid>
 
-        <!-- Standard Empty Canvas Root Container Window -->
-        <Grid x:Name="TabContentDisplayGrid" Grid.Row="1" Background="#121212" />
+        <Grid x:Name="TabContentDisplayGrid" Grid.Row="1" Background="#13111c" />
     </Grid>
 </Window>
