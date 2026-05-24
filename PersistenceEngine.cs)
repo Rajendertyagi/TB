@@ -19,11 +19,11 @@ namespace TradingBrowser
                 using var cmd = new SqliteCommand(createTables, conn);
                 cmd.ExecuteNonQuery();
                 
-                Logger.WriteLog("Persistence Engine", "SQLite database infrastructure initialized successfully.");
+                TradingBrowser.Logger.WriteLog("Persistence Engine", "SQLite database infrastructure initialized successfully.");
             }
             catch (Exception ex)
             {
-                Logger.WriteLog("Global Errors", $"SQLite Init Failure: {ex.Message}");
+                TradingBrowser.Logger.WriteLog("Global Errors", $"SQLite Init Failure: {ex.Message}");
             }
         }
     }
