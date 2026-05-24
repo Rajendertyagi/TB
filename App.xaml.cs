@@ -10,11 +10,10 @@ namespace TradingBrowser
 
         public App()
         {
-            // Catch absolute earliest .NET runtime failures
+            // 1. CRITICAL EMERGENCY PROTECTIONS (Keep these first)
             AppDomain.CurrentDomain.UnhandledException += (s, e) => 
                 WritePanicLog("AppDomain_UnhandledException", e.ExceptionObject as Exception);
 
-            // Catch Task background multi-threaded lock crashes
             System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (s, e) => {
                 WritePanicLog("TaskScheduler_UnobservedTaskException", e.Exception);
                 e.SetObserved();
@@ -22,7 +21,6 @@ namespace TradingBrowser
 
             this.InitializeComponent();
 
-            // Catch XAML parser / UI loop failures
             this.UnhandledException += (s, e) => {
                 WritePanicLog("WinUI_UnhandledException", e.Exception);
                 e.Handled = true; 
@@ -33,6 +31,10 @@ namespace TradingBrowser
         {
             try
             {
+                // 2. DIAGNOSTIC HEARTBEAT INITIALIZATION
+                LoggerService.Initialize();
+                LoggerService.Info("System: Application initialization sequence started.");
+
                 m_window = new MainWindow();
                 m_window.Activate();
             }
@@ -58,23 +60,13 @@ Failure Vector: {failurePoint}
 Message: 
 {ex?.Message}
 
-Source: 
-{ex?.Source}
-
 Stack Trace:
 {ex?.StackTrace}
-
-Inner Exception:
-{ex?.InnerException?.Message}
-{ex?.InnerException?.StackTrace}
 =================================================={Environment.NewLine}";
 
                 File.AppendAllText(panicFilePath, errorBlock);
             }
-            catch
-            {
-                // Unpreventable low-level system locks protection anchor
-            }
+            catch { /* Protection anchor against I/O locks */ }
         }
     }
 }
