@@ -1,158 +1,128 @@
 using System;
 using System.IO;
-using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.UI;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
+using System.Windows;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Data.Sqlite;
 
-namespace TradingBrowser
+namespace ModernWpfApp
 {
-    public sealed partial class MainWindow : Window
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
     {
-        private readonly string _rootPortablePath;
-        private readonly string _logDirectory;
+        private const string DatabaseFileName = "LocalCache.db";
         private readonly string _dbPath;
 
         public MainWindow()
         {
-            this.InitializeComponent();
-
-            // Establish Local Portable Application Scoping Execution Anchors
-            _rootPortablePath = AppDomain.CurrentDomain.BaseDirectory;
-            _logDirectory = Path.Combine(_rootPortablePath, "logs");
-            _dbPath = Path.Combine(_rootPortablePath, "userdata.db");
-
-            Directory.CreateDirectory(_logDirectory);
+            InitializeComponent();
             
-            // Clean Boot Trigger Pipelines
-            WriteLog("Startup Engine", "Initializing Portable Trading Core Structure.");
-            ExtendsContentIntoTitleBar = true;
-            InitializePersistenceEngine();
-            SetupCaptionButtons();
+            // Set up local app data path for SQLite and WebView2 user data
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string appDataFolder = Path.Combine(localAppData, "ModernWpfApp");
+            Directory.CreateDirectory(appDataFolder);
             
-            // Spawn initial default view viewport configuration
-            var initialTab = MainBrowserTabs.TabItems[0] as TabViewItem;
-            InitializeWebViewForTab(initialTab, "https://www.tradingview.com/chart/");
+            _dbPath = Path.Combine(appDataFolder, DatabaseFileName);
+
+            // Initialize components asynchronously
+            Loaded += MainWindow_Loaded;
         }
 
-        private void InitializePersistenceEngine()
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             try
             {
-                using var conn = new SqliteConnection($"Data Source={_dbPath}");
-                conn.Open();
-                string createTables = "CREATE TABLE IF NOT EXISTS store (key TEXT PRIMARY KEY, val TEXT);";
-                using var cmd = new SqliteCommand(createTables, conn);
-                cmd.ExecuteNonQuery();
-                WriteLog("Startup Engine", "Portable SQLite context mounted and validated.");
+                InitializeDatabase();
+                await InitializeWebViewAsync();
+                
+                // Load an initial verified URL or local resource
+                MainWebView.Source = new Uri("https://microsoft.com");
             }
             catch (Exception ex)
             {
-                WriteLog("Global Errors", $"SQLite Init Failure: {ex.Message}");
+                MessageBox.Show($"Initialization error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxIcon.Error);
             }
         }
 
-        private void InitializeWebViewForTab(TabViewItem tab, string targetUrl)
+        /// <summary>
+        /// Initializes WebView2 with a dedicated, isolated user data folder.
+        /// </summary>
+        private async Task InitializeWebViewAsync()
         {
-            WriteLog("Tab Lifecycle", $"Creating context footprint for tab container mapping target: {targetUrl}");
-            var webView = new WebView2();
-            tab.Content = webView;
+            if (MainWebView == null) return;
 
-            // Fluid layout binding rules explicitly attached to prevent render overflow clipping
-            webView.HorizontalAlignment = HorizontalAlignment.Stretch;
-            webView.VerticalAlignment = VerticalAlignment.Stretch;
-
-            Task.Run(async () =>
-            {
-                try
-                {
-                    var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(_rootPortablePath, "WebViewCache"));
-                    await webView.EnsureCoreWebView2Async(env);
-                    
-                    DispatcherQueue.TryEnqueue(() =>
-                    {
-                        // Disable multi-window background power constraints
-                        webView.CoreWebView2.Settings.IsWebMessageEnabled = true;
-                        
-                        // Setup Navigation Tracking & Interceptions
-                        webView.CoreWebView2.NavigationStarting += (s, e) => WriteLog("Navigation Loop", $"Initiating frame routing sequence: {e.Uri}");
-                        webView.CoreWebView2.NavigationCompleted += (s, e) => WriteLog("Navigation Loop", $"Render pipeline confirmation complete. HTTP Success: {e.IsSuccess}");
-                        
-                        // Attach Renderer Crashes, Unhandled Worker Faults & Unhandled Promises Interceptors
-                        webView.CoreWebView2.ProcessFailed += (s, e) => WriteLog("Renderer & Promise Faults", $"Chromium Context Failure Event. Reason: {e.ProcessFailedKind}");
-                        
-                        webView.CoreWebView2.DownloadStarting += (s, e) => {
-                            WriteLog("Downloads Subsystem", $"Intercepting external storage download routine. Path destination payload: {e.ResultFilePath}");
-                        };
-
-                        webView.Source = new Uri(targetUrl);
-                        UpdateDisplayGrid(webView);
-                    });
-                }
-                catch (Exception ex)
-                {
-                    WriteLog("Global Errors", $"WebView instantiation error chain broken: {ex.Message}");
-                }
-            });
-        }
-
-        private void OnOmniboxSubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
-        {
-            string rawInput = sender.Text.Trim();
-            if (string.IsNullOrEmpty(rawInput)) return;
-
-            string targetUrl;
-            // Omnibox URL Parsing & Search Fallback Engine
-            if (rawInput.StartsWith("http://") || rawInput.StartsWith("https://") || rawInput.Contains(".") && !rawInput.Contains(" "))
-            {
-                targetUrl = rawInput.StartsWith("http") ? rawInput : "https://" + rawInput;
-                WriteLog("Navigation Loop", $"Omnibox parsed exact route coordinates match: {targetUrl}");
-            }
-            else
-            {
-                targetUrl = "https://www.google.com/search?q=" + Uri.EscapeDataString(rawInput);
-                WriteLog("Navigation Loop", $"Omnibox fallback verification activated. Redirect routing: {targetUrl}");
-            }
-
-            if (MainBrowserTabs.SelectedItem is TabViewItem activeTab && activeTab.Content is WebView2 targetView)
-            {
-                targetView.Source = new Uri(targetUrl);
-            }
-        }
-
-        private void UpdateDisplayGrid(WebView2 view)
-        {
-            TabContentDisplayGrid.Children.Clear();
-            TabContentDisplayGrid.Children.Add(view);
-        }
-
-        private void WriteLog(string trackCategory, string dataLogged)
-        {
-            string logLine = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff}] [{trackCategory}] {dataLogged}{Environment.NewLine}";
-            string todayFile = Path.Combine(_logDirectory, $"trading_session_{DateTime.UtcNow:yyyyMMdd}.log");
+            // Set a secure local directory for browser cache and state
+            string webViewCacheDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ModernWpfApp", "WebView2Profile");
             
-            // Run entirely non-blocking to prevent UI animation thread stalling
-            Task.Run(() => {
-                try { File.AppendAllText(todayFile, logLine); } catch { /* Prevent recursive logging crashes */ }
-            });
+            var environment = await CoreWebView2Environment.CreateAsync(userDataFolder: webViewCacheDir);
+            await MainWebView.EnsureCoreWebView2Async(environment);
+
+            // Configure modern security defaults
+            MainWebView.CoreWebView2.Settings.IsPasswordAutofillEnabled = false;
+            MainWebView.CoreWebView2.Settings.IsWebMessageEnabled = true;
+
+            // Log navigation for cache syncing
+            MainWebView.CoreWebView2.NavigationCompleted += WebView_NavigationCompleted;
         }
 
-        // Framework Stubs for Chrome style UX Window Control Operations 
-        private void SetupCaptionButtons() => WriteLog("Startup Engine", "Caption button color matching optimization executed.");
-        private void OnNewTabRequested(TabView sender, object args) {
-            var newTab = new TabViewItem { Header = "New Dashboard Pane" };
-            sender.TabItems.Add(newTab);
-            InitializeWebViewForTab(newTab, "https://www.tradingview.com/chart/");
+        /// <summary>
+        /// Sets up the local SQLite architecture using Microsoft.Data.Sqlite.
+        /// </summary>
+        private void InitializeDatabase()
+        {
+            var connectionStringBuilder = new SqliteConnectionStringBuilder
+            {
+                DataSource = _dbPath,
+                Mode = SqliteOpenMode.ReadWriteCreate
+            };
+
+            using (var connection = new SqliteConnection(connectionStringBuilder.ConnectionString))
+            {
+                connection.Open();
+
+                string createTableQuery = @"
+                    CREATE TABLE IF NOT EXISTS AppCache (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Key TEXT NOT NULL UNIQUE,
+                        Value TEXT,
+                        Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+                    );";
+
+                using (var command = new SqliteCommand(createTableQuery, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
         }
-        private void OnTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args) => sender.TabItems.Remove(args.Tab);
-        private void MenuNewTab(object sender, RoutedEventArgs e) => OnNewTabRequested(MainBrowserTabs, null);
-        private void MenuReloadTab(object sender, RoutedEventArgs e) { if (MainBrowserTabs.SelectedItem is TabViewItem t && t.Content is WebView2 w) w.CoreWebView2?.Reload(); }
-        private void MenuDuplicateTab(object sender, RoutedEventArgs e) { /* Clones current tab configuration settings */ }
-        private void MenuCloseTab(object sender, RoutedEventArgs e) { if (MainBrowserTabs.SelectedItem is TabViewItem t) MainBrowserTabs.TabItems.Remove(t); }
-        private void MenuCloseOtherTabs(object sender, RoutedEventArgs e) { /* Iterates over structural loop matching selection index */ }
-        private void MenuCloseRightTabs(object sender, RoutedEventArgs e) { /* Iterates from selection index offset to count ceiling */ }
+
+        /// <summary>
+        /// Saves navigation history or tracking metrics directly to the local database.
+        /// </summary>
+        private void WebView_NavigationCompleted(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (!e.IsSuccess) return;
+
+            string currentUrl = MainWebView.Source.ToString();
+
+            using (var connection = new SqliteConnection($"Data Source={_dbPath}"))
+            {
+                connection.Open();
+
+                string upsertQuery = @"
+                    INSERT INTO AppCache (Key, Value, Timestamp) 
+                    VALUES ('LastVisitedUrl', @Url, CURRENT_TIMESTAMP)
+                    ON CONFLICT(Key) DO UPDATE SET 
+                        Value = excluded.Value, 
+                        Timestamp = CURRENT_TIMESTAMP;";
+
+                using (var command = new SqliteCommand(upsertQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@Url", currentUrl);
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
     }
 }
