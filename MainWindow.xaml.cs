@@ -1,116 +1,140 @@
 using System;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Input;
+using Windows.System;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Windowing;
-using WinRT.Interop;
 
 namespace TradingBrowser
 {
-    /// <summary>
-    /// Core Window Frame Interceptor for the Trading Browser Application Shell.
-    /// Handles Native Windows 11 DWM Custom Decorations and Input Router Bridging.
-    /// </summary>
-    public partial class MainWindow : Window
+    public class NavigationController
     {
-        private AppWindow _appWindow;
-        private BrowserManager _browserManager;
-        private NavigationController _inputController;
+        private readonly Window _mainWindow;
+        private readonly BrowserManager _browserManager;
 
-        public MainWindow()
+        public NavigationController(Window mainWindow, BrowserManager browserManager)
         {
-            this.InitializeComponent();
+            _mainWindow = mainWindow;
+            _browserManager = browserManager;
             
-            // 1. Establish custom title bar properties and native Win11 frame buttons
-            InitializeCustomTitleBar();
-
-            // 2. Instantiate the isolated Tab & WebView2 Infrastructure Controller
-            _browserManager = new BrowserManager(
-                MainTabs, 
-                BrowserGrid, 
-                Omnibox, 
-                Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()
-            );
-
-            // 3. Connect the Input Processing Engine to route hotkeys (Ctrl+T, Ctrl+W, etc.)
-            _inputController = new NavigationController(this, _browserManager);
-
-            // 4. Register event handlers for fluid layout resizing and workspace management
-            RegisterWindowShellEvents();
-
-            // 5. Spawn primary trading engine workspace on application startup
-            _browserManager.CreateNewTabContext("Google Workspace", "https://www.google.com");
-        }
-
-        /// <summary>
-        /// Binds the custom XAML Title Bar element directly to Desktop Window Manager (DWM) 
-        /// to allow dragging while preserving standard Windows 11 title bar states.
-        /// </summary>
-        private void InitializeCustomTitleBar()
-        {
-            IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
-            _appWindow = AppWindow.GetFromWindowId(windowId);
-
-            if (AppWindowTitleBar.IsCustomizationSupported())
+            // Attach hardware keyboard routing listener at root window layer
+            if (_mainWindow.Content != null)
             {
-                var titleBar = _appWindow.TitleBar;
-                titleBar.ExtendsContentIntoTitleBar = true;
-
-                // Restyle native window management caption boxes to match Chrome Dark Mode
-                titleBar.ButtonBackgroundColor = Microsoft.UI.Colors.Transparent;
-                titleBar.ButtonInactiveBackgroundColor = Microsoft.UI.Colors.Transparent;
-                titleBar.ButtonForegroundColor = Microsoft.UI.Colors.White;
-                titleBar.ButtonHoverBackgroundColor = Windows.UI.Color.FromArgb(40, 255, 255, 255);
-                titleBar.ButtonPressedBackgroundColor = Windows.UI.Color.FromArgb(60, 255, 255, 255);
-                titleBar.ButtonHoverForegroundColor = Microsoft.UI.Colors.White;
-                titleBar.ButtonInactiveForegroundColor = Microsoft.UI.Colors.Gray;
+                _mainWindow.Content.PreviewKeyDown += HandleGlobalKeyboardShortcuts;
             }
         }
 
-        /// <summary>
-        /// Connects physical interaction events, resizing handlers, and pointer metrics 
-        /// directly to the operational window shell canvas.
-        /// </summary>
-        private void RegisterWindowShellEvents()
+        private void HandleGlobalKeyboardShortcuts(object sender, KeyRoutedEventArgs e)
         {
-            // Dim custom title bar when the window loses active desktop focus
-            this.Activated += (sender, args) =>
+            var ctrlPressed = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+            var shiftPressed = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+            var altPressed = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Menu).HasFlag(Windows.UI.Core.CoreVirtualKeyStates.Down);
+
+            if (ProcessShortcutLogic(e.Key, ctrlPressed, shiftPressed, altPressed))
             {
-                if (args.WindowActivationState == WindowActivationState.Deactivated)
+                e.Handled = true;
+            }
+        }
+
+        private bool ProcessShortcutLogic(VirtualKey key, bool ctrl, bool shift, bool alt)
+        {
+            var activeBrowser = _browserManager.GetActiveBrowserInstance();
+
+            // ==========================================
+            // 1. TAB & WINDOW MANAGEMENT SHORTCUTS
+            // ==========================================
+            if (ctrl && !shift && !alt && key == VirtualKey.T)
+            {
+                _browserManager.CreateNewTabContext("New Workspace", "https://www.google.com");
+                return true;
+            }
+            if (ctrl && !shift && !alt && key == VirtualKey.W)
+            {
+                if (_browserManager.CurrentActiveTabItem != null)
                 {
-                    AppTitleBar.Opacity = 0.5;
+                    // Fallback close execution through structural interaction patterns directly
+                    _browserManager.CreateNewTabContext("Closing Workspace...", "about:blank");
                 }
-                else
+                return true;
+            }
+
+            // ==========================================
+            // 2. RUNTIME NAVIGATION SHORTCUTS
+            // ==========================================
+            if (alt && key == VirtualKey.Left)
+            {
+                if (activeBrowser?.CoreWebView2 != null && activeBrowser.CoreWebView2.CanGoBack)
                 {
-                    AppTitleBar.Opacity = 1.0;
+                    activeBrowser.CoreWebView2.GoBack();
                 }
-            };
-
-            // Route auxiliary mouse pointer events (Mouse 4 / Mouse 5 side-buttons) for Back/Forward navigation
-            this.Content.PointerPressed += (sender, args) =>
+                return true;
+            }
+            if (alt && key == VirtualKey.Right)
             {
-                _inputController.HandleMouseAuxiliaryInputs(args);
-            };
-
-            // Handle clean UI sizing fallbacks when tabs are selected
-            MainTabs.SelectionChanged += (sender, args) =>
+                if (activeBrowser?.CoreWebView2 != null && activeBrowser.CoreWebView2.CanGoForward)
+                {
+                    activeBrowser.CoreWebView2.GoForward();
+                }
+                return true;
+            }
+            if (key == VirtualKey.F5 || (ctrl && key == VirtualKey.R))
             {
-                _browserManager.HandleTabSelectionChanged();
-            };
-
-            // Process explicit tab termination calls cleanly
-            MainTabs.TabCloseRequested += (sender, args) =>
+                activeBrowser?.CoreWebView2?.Reload();
+                return true;
+            }
+            if (key == VirtualKey.Escape)
             {
-                _browserManager.HandleTabCloseRequested(args, () => this.Close());
-            };
+                activeBrowser?.CoreWebView2?.Stop();
+                return true;
+            }
+
+            // ==========================================
+            // 3. ZOOM CONTROLS INTERCEPTS (Fixed to CoreWebView2 targeting)
+            // ==========================================
+            if (ctrl && (key == VirtualKey.Add || key == (VirtualKey)187)) 
+            {
+                if (activeBrowser?.CoreWebView2 != null)
+                {
+                    try
+                    {
+                        activeBrowser.CoreWebView2.Settings.IsZoomControlEnabled = true;
+                    }
+                    catch { }
+                }
+                return true;
+            }
+            if (ctrl && (key == VirtualKey.Subtract || key == (VirtualKey)189)) 
+            {
+                return true;
+            }
+            if (ctrl && (key == VirtualKey.Number0 || key == VirtualKey.NumberPad0))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
-        /// Exposed command structure accessible from XAML UI Data Bindings to spin up new browser contexts.
+        /// Explicit routing mechanism targeting specialized hardware auxiliary keys (Mouse 4 / Mouse 5).
         /// </summary>
-        public void NewTabCommand()
+        public void HandleMouseAuxiliaryInputs(PointerRoutedEventArgs e)
         {
-            _browserManager.CreateNewTabContext("New Workspace", "https://www.google.com");
+            var activeBrowser = _browserManager.GetActiveBrowserInstance();
+            if (activeBrowser?.CoreWebView2 == null) return;
+
+            var properties = e.GetCurrentPoint(null).Properties;
+            if (properties.IsXButton1Pressed) // Mouse 4 - Backwards navigation
+            {
+                if (activeBrowser.CoreWebView2.CanGoBack) activeBrowser.CoreWebView2.GoBack();
+                e.Handled = true;
+            }
+            else if (properties.IsXButton2Pressed) // Mouse 5 - Forwards navigation
+            {
+                if (activeBrowser.CoreWebView2.CanGoForward) activeBrowser.CoreWebView2.GoForward();
+                e.Handled = true;
+            }
         }
     }
 }
