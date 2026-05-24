@@ -5,9 +5,9 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
-    mc:Ignorable="d"
-    Background="#121212">
+    mc:Ignorable="d">
 
+    <!-- WinUI 3 background applied here to the root layout element instead of the Window tag -->
     <Grid Background="#121212">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -24,8 +24,11 @@
             <!-- Chrome Style Tab Management Engine -->
             <controls:TabView x:Name="MainBrowserTabs" Grid.Column="0" VerticalAlignment="Bottom" Margin="0,0,0,0" AddTabButtonClick="OnNewTabRequested" TabCloseRequested="OnTabCloseRequested" Background="Transparent">
                 <controls:TabView.TabItems>
-                    <!-- Initial Workspace Shell Tab -->
-                    <controls:TabViewItem Header="TradingView Workspace" IsSelected="True" IconSource="Document">
+                    <!-- Initial Workspace Shell Tab with explicitly declared IconSource block -->
+                    <controls:TabViewItem Header="TradingView Workspace" IsSelected="True">
+                        <controls:TabViewItem.IconSource>
+                            <controls:SymbolIconSource Symbol="Document"/>
+                        </controls:TabViewItem.IconSource>
                         <controls:TabViewItem.ContextFlyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem Text="New Tab" Click="MenuNewTab"/>
