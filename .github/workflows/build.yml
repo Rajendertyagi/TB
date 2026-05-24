@@ -8,7 +8,8 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
     - name: Setup .NET 10
       uses: actions/setup-dotnet@v4
@@ -19,7 +20,7 @@ jobs:
       run: dotnet restore
 
     - name: Publish
-      run: dotnet publish -c Release -r win-x64 --self-contained false
+      run: dotnet publish -c Release -r win-x64 --self-contained true
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
