@@ -10,6 +10,8 @@
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWinUI>true</UseWinUI>
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    
+    <AppxPackage>false</AppxPackage>
   </PropertyGroup>
 
   <ItemGroup>
