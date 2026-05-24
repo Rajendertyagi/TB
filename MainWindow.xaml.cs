@@ -2,14 +2,16 @@ using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Windowing;
 using WinRT.Interop;
+using System.Linq;
 
 namespace TradingBrowser
 {
-    public partial class MainWindow : Window
+    public sealed partial class MainWindow : Window
     {
         private AppWindow _appWindow;
-        
-        // Expose the viewmodel property cleanly for the x:Bind compilation target
+        private DatabaseService _dbService;
+        private NavigationController _inputController;
+
         public BrowserViewModel ViewModel { get; } = new BrowserViewModel();
 
         public MainWindow()
@@ -17,17 +19,16 @@ namespace TradingBrowser
             this.InitializeComponent();
             InitializeCustomTitleBar();
 
-            // Track selection changes to dynamically remount the active chromium view frame
-            ViewModel.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(BrowserViewModel.ActiveTab))
-                {
-                    UpdateActiveBrowserDisplay();
-                }
-            };
+            _dbService = new DatabaseService();
+            _inputController = new NavigationController(ViewModel);
 
-            // Spawn first workspace natively inside the MVVM structural scope
-            ViewModel.OpenNewTab();
+            // Hook input events to the isolated controller
+            this.Content.PreviewKeyDown += _inputController.HandleGlobalKeyboardShortcuts;
+            this.Content.PointerPressed += (s, e) => _inputController.HandleMouseAuxiliaryInputs(e);
+
+            ViewModel.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(BrowserViewModel.ActiveTab)) UpdateActiveBrowserDisplay(); };
+            
+            LoadPreviousSession();
         }
 
         private void InitializeCustomTitleBar()
@@ -35,7 +36,6 @@ namespace TradingBrowser
             IntPtr hWnd = WindowNative.GetWindowHandle(this);
             Microsoft.UI.WindowId windowId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
             _appWindow = AppWindow.GetFromWindowId(windowId);
-
             if (AppWindowTitleBar.IsCustomizationSupported())
             {
                 var titleBar = _appWindow.TitleBar;
@@ -46,22 +46,29 @@ namespace TradingBrowser
             }
         }
 
+        private void LoadPreviousSession()
+        {
+            var savedTabs = _dbService.LoadWorkspaceLayout();
+            if (savedTabs != null && savedTabs.Any())
+            {
+                foreach (var tab in savedTabs) ViewModel.OpenTabs.Add(new TabContext(tab.Title, tab.Url));
+                ViewModel.ActiveTab = ViewModel.OpenTabs.FirstOrDefault();
+            }
+            else ViewModel.OpenNewTab();
+        }
+
         private void UpdateActiveBrowserDisplay()
         {
             BrowserGrid.Children.Clear();
             if (ViewModel.ActiveTab != null)
             {
-                // If this tab context doesn't own a concrete hardware control yet, spin one up
                 if (ViewModel.ActiveTab.BrowserInstance == null)
                 {
                     var webView = new Microsoft.UI.Xaml.Controls.WebView2();
                     ViewModel.ActiveTab.BrowserInstance = webView;
-                    
-                    // Route address state streams safely back to data model
-                    webView.NavigationStarting += (s, args) => { ViewModel.ActiveTab.CurrentUrl = args.Uri; };
+                    webView.NavigationStarting += (s, args) => { ViewModel.ActiveTab.CurrentUrl = args.Uri?.ToString() ?? ""; };
                     webView.Source = new Uri(ViewModel.ActiveTab.CurrentUrl);
                 }
-
                 BrowserGrid.Children.Add(ViewModel.ActiveTab.BrowserInstance);
             }
         }
