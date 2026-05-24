@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:TradingBrowser"
     mc:Ignorable="d">
 
     <Grid Background="#1E1E1E">
@@ -25,13 +26,14 @@
                 <TextBlock Text="TB" FontWeight="Bold" Foreground="#FFFFFF" Margin="8,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
 
-            <TabView x:Name="MainTabs" Grid.Column="1" VerticalAlignment="Bottom" AddTabButtonCommand="{x:Bind NewTabCommand}"
-                     Background="Transparent" IsAddTabButtonVisible="True">
-                <TabView.TabItems>
-                    </TabView.TabItems>
+            <TabView x:Name="MainTabs" Grid.Column="1" VerticalAlignment="Bottom" 
+                     TabItemsSource="{x:Bind ViewModel.OpenTabs, Mode=OneWay}"
+                     SelectedItem="{x:Bind ViewModel.ActiveTab, Mode=TwoWay}"
+                     AddTabButtonCommand="{x:Bind ViewModel.OpenNewTabCommand}"
+                     Background="Transparent">
                 <TabView.TabItemTemplate>
-                    <DataTemplate>
-                        <TabViewItem Header="{Binding Header}" ContextFlyout="{StaticResource TabContextMenu}">
+                    <DataTemplate x:DataType="local/TabContext">
+                        <TabViewItem Header="{x:Bind Title, Mode=OneWay}">
                             <TabViewItem.IconSource>
                                 <SymbolIconSource Symbol="Globe"/>
                             </TabViewItem.IconSource>
@@ -43,24 +45,24 @@
 
         <Grid Grid.Row="1" Background="#252526" Padding="8,4">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/> <ColumnDefinition Width="*"/>    <ColumnDefinition Width="Auto"/> </Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" Margin="0,0,8,0">
-                <Button x:Name="BackButton" Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
-                <Button x:Name="ForwardButton" Content="&#xE72A;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
-                <Button x:Name="RefreshButton" Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+                <Button Content="&#xE72B;" FontFamily="Segoe MDL2 Assets" Background="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+                <Button Content="&#xE72A;" FontFamily="Segoe MDL2 Assets" Background="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+                <Button Content="&#xE72C;" FontFamily="Segoe MDL2 Assets" Background="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
             </StackPanel>
 
             <AutoSuggestBox x:Name="Omnibox" Grid.Column="1" 
+                            Text="{x:Bind ViewModel.ActiveTab.CurrentUrl, Mode=OneWay}"
                             PlaceholderText="Search or enter web address..." 
-                            QueryIcon="Find"
-                            Background="#1E1E1E" 
-                            Foreground="#FFFFFF"
-                            VerticalAlignment="Center"
-                            UpdateTextOnSelect="False"/>
+                            QueryIcon="Find" Background="#1E1E1E" Foreground="#FFFFFF" VerticalAlignment="Center"/>
 
-            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0" Spacing="4">
-                <Button Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderBrush="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="8,0,0,0">
+                <Button Content="&#xE713;" FontFamily="Segoe MDL2 Assets" Background="Transparent" Foreground="#FFFFFF" Width="36" Height="32"/>
             </StackPanel>
         </Grid>
 
