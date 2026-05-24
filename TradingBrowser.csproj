@@ -13,7 +13,7 @@
 
     <UseWinUI>true</UseWinUI>
     <WindowsPackageType>None</WindowsPackageType>
-    <EnableMsixTooling>true</EnableMsixTooling> 
+    <EnableMsixTooling>false</EnableMsixTooling> 
     
     <SelfContained>false</SelfContained> 
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages> 
