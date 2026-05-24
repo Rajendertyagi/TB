@@ -7,44 +7,44 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <Grid Background="#13111c">
+    <Grid Background="#1C1B1F">
         <Grid.RowDefinitions>
-            <RowDefinition Height="64"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="44"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1e1b29" Padding="16,0,16,0">
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1F1F1F" Padding="0,0,140,0">
+            <controls:TabView x:Name="MainBrowserTabs" 
+                              VerticalAlignment="Bottom" 
+                              UpdateLayoutTrigger="Default"
+                              Background="Transparent"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Background="#2E2E2E" Padding="8,0,8,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="150"/>
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,16,0">
-                <TextBlock Text="X" Foreground="#ff9f43" FontSize="22" FontWeight="Bold" FontFamily="Segoe UI Symbol"/>
-                <TextBlock Text=" Dext" Foreground="White" FontSize="18" FontWeight="SemiBold" Margin="4,0,0,0"/>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="0,0,8,0">
+                <Button x:Name="BackButton" Content="" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14"/>
+                <Button x:Name="ForwardButton" Content="" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14"/>
+                <Button x:Name="RefreshButton" Content="" FontFamily="Segoe MDL2 Assets" Background="Transparent" BorderThickness="0" Foreground="White" Width="28" Height="28" CornerRadius="14"/>
             </StackPanel>
 
-            <controls:TabView x:Name="MainBrowserTabs" Grid.Column="1" VerticalAlignment="Bottom" Margin="0,0,8,0" Background="Transparent">
-                <controls:TabView.TabItems>
-                    <controls:TabViewItem Header="Workspace: Qwen Studio" IsSelected="True" Height="36"/>
-                </controls:TabView.TabItems>
-            </controls:TabView>
-
-            <Grid Grid.Column="2" MaxWidth="520" Height="38" VerticalAlignment="Center">
-                <AutoSuggestBox x:Name="Omnibox" 
-                                PlaceholderText="Advanced: tradingview lightweight charts multi-chart setup" 
-                                QueryIcon="Find" 
-                                Background="#2d293d" 
-                                Foreground="White" 
-                                BorderThickness="0"
-                                VerticalAlignment="Center"
-                                CornerRadius="19"
-                                Padding="16,4,16,4"/>
-            </Grid>
+            <AutoSuggestBox x:Name="Omnibox" 
+                            Grid.Column="1" 
+                            VerticalAlignment="Center" 
+                            PlaceholderText="Search Google or type a URL" 
+                            QueryIcon="Find" 
+                            Background="#1F1F1F" 
+                            Foreground="White" 
+                            BorderThickness="0"
+                            CornerRadius="16"
+                            Padding="12,3,12,3"/>
         </Grid>
 
-        <Grid x:Name="TabContentDisplayGrid" Grid.Row="1" Background="#13111c" />
+        <Grid x:Name="TabContentDisplayGrid" Grid.Row="2" Background="#1C1B1F" />
     </Grid>
 </Window>
