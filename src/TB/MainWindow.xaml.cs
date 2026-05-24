@@ -50,7 +50,7 @@ namespace TB
             if (e.PropertyName == nameof(MainViewModel.CurrentTab) && ViewModel.CurrentTab != null)
             {
                 // Intercept state change to navigate the shared control safely
-                if (SharedWebView.CoreWebView2 != null && SharedWebView.Source.ToString() != ViewModel.CurrentTab.Url)
+                if (SharedWebView.CoreWebView2 != null && SharedWebView.Source?.ToString() != ViewModel.CurrentTab.Url)
                 {
                     SharedWebView.Source = new Uri(ViewModel.CurrentTab.Url);
                 }
@@ -86,7 +86,10 @@ namespace TB
             if (ViewModel.CurrentTab != null && args.IsSuccess)
             {
                 ViewModel.CurrentTab.Url = sender.Source.ToString();
-                ViewModel.CurrentTab.Title = sender.CoreWebView2.Title;
+                
+                // CRITICAL FIX: Changed from .Title to .DocumentTitle
+                ViewModel.CurrentTab.Title = sender.CoreWebView2.DocumentTitle;
+                
                 ViewModel.OmniboxText = sender.Source.ToString();
             }
         }
