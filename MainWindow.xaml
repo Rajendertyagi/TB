@@ -7,21 +7,25 @@
     xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
 
-    <Grid Background="#1C1B1F">
+    <Grid Background="#1C1B1F" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition Height="44"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1F1F1F" Padding="0,0,140,0">
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Background="#1F1F1F" Padding="0,0,140,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <controls:TabView x:Name="MainBrowserTabs" 
                               VerticalAlignment="Bottom" 
-                              UpdateLayoutTrigger="Default"
-                              Background="Transparent"/>
+                              HorizontalAlignment="Stretch"
+                              Background="Transparent">
+                <controls:TabView.TabItems>
+                    <controls:TabViewItem Header="New Tab" Visibility="Collapsed"/>
+                </controls:TabView.TabItems>
+            </controls:TabView>
         </Grid>
 
-        <Grid Grid.Row="1" Background="#2E2E2E" Padding="8,0,8,0">
+        <Grid Grid.Row="1" Background="#2E2E2E" Padding="8,0,8,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
@@ -36,6 +40,7 @@
             <AutoSuggestBox x:Name="Omnibox" 
                             Grid.Column="1" 
                             VerticalAlignment="Center" 
+                            HorizontalAlignment="Stretch"
                             PlaceholderText="Search Google or type a URL" 
                             QueryIcon="Find" 
                             Background="#1F1F1F" 
@@ -45,6 +50,8 @@
                             Padding="12,3,12,3"/>
         </Grid>
 
-        <Grid x:Name="TabContentDisplayGrid" Grid.Row="2" Background="#1C1B1F" />
+        <Grid x:Name="TabContentDisplayGrid" Grid.Row="2" Background="#1C1B1F" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Canvas Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        </Grid>
     </Grid>
 </Window>
