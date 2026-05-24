@@ -16,7 +16,6 @@ namespace TradingBrowser
         private readonly string _logDirectory;
         private readonly string _dbPath;
         
-        // Dictionary tracking pairs to match TabItems directly with individual WebView2 browser frames
         private readonly Dictionary<TabViewItem, WebView2> _tabBrowserMapping = new Dictionary<TabViewItem, WebView2>();
         private TabViewItem _currentActiveTabItem = null;
 
@@ -29,11 +28,9 @@ namespace TradingBrowser
             _dbPath = Path.Combine(_rootPortablePath, "userdata.db");
             Directory.CreateDirectory(_logDirectory);
             
-            // Turn on borderless layout mapping and designate Tier 1 as the draggable track handle
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
 
-            // Hook layout events explicitly
             MainBrowserTabs.AddTabButtonClick += OnNewTabRequested;
             MainBrowserTabs.SelectionChanged += OnTabSelectionChanged;
             MainBrowserTabs.TabCloseRequested += OnTabCloseRequested;
@@ -44,12 +41,10 @@ namespace TradingBrowser
             RefreshButton.Click += (s, e) => { GetActiveBrowser()?.CoreWebView2?.Reload(); };
 
             InitializePersistenceEngine();
-            
-            // Clear out the pre-compiler placeholder tab safely before initializing real tabs
             MainBrowserTabs.TabItems.Clear();
             
-            // Create your very first startup workspace tab automatically on boot
-            CreateNewTabContext("TradingView Workspace", "https://www.tradingview.com/chart/");
+            // Initializing with TradingView standard chart baseline
+            CreateNewTabContext("TradingView", "https://www.tradingview.com/chart/");
         }
 
         private void InitializePersistenceEngine()
@@ -70,25 +65,20 @@ namespace TradingBrowser
 
         private void CreateNewTabContext(string tabTitle, string targetUrl)
         {
-            // Create a real, visible visual tab pill item in the TabView control bar
             var newTabItem = new TabViewItem
             {
                 Header = tabTitle,
-                IconSource = new SymbolIconSource { Symbol = Symbol.Document }
+                IconSource = new SymbolIconSource { Symbol = Symbol.Globe }
             };
 
-            // Instantiate a completely isolated dedicated browser container instance for this specific tab context
             var webBrowserInstance = new WebView2
             {
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 VerticalAlignment = VerticalAlignment.Stretch
             };
 
-            // Save the connection pairing into our mapping framework index layout 
             _tabBrowserMapping.Add(newTabItem, webBrowserInstance);
             MainBrowserTabs.TabItems.Add(newTabItem);
-            
-            // Auto-focus selection onto the newly built workspace tab
             MainBrowserTabs.SelectedItem = newTabItem;
 
             DispatcherQueue.TryEnqueue(async () =>
@@ -107,7 +97,16 @@ namespace TradingBrowser
                     await webBrowserInstance.EnsureCoreWebView2Async(env);
                     webBrowserInstance.CoreWebView2.Settings.IsWebMessageEnabled = true;
                     
-                    // Capture internal frame routes to dynamically sync the wide address bar text
+                    // OPTION A FIX: Catch all click pops or window redirects and route them into standard tabs instead of separate apps
+                    webBrowserInstance.CoreWebView2.NewWindowRequested += (s, e) =>
+                    {
+                        e.Handled = true; // Block the unmanaged default external popup layout window completely
+                        DispatcherQueue.TryEnqueue(() =>
+                        {
+                            CreateNewTabContext("Loading Workspace...", e.Uri);
+                        });
+                    };
+
                     webBrowserInstance.CoreWebView2.SourceChanged += (s, e) =>
                     {
                         if (MainBrowserTabs.SelectedItem == newTabItem)
@@ -140,18 +139,14 @@ namespace TradingBrowser
                 _currentActiveTabItem = selectedTab;
                 var targetBrowserInstance = _tabBrowserMapping[selectedTab];
 
-                // Swap out viewport visibility blocks to project the focused workspace canvas content frame
                 TabContentDisplayGrid.Children.Clear();
                 TabContentDisplayGrid.Children.Add(targetBrowserInstance);
-
-                // Update the address entry string field display value 
                 Omnibox.Text = targetBrowserInstance.Source?.ToString() ?? "";
             }
         }
 
         private void OnNewTabRequested(TabView sender, object args)
         {
-            // Creates and registers a clean visual workspace tab upon clicking '+'
             CreateNewTabContext("New Tab", "https://www.tradingview.com/chart/");
         }
 
@@ -163,7 +158,6 @@ namespace TradingBrowser
                 _tabBrowserMapping.Remove(targetTabItem);
                 MainBrowserTabs.TabItems.Remove(targetTabItem);
 
-                // Safety checks for closing down the last remaining workspace window frame anchor
                 if (MainBrowserTabs.TabItems.Count == 0)
                 {
                     this.Close();
@@ -207,7 +201,7 @@ namespace TradingBrowser
                 string todayFile = Path.Combine(_logDirectory, $"trading_session_{DateTime.UtcNow:yyyyMMdd}.log");
                 File.AppendAllText(todayFile, logLine);
             }
-            catch { /* Protection anchor locks */ }
+            catch { /* Protection locks */ }
         }
     }
 }
