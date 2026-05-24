@@ -20,7 +20,7 @@
                 <ColumnDefinition Width="140" />
             </Grid.ColumnDefinitions>
 
-            <StackPanel Grid.Column0 Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,8,0">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,8,0">
                 <FontIcon Glyph="&#xE774;" FontSize="14" Foreground="#00E676" FontFamily="Segoe MDL2 Assets"/>
                 <TextBlock Text="TB" FontWeight="Bold" Foreground="#FFFFFF" Margin="8,0,0,0" VerticalAlignment="Center"/>
             </StackPanel>
