@@ -2,102 +2,43 @@
     x:Class="RTBrowser.UI.Controls.StatusBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Height="{StaticResource StatusBarHeight}">
+    Height="24">
 
     <Border
-        Background="{StaticResource BackgroundPrimaryBrush}">
+        Background="#101113"
+        BorderBrush="#1E1F22"
+        BorderThickness="0,1,0,0">
 
-        <Grid Height="{StaticResource StatusBarHeight}">
+        <Grid>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
+
+                <ColumnDefinition Width="*" />
+
+                <ColumnDefinition Width="Auto" />
+
             </Grid.ColumnDefinitions>
 
             <!-- LEFT -->
 
-            <StackPanel
+            <TextBlock
+                x:Name="StatusText"
                 Grid.Column="0"
-                Orientation="Horizontal"
+                Margin="10,0"
                 VerticalAlignment="Center"
-                Margin="8,0">
-
-                <Button
-                    Width="22"
-                    Height="22"
-                    Margin="0,0,4,0"
-                    Background="Transparent"
-                    BorderThickness="0">
-
-                    <TextBlock
-                        Text=""
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="11"
-                        Foreground="{StaticResource TextSecondaryBrush}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center" />
-
-                </Button>
-
-                <Button
-                    Width="22"
-                    Height="22"
-                    Background="Transparent"
-                    BorderThickness="0">
-
-                    <TextBlock
-                        Text=""
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="11"
-                        Foreground="{StaticResource TextSecondaryBrush}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center" />
-
-                </Button>
-
-            </StackPanel>
+                FontSize="11"
+                Foreground="#8F9093"
+                Text="Ready" />
 
             <!-- RIGHT -->
 
-            <StackPanel
-                Grid.Column="2"
-                Orientation="Horizontal"
+            <TextBlock
+                Grid.Column="1"
+                Margin="0,0,10,0"
                 VerticalAlignment="Center"
-                Margin="0,0,8,0">
-
-                <Button
-                    Height="22"
-                    Margin="0,0,4,0"
-                    Padding="6,0"
-                    Background="Transparent"
-                    BorderThickness="0">
-
-                    <TextBlock
-                        Text="100%"
-                        FontFamily="{StaticResource AppFontFamily}"
-                        FontSize="{StaticResource FontStatus}"
-                        Foreground="{StaticResource TextSecondaryBrush}" />
-
-                </Button>
-
-                <Button
-                    Width="22"
-                    Height="22"
-                    Background="Transparent"
-                    BorderThickness="0">
-
-                    <TextBlock
-                        Text=""
-                        FontFamily="Segoe Fluent Icons"
-                        FontSize="11"
-                        Foreground="{StaticResource TextSecondaryBrush}"
-                        VerticalAlignment="Center"
-                        HorizontalAlignment="Center" />
-
-                </Button>
-
-            </StackPanel>
+                FontSize="11"
+                Foreground="#8F9093"
+                Text="RTBrowser" />
 
         </Grid>
 
