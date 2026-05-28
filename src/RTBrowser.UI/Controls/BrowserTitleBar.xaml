@@ -7,7 +7,8 @@
     <Border
         Background="#111214"
         BorderBrush="#1E1F22"
-        BorderThickness="0,0,0,1">
+        BorderThickness="0,0,0,1"
+        MouseLeftButtonDown="OnDragWindow">
 
         <Grid>
 
@@ -19,13 +20,15 @@
 
             </Grid.ColumnDefinitions>
 
-            <!-- ACTIVE TAB -->
+            <!-- LEFT -->
 
             <StackPanel
                 Grid.Column="0"
                 Orientation="Horizontal"
                 VerticalAlignment="Center"
                 Margin="8,0,0,0">
+
+                <!-- ACTIVE TAB -->
 
                 <Border
                     Width="240"
@@ -47,6 +50,8 @@
 
                         </Grid.ColumnDefinitions>
 
+                        <!-- FAVICON -->
+
                         <Border
                             Width="14"
                             Height="14"
@@ -54,6 +59,8 @@
                             VerticalAlignment="Center"
                             CornerRadius="7"
                             Background="#4285F4"/>
+
+                        <!-- TITLE -->
 
                         <TextBlock
                             Grid.Column="1"
@@ -64,12 +71,15 @@
                             Foreground="White"
                             TextTrimming="CharacterEllipsis"/>
 
-                        <Border
+                        <!-- CLOSE TAB -->
+
+                        <Button
                             Grid.Column="2"
                             Width="18"
                             Height="18"
                             Margin="0,0,8,0"
-                            CornerRadius="4">
+                            Background="Transparent"
+                            BorderThickness="0">
 
                             <TextBlock
                                 Text="✕"
@@ -78,15 +88,18 @@
                                 HorizontalAlignment="Center"
                                 VerticalAlignment="Center"/>
 
-                        </Border>
+                        </Button>
 
                     </Grid>
 
                 </Border>
 
+                <!-- NEW TAB -->
+
                 <Button
                     Width="28"
                     Height="28"
+                    Margin="4,0,0,0"
                     Background="Transparent"
                     BorderThickness="0">
 
@@ -117,11 +130,15 @@
                 VerticalAlignment="Center"
                 Margin="0,0,4,0">
 
+                <!-- MINIMIZE -->
+
                 <Button
+                    x:Name="MinimizeButton"
                     Width="46"
                     Height="30"
                     Background="Transparent"
-                    BorderThickness="0">
+                    BorderThickness="0"
+                    Click="OnMinimize">
 
                     <TextBlock
                         Text="—"
@@ -132,11 +149,15 @@
 
                 </Button>
 
+                <!-- MAXIMIZE -->
+
                 <Button
+                    x:Name="MaximizeButton"
                     Width="46"
                     Height="30"
                     Background="Transparent"
-                    BorderThickness="0">
+                    BorderThickness="0"
+                    Click="OnMaximize">
 
                     <TextBlock
                         Text="▢"
@@ -147,11 +168,15 @@
 
                 </Button>
 
+                <!-- CLOSE -->
+
                 <Button
+                    x:Name="CloseButton"
                     Width="46"
                     Height="30"
                     Background="Transparent"
-                    BorderThickness="0">
+                    BorderThickness="0"
+                    Click="OnClose">
 
                     <TextBlock
                         Text="✕"
