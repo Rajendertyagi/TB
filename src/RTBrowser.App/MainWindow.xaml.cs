@@ -50,20 +50,21 @@ namespace RTBrowser.App
         private async Task CreateNewTab(
             string url)
         {
-            var webView = new WebView2();
+            if (BrowserHost.CoreWebView2 == null)
+            {
+                await BrowserHost.EnsureCoreWebView2Async();
+            }
 
-            await webView.EnsureCoreWebView2Async();
-
-            webView.CoreWebView2.Settings
+            BrowserHost.CoreWebView2.Settings
                 .AreDefaultContextMenusEnabled = false;
 
-            webView.CoreWebView2.NavigationStarting +=
+            BrowserHost.CoreWebView2.NavigationStarting +=
                 OnNavigationStarting;
 
-            webView.CoreWebView2.NavigationCompleted +=
+            BrowserHost.CoreWebView2.NavigationCompleted +=
                 OnNavigationCompleted;
 
-            webView.CoreWebView2.DocumentTitleChanged +=
+            BrowserHost.CoreWebView2.DocumentTitleChanged +=
                 OnDocumentTitleChanged;
 
             var tab = new BrowserTab
@@ -80,11 +81,9 @@ namespace RTBrowser.App
 
             _tabs.Add(tab);
 
-            _webViews[tab.Id] = webView;
+            _webViews[tab.Id] = BrowserHost;
 
             _activeTab = tab;
-
-            BrowserHost.Content = webView;
 
             NavigateTo(url);
 
@@ -107,7 +106,7 @@ namespace RTBrowser.App
         private void NavigateTo(
             string url)
         {
-            if (ActiveWebView == null)
+            if (ActiveWebView?.CoreWebView2 == null)
                 return;
 
             AddressBar.Text = url;
@@ -189,7 +188,7 @@ namespace RTBrowser.App
             object? sender,
             object e)
         {
-            if (ActiveWebView == null)
+            if (ActiveWebView?.CoreWebView2 == null)
                 return;
 
             string title =
@@ -238,21 +237,27 @@ namespace RTBrowser.App
             object sender,
             RoutedEventArgs e)
         {
-            ActiveWebView?.CoreWebView2.GoBack();
+            if (ActiveWebView?.CoreWebView2?.CanGoBack == true)
+            {
+                ActiveWebView.CoreWebView2.GoBack();
+            }
         }
 
         private void OnForwardClicked(
             object sender,
             RoutedEventArgs e)
         {
-            ActiveWebView?.CoreWebView2.GoForward();
+            if (ActiveWebView?.CoreWebView2?.CanGoForward == true)
+            {
+                ActiveWebView.CoreWebView2.GoForward();
+            }
         }
 
         private void OnRefreshClicked(
             object sender,
             RoutedEventArgs e)
         {
-            ActiveWebView?.CoreWebView2.Reload();
+            ActiveWebView?.CoreWebView2?.Reload();
         }
 
         private void OnHomeClicked(
@@ -266,7 +271,7 @@ namespace RTBrowser.App
             object sender,
             RoutedEventArgs e)
         {
-            ActiveWebView?.CoreWebView2.Stop();
+            ActiveWebView?.CoreWebView2?.Stop();
         }
 
         private async void OnAddTabClicked(
