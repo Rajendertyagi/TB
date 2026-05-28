@@ -1,8 +1,9 @@
-<Window
+<ui:FluentWindow
     x:Class="RTBrowser.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:webview="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="RTBrowser"
     Width="1720"
     Height="920"
@@ -11,7 +12,10 @@
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     ResizeMode="CanResize"
-    Background="#0F0F10">
+    Background="#0F0F10"
+    ExtendsContentIntoTitleBar="True"
+    WindowCornerPreference="Round"
+    WindowBackdropType="Mica">
 
     <Border
         BorderBrush="#1F1F22"
@@ -53,7 +57,7 @@
 
                     <Grid
                         Grid.Row="0"
-                        Background="#111214"
+                        Background="Transparent"
                         MouseLeftButtonDown="OnWindowDrag">
 
                         <Grid.ColumnDefinitions>
@@ -63,6 +67,8 @@
                             <ColumnDefinition Width="Auto" />
 
                         </Grid.ColumnDefinitions>
+
+                        <!-- LEFT -->
 
                         <StackPanel
                             Grid.Column="0"
@@ -105,13 +111,12 @@
                                         Foreground="White"
                                         TextTrimming="CharacterEllipsis" />
 
-                                    <Button
+                                    <ui:Button
                                         Grid.Column="2"
                                         Width="18"
                                         Height="18"
                                         Margin="0,0,8,0"
-                                        Background="Transparent"
-                                        BorderThickness="0">
+                                        Appearance="Transparent">
 
                                         <TextBlock
                                             Text="✕"
@@ -120,17 +125,16 @@
                                             VerticalAlignment="Center"
                                             HorizontalAlignment="Center" />
 
-                                    </Button>
+                                    </ui:Button>
 
                                 </Grid>
 
                             </Border>
 
-                            <Button
+                            <ui:Button
                                 Width="28"
                                 Height="28"
-                                Background="Transparent"
-                                BorderThickness="0"
+                                Appearance="Transparent"
                                 Click="OnAddTabClicked">
 
                                 <TextBlock
@@ -140,65 +144,7 @@
                                     VerticalAlignment="Center"
                                     HorizontalAlignment="Center" />
 
-                            </Button>
-
-                        </StackPanel>
-
-                        <!-- WINDOW BUTTONS -->
-
-                        <StackPanel
-                            Grid.Column="1"
-                            Orientation="Horizontal"
-                            VerticalAlignment="Center"
-                            Margin="0,0,4,0">
-
-                            <Button
-                                Width="42"
-                                Height="28"
-                                Click="OnMinimizeClicked"
-                                Background="Transparent"
-                                BorderThickness="0">
-
-                                <TextBlock
-                                    Text="—"
-                                    FontSize="12"
-                                    Foreground="#D0D0D0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
-
-                            </Button>
-
-                            <Button
-                                Width="42"
-                                Height="28"
-                                Click="OnMaximizeClicked"
-                                Background="Transparent"
-                                BorderThickness="0">
-
-                                <TextBlock
-                                    Text="▢"
-                                    FontSize="10"
-                                    Foreground="#D0D0D0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
-
-                            </Button>
-
-                            <Button
-                                Width="42"
-                                Height="28"
-                                Click="OnCloseClicked"
-                                Background="Transparent"
-                                BorderThickness="0">
-
-                                <TextBlock
-                                    Text="✕"
-                                    FontSize="11"
-                                    Foreground="#D0D0D0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
-
-                            </Button>
+                            </ui:Button>
 
                         </StackPanel>
 
@@ -218,7 +164,7 @@
 
                         </Grid.ColumnDefinitions>
 
-                        <!-- NAV BUTTONS -->
+                        <!-- NAV -->
 
                         <StackPanel
                             Grid.Column="0"
@@ -226,61 +172,33 @@
                             VerticalAlignment="Center"
                             Margin="0,0,8,0">
 
-                            <Button
+                            <ui:Button
                                 Width="30"
                                 Height="30"
+                                Appearance="Transparent"
                                 Click="OnBackClicked"
-                                Background="Transparent"
-                                BorderThickness="0">
+                                Icon="{ui:SymbolIcon ArrowLeft24}" />
 
-                                <TextBlock
-                                    Text="←"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
-
-                            </Button>
-
-                            <Button
+                            <ui:Button
                                 Width="30"
                                 Height="30"
+                                Appearance="Transparent"
                                 Click="OnForwardClicked"
-                                Background="Transparent"
-                                BorderThickness="0">
+                                Icon="{ui:SymbolIcon ArrowRight24}" />
 
-                                <TextBlock
-                                    Text="→"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
-
-                            </Button>
-
-                            <Button
+                            <ui:Button
                                 Width="30"
                                 Height="30"
+                                Appearance="Transparent"
                                 Click="OnRefreshClicked"
-                                Background="Transparent"
-                                BorderThickness="0">
+                                Icon="{ui:SymbolIcon ArrowClockwise24}" />
 
-                                <TextBlock
-                                    Text="↻"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
-
-                            </Button>
-
-                            <Button
+                            <ui:Button
                                 Width="30"
                                 Height="30"
+                                Appearance="Transparent"
                                 Click="OnHomeClicked"
-                                Background="Transparent"
-                                BorderThickness="0">
-
-                                <TextBlock
-                                    Text="⌂"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
-
-                            </Button>
+                                Icon="{ui:SymbolIcon Home24}" />
 
                         </StackPanel>
 
@@ -324,20 +242,19 @@
                                     VerticalContentAlignment="Center"
                                     KeyDown="OnAddressBarKeyDown"/>
 
-                                <Button
+                                <ui:Button
                                     Grid.Column="2"
                                     Width="32"
                                     Height="30"
-                                    Click="OnStopClicked"
-                                    Background="Transparent"
-                                    BorderThickness="0">
+                                    Appearance="Transparent"
+                                    Click="OnStopClicked">
 
                                     <TextBlock
                                         Text="✕"
                                         FontSize="11"
                                         Foreground="#C0C0C0"/>
 
-                                </Button>
+                                </ui:Button>
 
                             </Grid>
 
@@ -349,7 +266,7 @@
 
             </Border>
 
-            <!-- LOADING BAR -->
+            <!-- LOADING -->
 
             <ProgressBar
                 x:Name="LoadingBar"
@@ -370,11 +287,11 @@
 
                 <webview:WebView2
                     x:Name="BrowserHost"
-                    DefaultBackgroundColor="Transparent" />
+                    DefaultBackgroundColor="Transparent"/>
 
             </Border>
 
-            <!-- STATUS BAR -->
+            <!-- STATUS -->
 
             <Border
                 Grid.Row="2"
@@ -417,4 +334,4 @@
 
     </Border>
 
-</Window>
+</ui:FluentWindow>
