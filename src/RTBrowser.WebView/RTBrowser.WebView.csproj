@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <TargetFramework>
+      net8.0-windows
+    </TargetFramework>
+
+    <UseWPF>
+      true
+    </UseWPF>
+
+    <Nullable>
+      enable
+    </Nullable>
+
+    <ImplicitUsings>
+      enable
+    </ImplicitUsings>
+
+    <AssemblyName>
+      RTBrowser.WebView
+    </AssemblyName>
+
+    <RootNamespace>
+      RTBrowser.WebView
+    </RootNamespace>
+
+  </PropertyGroup>
+
+  <!-- ========================================= -->
+  <!-- WEBVIEW2 -->
+  <!-- ========================================= -->
+
+  <ItemGroup>
+
+    <PackageReference Include="Microsoft.Web.WebView2"
+                      Version="1.0.2792.45" />
+
+  </ItemGroup>
+
+  <!-- ========================================= -->
+  <!-- PROJECT REFERENCES -->
+  <!-- ========================================= -->
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\RTBrowser.Runtime\RTBrowser.Runtime.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
+
+  </ItemGroup>
+
+</Project>
