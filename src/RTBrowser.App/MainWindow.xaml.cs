@@ -4,7 +4,6 @@ using RTBrowser.Services;
 
 using System;
 using System.Windows;
-using System.Windows.Input;
 
 namespace RTBrowser.App
 {
@@ -17,6 +16,9 @@ namespace RTBrowser.App
             Loaded += OnLoaded;
 
             Closed += OnClosed;
+
+            Omnibox.NavigateRequested +=
+                OnNavigateRequested;
         }
 
         private async void OnLoaded(
@@ -60,6 +62,40 @@ namespace RTBrowser.App
             }
         }
 
+        private void OnNavigateRequested(
+            string input)
+        {
+            string url =
+                NormalizeInput(input);
+
+            NavigateTo(url);
+        }
+
+        private string NormalizeInput(
+            string input)
+        {
+            input = input.Trim();
+
+            bool looksLikeUrl =
+                input.Contains('.')
+                && !input.Contains(' ');
+
+            if (looksLikeUrl)
+            {
+                if (!input.StartsWith("http://")
+                    && !input.StartsWith("https://"))
+                {
+                    input = "https://" + input;
+                }
+
+                return input;
+            }
+
+            return
+                "https://www.google.com/search?q="
+                + Uri.EscapeDataString(input);
+        }
+
         private void NavigateTo(
             string url)
         {
@@ -68,6 +104,8 @@ namespace RTBrowser.App
                 LoggerService.Info(
                     "Navigation",
                     $"Navigating to {url}");
+
+                Omnibox.SetAddress(url);
 
                 BrowserView.CoreWebView2.Navigate(url);
             }
@@ -92,17 +130,32 @@ namespace RTBrowser.App
             object? sender,
             CoreWebView2NavigationCompletedEventArgs e)
         {
-            if (e.IsSuccess)
+            try
             {
-                LoggerService.Info(
-                    "Navigation",
-                    $"Navigation completed: {BrowserView.Source}");
+                if (BrowserView.Source != null)
+                {
+                    Omnibox.SetAddress(
+                        BrowserView.Source.ToString());
+                }
+
+                if (e.IsSuccess)
+                {
+                    LoggerService.Info(
+                        "Navigation",
+                        $"Navigation completed: {BrowserView.Source}");
+                }
+                else
+                {
+                    LoggerService.Error(
+                        "Navigation",
+                        $"Navigation failed: {e.WebErrorStatus}");
+                }
             }
-            else
+            catch (Exception ex)
             {
                 LoggerService.Error(
                     "Navigation",
-                    $"Navigation failed: {e.WebErrorStatus}");
+                    ex.ToString());
             }
         }
 
