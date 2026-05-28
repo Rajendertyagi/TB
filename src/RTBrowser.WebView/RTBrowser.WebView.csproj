@@ -3,7 +3,7 @@
   <PropertyGroup>
 
     <TargetFramework>
-       net10.0-windows
+      net10.0-windows
     </TargetFramework>
 
     <UseWPF>
@@ -18,6 +18,14 @@
       enable
     </ImplicitUsings>
 
+    <LangVersion>
+      preview
+    </LangVersion>
+
+    <SatelliteResourceLanguages>
+      en-US
+    </SatelliteResourceLanguages>
+
     <AssemblyName>
       RTBrowser.WebView
     </AssemblyName>
@@ -25,6 +33,22 @@
     <RootNamespace>
       RTBrowser.WebView
     </RootNamespace>
+
+    <Platforms>
+      x64
+    </Platforms>
+
+    <PlatformTarget>
+      x64
+    </PlatformTarget>
+
+    <RuntimeIdentifier>
+      win-x64
+    </RuntimeIdentifier>
+
+    <Prefer32Bit>
+      false
+    </Prefer32Bit>
 
   </PropertyGroup>
 
@@ -35,7 +59,7 @@
   <ItemGroup>
 
     <PackageReference Include="Microsoft.Web.WebView2"
-                      Version="1.0.2792.45" />
+                      Version="1.0.3124.44" />
 
   </ItemGroup>
 
