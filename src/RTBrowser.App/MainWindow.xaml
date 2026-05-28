@@ -48,30 +48,11 @@
 
             </Grid.RowDefinitions>
 
-            <!-- TOP CHROME -->
+            <!-- TITLEBAR -->
 
-            <Border
-                Grid.Row="0"
-                Background="#101113"
-                BorderBrush="#1A1B1E"
-                BorderThickness="0,0,0,1">
-
-                <Grid>
-
-                    <!-- DRAG REGION -->
-
-                    <Border
-                        Background="Transparent"
-                        shell:WindowChrome.IsHitTestVisibleInChrome="False"/>
-
-                    <!-- TITLEBAR -->
-
-                    <ui:BrowserTitleBar
-                        x:Name="BrowserTitleBar"/>
-
-                </Grid>
-
-            </Border>
+            <ui:BrowserTitleBar
+                x:Name="BrowserTitleBar"
+                Grid.Row="0"/>
 
             <!-- NAVIGATION -->
 
@@ -79,20 +60,22 @@
                 x:Name="NavigationBar"
                 Grid.Row="1"/>
 
-            <!-- CONTENT -->
+            <!-- WEBVIEW -->
 
-            <Grid
+            <Border
                 Grid.Row="2"
-                Background="#0C0D0F">
+                Background="#0C0D0F"
+                ClipToBounds="True">
 
                 <ui:WebViewContainer
                     x:Name="WebViewContainer"/>
 
-            </Grid>
+            </Border>
 
             <!-- STATUSBAR -->
 
             <ui:StatusBar
+                x:Name="StatusBar"
                 Grid.Row="3"/>
 
         </Grid>
