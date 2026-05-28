@@ -1,68 +1,75 @@
-
 using System;
 using System.IO;
-    
+using System.Text.Json;
+
 namespace RTBrowser.Services
 {
-    public sealed class LoggerService
+    public static class LoggerService
     {
-        private readonly string _logDirectory;
+        private static readonly object LockObject = new();
 
-        private readonly string _logFilePath;
-
-        public LoggerService()
-        {
-            _logDirectory = Path.Combine(
+        private static readonly string LogDirectory =
+            Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 "Logs");
 
-            Directory.CreateDirectory(_logDirectory);
+        private static readonly string LogFilePath =
+            Path.Combine(
+                LogDirectory,
+                $"runtime-{DateTime.UtcNow:yyyy-MM-dd}.jsonl");
 
-            _logFilePath = Path.Combine(
-                _logDirectory,
-                $"rtbrowser-{DateTime.Now:yyyy-MM-dd}.log");
-        }
-
-        public void Info(string message)
+        static LoggerService()
         {
-            Write("INFO", message);
+            Directory.CreateDirectory(LogDirectory);
         }
 
-        public void Warning(string message)
+        public static void Info(
+            string category,
+            string message)
         {
-            Write("WARNING", message);
+            Write(
+                "INFO",
+                category,
+                message);
         }
 
-        public void Error(string message)
-        {
-            Write("ERROR", message);
-        }
-
-        public void Error(Exception exception)
+        public static void Error(
+            string category,
+            string message)
         {
             Write(
                 "ERROR",
-                $"{exception.Message}{Environment.NewLine}{exception.StackTrace}");
+                category,
+                message);
         }
 
-        private void Write(
+        private static void Write(
             string level,
+            string category,
             string message)
         {
             try
             {
-                var logEntry =
-                    $"[{DateTime.Now:HH:mm:ss}] " +
-                    $"[{level}] " +
-                    $"{message}";
+                var payload = new
+                {
+                    timestamp = DateTime.UtcNow,
+                    level,
+                    category,
+                    message
+                };
 
-                File.AppendAllText(
-                    _logFilePath,
-                    logEntry + Environment.NewLine);
+                string json =
+                    JsonSerializer.Serialize(payload);
+
+                lock (LockObject)
+                {
+                    File.AppendAllText(
+                        LogFilePath,
+                        json + Environment.NewLine);
+                }
             }
             catch
             {
-                // Prevent logger crashes from affecting runtime
             }
         }
     }
