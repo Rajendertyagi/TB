@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <TargetFramework>
+      net8.0-windows
+    </TargetFramework>
+
+    <UseWPF>
+      true
+    </UseWPF>
+
+    <Nullable>
+      enable
+    </Nullable>
+
+    <ImplicitUsings>
+      enable
+    </ImplicitUsings>
+
+    <AssemblyName>
+      RTBrowser.UI
+    </AssemblyName>
+
+    <RootNamespace>
+      RTBrowser.UI
+    </RootNamespace>
+
+  </PropertyGroup>
+
+</Project>
