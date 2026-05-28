@@ -37,10 +37,11 @@ namespace RTBrowser.Runtime
             object? sender,
             ElapsedEventArgs e)
         {
-            var currentProcess = Process.GetCurrentProcess();
+            var process =
+                Process.GetCurrentProcess();
 
             long memoryUsageMb =
-                currentProcess.WorkingSet64 / 1024 / 1024;
+                process.WorkingSet64 / 1024 / 1024;
 
             if (memoryUsageMb >= MemoryThresholdMb)
             {
