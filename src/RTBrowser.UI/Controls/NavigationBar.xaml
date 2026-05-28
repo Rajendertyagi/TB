@@ -2,14 +2,38 @@
     x:Class="RTBrowser.UI.Controls.NavigationBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Height="44">
+    Height="46">
+
+    <UserControl.Resources>
+
+        <Style TargetType="Button">
+
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+
+            <Style.Triggers>
+
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.82"/>
+                </Trigger>
+
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.65"/>
+                </Trigger>
+
+            </Style.Triggers>
+
+        </Style>
+
+    </UserControl.Resources>
 
     <Border
         Background="#111214"
         BorderBrush="#1E1F22"
         BorderThickness="0,0,0,1">
 
-        <Grid Margin="10,4,10,4">
+        <Grid Margin="10,5,10,5">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -17,7 +41,7 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- LEFT NAV -->
+            <!-- LEFT -->
 
             <StackPanel
                 Grid.Column="0"
@@ -26,52 +50,70 @@
 
                 <Button
                     x:Name="BackButton"
-                    Width="30"
-                    Height="30"
-                    Margin="0,0,4,0"
-                    Background="Transparent"
-                    BorderThickness="0">
+                    Width="32"
+                    Height="32"
+                    Margin="0,0,4,0">
 
-                    <TextBlock
-                        Text="←"
-                        FontSize="12"
-                        Foreground="#D0D0D0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+                    <Border
+                        Width="28"
+                        Height="28"
+                        Background="#1C1D21"
+                        CornerRadius="14">
+
+                        <TextBlock
+                            Text="←"
+                            FontSize="12"
+                            Foreground="#D0D0D0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                    </Border>
 
                 </Button>
 
                 <Button
                     x:Name="ForwardButton"
-                    Width="30"
-                    Height="30"
-                    Margin="0,0,4,0"
-                    Background="Transparent"
-                    BorderThickness="0">
+                    Width="32"
+                    Height="32"
+                    Margin="0,0,4,0">
 
-                    <TextBlock
-                        Text="→"
-                        FontSize="12"
-                        Foreground="#D0D0D0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+                    <Border
+                        Width="28"
+                        Height="28"
+                        Background="#1C1D21"
+                        CornerRadius="14">
+
+                        <TextBlock
+                            Text="→"
+                            FontSize="12"
+                            Foreground="#D0D0D0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                    </Border>
 
                 </Button>
 
                 <Button
                     x:Name="RefreshButton"
-                    Width="30"
-                    Height="30"
-                    Margin="0,0,8,0"
-                    Background="Transparent"
-                    BorderThickness="0">
+                    Width="32"
+                    Height="32"
+                    Margin="0,0,10,0">
 
-                    <TextBlock
-                        Text="↻"
-                        FontSize="12"
-                        Foreground="#D0D0D0"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+                    <Border
+                        Width="28"
+                        Height="28"
+                        Background="#1C1D21"
+                        CornerRadius="14">
+
+                        <TextBlock
+                            Text="↻"
+                            FontSize="12"
+                            Foreground="#D0D0D0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                    </Border>
 
                 </Button>
 
@@ -81,42 +123,43 @@
 
             <Border
                 Grid.Column="1"
-                Height="34"
-                Background="#191B1F"
-                BorderBrush="#2A2D32"
+                Height="38"
+                Background="#1A1C20"
+                BorderBrush="#31343A"
                 BorderThickness="1"
-                CornerRadius="17"
+                CornerRadius="19"
                 VerticalAlignment="Center">
 
                 <Grid>
 
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="36"/>
+                        <ColumnDefinition Width="40"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
 
-                    <!-- LOCK -->
+                    <!-- SECURITY -->
 
                     <TextBlock
                         Grid.Column="0"
                         Text="🔒"
                         FontSize="11"
-                        Foreground="#9FA3AA"
+                        Foreground="#A1A5AD"
                         HorizontalAlignment="Center"
                         VerticalAlignment="Center"/>
 
-                    <!-- URL BOX -->
+                    <!-- ADDRESS -->
 
                     <TextBox
                         x:Name="AddressBar"
                         Grid.Column="1"
+                        Margin="0,0,12,0"
                         BorderThickness="0"
                         Background="Transparent"
                         Foreground="White"
                         FontSize="13"
                         CaretBrush="White"
                         VerticalContentAlignment="Center"
-                        Padding="0,0,12,0"/>
+                        Padding="0"/>
 
                 </Grid>
 
@@ -129,7 +172,7 @@
                 Width="10"
                 Height="10"
                 Margin="12,0,0,0"
-                Fill="#2C7DFF"
+                Fill="#2F81F7"
                 VerticalAlignment="Center"/>
 
         </Grid>
