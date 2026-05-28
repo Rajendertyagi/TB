@@ -9,6 +9,7 @@ using RTBrowser.UI.Controls;
 using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 
 namespace RTBrowser.App
 {
@@ -24,6 +25,9 @@ namespace RTBrowser.App
             Loaded += OnLoaded;
 
             Closed += OnClosed;
+
+            PreviewKeyDown +=
+                OnPreviewKeyDown;
 
             NavigationBar.NavigateRequested +=
                 OnNavigateRequested;
@@ -277,6 +281,35 @@ namespace RTBrowser.App
             LoggerService.Info(
                 "Navigation",
                 "Refresh pressed");
+        }
+
+        private void OnPreviewKeyDown(
+            object sender,
+            KeyEventArgs e)
+        {
+            BrowserKeyboardShortcuts.Handle(
+                this,
+                e,
+                _sessionManager,
+                () => OnNewTabRequested(),
+                () =>
+                {
+                    if (ActiveSession == null)
+                    {
+                        return;
+                    }
+
+                    OnCloseTabRequested(
+                        ActiveSession.Id);
+                },
+                () =>
+                {
+                    NavigationBar.FocusAddressBar();
+                },
+                () =>
+                {
+                    OnRefreshRequested();
+                });
         }
 
         private void OnNavigationStarting(
