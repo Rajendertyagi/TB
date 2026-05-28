@@ -2,29 +2,31 @@
 
   <PropertyGroup>
 
-    <TargetFramework>
-      net8.0-windows
-    </TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
 
-    <UseWPF>
-      true
-    </UseWPF>
+    <UseWPF>true</UseWPF>
 
-    <Nullable>
-      enable
-    </Nullable>
+    <Nullable>enable</Nullable>
 
-    <ImplicitUsings>
-      enable
-    </ImplicitUsings>
+    <ImplicitUsings>enable</ImplicitUsings>
 
-    <AssemblyName>
-      RTBrowser.UI
-    </AssemblyName>
+    <LangVersion>preview</LangVersion>
 
-    <RootNamespace>
-      RTBrowser.UI
-    </RootNamespace>
+    <SatelliteResourceLanguages>
+      en-US
+    </SatelliteResourceLanguages>
+
+    <AssemblyName>RTBrowser.UI</AssemblyName>
+
+    <RootNamespace>RTBrowser.UI</RootNamespace>
+
+    <Platforms>x64</Platforms>
+
+    <PlatformTarget>x64</PlatformTarget>
+
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <Prefer32Bit>false</Prefer32Bit>
 
   </PropertyGroup>
 
