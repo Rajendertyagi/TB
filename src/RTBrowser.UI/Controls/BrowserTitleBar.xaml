@@ -49,66 +49,12 @@
                 VerticalAlignment="Center"
                 Margin="8,0,0,0">
 
-                <!-- ACTIVE TAB -->
+                <!-- DYNAMIC TABS -->
 
-                <Border
-                    Width="220"
-                    Height="24"
-                    Background="#18191C"
-                    BorderBrush="#2E3136"
-                    BorderThickness="1"
-                    CornerRadius="5,5,0,0">
-
-                    <Grid>
-
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- INDICATOR -->
-
-                        <Border
-                            Width="8"
-                            Height="8"
-                            Margin="8,0,6,0"
-                            Background="#4C8DFF"
-                            CornerRadius="4"
-                            VerticalAlignment="Center"/>
-
-                        <!-- TITLE -->
-
-                        <TextBlock
-                            Grid.Column="1"
-                            VerticalAlignment="Center"
-                            FontSize="11"
-                            FontWeight="SemiBold"
-                            Foreground="#E8E8E8"
-                            Text="New Tab"
-                            TextTrimming="CharacterEllipsis"/>
-
-                        <!-- CLOSE -->
-
-                        <Button
-                            Grid.Column="2"
-                            Width="18"
-                            Height="18"
-                            Margin="0,0,6,0"
-                            Click="OnCloseTab">
-
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                FontSize="9"
-                                Foreground="#A4A7AD"
-                                Text="✕"/>
-
-                        </Button>
-
-                    </Grid>
-
-                </Border>
+                <StackPanel
+                    x:Name="TabsHost"
+                    Orientation="Horizontal"
+                    VerticalAlignment="Center"/>
 
                 <!-- NEW TAB -->
 
