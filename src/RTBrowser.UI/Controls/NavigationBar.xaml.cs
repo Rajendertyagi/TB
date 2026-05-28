@@ -1,165 +1,421 @@
-<UserControl
-    x:Class="RTBrowser.UI.Controls.NavigationBar"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Height="30">
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Wpf;
 
-    <UserControl.Resources>
+using RTBrowser.Core;
+using RTBrowser.Runtime;
+using RTBrowser.Services;
+using RTBrowser.UI.Controls;
 
-        <Style TargetType="Button">
+using System;
+using System.Linq;
+using System.Windows;
 
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+namespace RTBrowser.App
+{
+    public partial class MainWindow : Window
+    {
+        private const string HomeUrl =
+            "https://www.google.com";
 
-            <Style.Triggers>
+        private readonly BrowserSessionManager _sessionManager =
+            new();
 
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="0.78"/>
-                </Trigger>
+        public MainWindow()
+        {
+            InitializeComponent();
 
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Opacity" Value="0.58"/>
-                </Trigger>
+            Loaded += OnLoaded;
 
-            </Style.Triggers>
+            Closed += OnClosed;
 
-        </Style>
+            NavigationBar.NavigateRequested +=
+                OnNavigateRequested;
 
-    </UserControl.Resources>
+            NavigationBar.BackRequested +=
+                OnBackRequested;
 
-    <Border
-        Background="#101113"
-        BorderBrush="#1A1B1E"
-        BorderThickness="0,0,0,1">
+            NavigationBar.ForwardRequested +=
+                OnForwardRequested;
 
-        <Grid Margin="8,2,8,2">
+            NavigationBar.RefreshRequested +=
+                OnRefreshRequested;
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+            BrowserTitleBar.NewTabRequested +=
+                OnNewTabRequested;
 
-            <!-- LEFT -->
+            BrowserTitleBar.CloseTabRequested +=
+                OnCloseTabRequested;
 
-            <StackPanel
-                Grid.Column="0"
-                Orientation="Horizontal"
-                VerticalAlignment="Center">
+            BrowserTitleBar.TabSelected +=
+                OnTabSelected;
+        }
 
-                <!-- BACK -->
+        private async void OnLoaded(
+            object sender,
+            RoutedEventArgs e)
+        {
+            RestoreWindowState();
 
-                <Button
-                    x:Name="BackButton"
-                    Width="20"
-                    Height="20"
-                    Margin="0,0,3,0">
+            LoggerService.Info(
+                "Window",
+                "Main window loaded");
 
-                    <TextBlock
-                        Text="←"
-                        FontSize="10"
-                        Foreground="#AEB4BC"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+            await CreateNewTab(HomeUrl);
+        }
 
-                </Button>
+        private async void OnNewTabRequested()
+        {
+            await CreateNewTab(HomeUrl);
 
-                <!-- FORWARD -->
+            LoggerService.Info(
+                "Tabs",
+                "New tab requested");
+        }
 
-                <Button
-                    x:Name="ForwardButton"
-                    Width="20"
-                    Height="20"
-                    Margin="0,0,3,0">
+        private void OnTabSelected(
+            Guid tabId)
+        {
+            _sessionManager.SetActiveSession(tabId);
 
-                    <TextBlock
-                        Text="→"
-                        FontSize="10"
-                        Foreground="#AEB4BC"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+            if (_sessionManager.ActiveSession == null)
+            {
+                return;
+            }
 
-                </Button>
+            WebViewContainer.SetBrowser(
+                _sessionManager
+                    .ActiveSession
+                    .WebView);
 
-                <!-- REFRESH -->
+            NavigationBar.SetAddress(
+                _sessionManager
+                    .ActiveSession
+                    .Tab
+                    .Url);
 
-                <Button
-                    x:Name="RefreshButton"
-                    Width="20"
-                    Height="20"
-                    Margin="0,0,6,0">
+            RenderTabs();
 
-                    <TextBlock
-                        Text="↻"
-                        FontSize="10"
-                        Foreground="#AEB4BC"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+            LoggerService.Info(
+                "Tabs",
+                $"Activated tab: {tabId}");
+        }
 
-                </Button>
+        private void OnCloseTabRequested(
+            Guid tabId)
+        {
+            _sessionManager.CloseSession(tabId);
 
-            </StackPanel>
+            if (_sessionManager.ActiveSession == null)
+            {
+                Close();
 
-            <!-- OMNIBOX -->
+                return;
+            }
 
-            <Border
-                Grid.Column="1"
-                Height="24"
-                Background="#17181B"
-                BorderBrush="#26282D"
-                BorderThickness="1"
-                CornerRadius="6"
-                VerticalAlignment="Center">
+            WebViewContainer.SetBrowser(
+                _sessionManager
+                    .ActiveSession
+                    .WebView);
 
-                <Grid>
+            NavigationBar.SetAddress(
+                _sessionManager
+                    .ActiveSession
+                    .Tab
+                    .Url);
 
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="26"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+            RenderTabs();
 
-                    <!-- SECURITY -->
+            LoggerService.Info(
+                "Tabs",
+                $"Closed tab: {tabId}");
+        }
 
-                    <TextBlock
-                        Grid.Column="0"
-                        Text="◦"
-                        FontSize="12"
-                        Foreground="#5EA1FF"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
+        private async System.Threading.Tasks.Task CreateNewTab(
+            string url)
+        {
+            WebView2 webView =
+                new()
+                {
+                    HorizontalAlignment =
+                        HorizontalAlignment.Stretch,
 
-                    <!-- ADDRESS -->
+                    VerticalAlignment =
+                        VerticalAlignment.Stretch
+                };
 
-                    <TextBox
-                        x:Name="AddressBar"
-                        Grid.Column="1"
-                        Margin="0,0,8,0"
-                        Background="Transparent"
-                        BorderThickness="0"
-                        CaretBrush="White"
-                        FontSize="11"
-                        Foreground="#E6E6E6"
-                        VerticalContentAlignment="Center"
-                        Padding="0"/>
+            await webView
+                .EnsureCoreWebView2Async();
 
-                </Grid>
+            ConfigureWebView(webView);
 
-            </Border>
+            BrowserTab tab =
+                new()
+                {
+                    Title = "New Tab",
+                    Url = url,
+                    IsActive = true,
+                    WebView = webView
+                };
 
-            <!-- RIGHT -->
+            TabSession session =
+                new(tab);
 
-            <Border
-                Grid.Column="2"
-                Width="8"
-                Height="8"
-                Margin="8,0,0,0"
-                Background="#4C8DFF"
-                CornerRadius="4"
-                VerticalAlignment="Center"/>
+            _sessionManager.AddSession(
+                session);
 
-        </Grid>
+            WebViewContainer.SetBrowser(
+                webView);
 
-    </Border>
+            session.Navigate(url);
 
-</UserControl>
+            NavigationBar.SetAddress(url);
+
+            RenderTabs();
+
+            LoggerService.Info(
+                "Tabs",
+                $"Created tab: {tab.Id}");
+        }
+
+        private void ConfigureWebView(
+            WebView2 webView)
+        {
+            if (webView.CoreWebView2 == null)
+            {
+                return;
+            }
+
+            webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled =
+                false;
+
+            webView.CoreWebView2.Settings.AreDevToolsEnabled =
+                false;
+
+            webView.CoreWebView2.Settings.IsStatusBarEnabled =
+                false;
+
+            webView.NavigationStarting +=
+                OnNavigationStarting;
+
+            webView.NavigationCompleted +=
+                OnNavigationCompleted;
+
+            webView.CoreWebView2.DocumentTitleChanged +=
+                OnDocumentTitleChanged;
+        }
+
+        private void RenderTabs()
+        {
+            BrowserTitleBar.RenderTabs(
+                _sessionManager
+                    .Sessions
+                    .Select(x => x.Tab)
+                    .ToList());
+        }
+
+        private TabSession? ActiveSession =>
+            _sessionManager.ActiveSession;
+
+        private WebView2? ActiveWebView =>
+            ActiveSession?.WebView;
+
+        private void OnNavigateRequested(
+            string input)
+        {
+            string url =
+                NormalizeInput(input);
+
+            NavigateTo(url);
+        }
+
+        private void NavigateTo(
+            string url)
+        {
+            if (ActiveSession == null)
+            {
+                return;
+            }
+
+            ActiveSession.Navigate(url);
+
+            NavigationBar.SetAddress(url);
+
+            LoggerService.Info(
+                "Navigation",
+                $"Navigate: {url}");
+        }
+
+        private void OnBackRequested()
+        {
+            if (ActiveWebView?.CoreWebView2?.CanGoBack == true)
+            {
+                ActiveWebView
+                    .CoreWebView2
+                    .GoBack();
+
+                LoggerService.Info(
+                    "Navigation",
+                    "Back pressed");
+            }
+        }
+
+        private void OnForwardRequested()
+        {
+            if (ActiveWebView?.CoreWebView2?.CanGoForward == true)
+            {
+                ActiveWebView
+                    .CoreWebView2
+                    .GoForward();
+
+                LoggerService.Info(
+                    "Navigation",
+                    "Forward pressed");
+            }
+        }
+
+        private void OnRefreshRequested()
+        {
+            ActiveWebView?.Reload();
+
+            LoggerService.Info(
+                "Navigation",
+                "Refresh pressed");
+        }
+
+        private string NormalizeInput(
+            string input)
+        {
+            input = input.Trim();
+
+            bool looksLikeUrl =
+                input.Contains('.')
+                && !input.Contains(' ');
+
+            if (looksLikeUrl)
+            {
+                if (!input.StartsWith("http://")
+                    && !input.StartsWith("https://"))
+                {
+                    input =
+                        "https://" + input;
+                }
+
+                return input;
+            }
+
+            return
+                "https://www.google.com/search?q="
+                + Uri.EscapeDataString(input);
+        }
+
+        private void OnNavigationStarting(
+            object? sender,
+            CoreWebView2NavigationStartingEventArgs e)
+        {
+            NavigationBar.SetAddress(e.Uri);
+
+            LoggerService.Info(
+                "Navigation",
+                $"Navigation started: {e.Uri}");
+        }
+
+        private void OnNavigationCompleted(
+            object? sender,
+            CoreWebView2NavigationCompletedEventArgs e)
+        {
+            LoggerService.Info(
+                "Navigation",
+                e.IsSuccess
+                    ? "Navigation completed"
+                    : $"Navigation failed: {e.WebErrorStatus}");
+        }
+
+        private void OnDocumentTitleChanged(
+            object? sender,
+            object e)
+        {
+            if (sender is not CoreWebView2 coreWebView)
+            {
+                return;
+            }
+
+            TabSession? session =
+                _sessionManager
+                    .Sessions
+                    .FirstOrDefault(
+                        x => x.WebView.CoreWebView2 == coreWebView);
+
+            if (session == null)
+            {
+                return;
+            }
+
+            session.Tab.Title =
+                coreWebView.DocumentTitle;
+
+            if (session.Tab.IsActive)
+            {
+                Title =
+                    $"{session.Tab.Title} - RTBrowser";
+            }
+
+            RenderTabs();
+
+            LoggerService.Info(
+                "Tabs",
+                $"Title changed: {session.Tab.Title}");
+        }
+
+        private void RestoreWindowState()
+        {
+            WindowStateModel state =
+                WindowStateService.Load();
+
+            Width = state.Width;
+            Height = state.Height;
+            Left = state.Left;
+            Top = state.Top;
+
+            WindowState =
+                state.IsMaximized
+                    ? WindowState.Maximized
+                    : WindowState.Normal;
+
+            LoggerService.Info(
+                "Window",
+                "Window state restored");
+        }
+
+        private void SaveWindowState()
+        {
+            WindowStateModel state =
+                new()
+                {
+                    Width = Width,
+                    Height = Height,
+                    Left = Left,
+                    Top = Top,
+                    IsMaximized =
+                        WindowState ==
+                        WindowState.Maximized
+                };
+
+            WindowStateService.Save(state);
+
+            LoggerService.Info(
+                "Window",
+                "Window state saved");
+        }
+
+        private void OnClosed(
+            object? sender,
+            EventArgs e)
+        {
+            SaveWindowState();
+
+            LoggerService.Info(
+                "Window",
+                "Main window closed");
+        }
+    }
+}
