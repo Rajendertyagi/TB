@@ -1,60 +1,165 @@
-using System;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+<UserControl
+    x:Class="RTBrowser.UI.Controls.NavigationBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Height="30">
 
-namespace RTBrowser.UI.Controls
-{
-    public partial class NavigationBar : UserControl
-    {
-        public event Action<string>? NavigateRequested;
+    <UserControl.Resources>
 
-        public event Action? BackRequested;
+        <Style TargetType="Button">
 
-        public event Action? ForwardRequested;
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
 
-        public event Action? RefreshRequested;
+            <Style.Triggers>
 
-        public NavigationBar()
-        {
-            InitializeComponent();
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.78"/>
+                </Trigger>
 
-            AddressBar.KeyDown += OnAddressBarKeyDown;
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Opacity" Value="0.58"/>
+                </Trigger>
 
-            BackButton.Click +=
-                (_, _) => BackRequested?.Invoke();
+            </Style.Triggers>
 
-            ForwardButton.Click +=
-                (_, _) => ForwardRequested?.Invoke();
+        </Style>
 
-            RefreshButton.Click +=
-                (_, _) => RefreshRequested?.Invoke();
-        }
+    </UserControl.Resources>
 
-        public void SetAddress(
-            string url)
-        {
-            AddressBar.Text = url;
-        }
+    <Border
+        Background="#101113"
+        BorderBrush="#1A1B1E"
+        BorderThickness="0,0,0,1">
 
-        private void OnAddressBarKeyDown(
-            object sender,
-            KeyEventArgs e)
-        {
-            if (e.Key != Key.Enter)
-            {
-                return;
-            }
+        <Grid Margin="8,2,8,2">
 
-            string input =
-                AddressBar.Text.Trim();
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
 
-            if (string.IsNullOrWhiteSpace(input))
-            {
-                return;
-            }
+            <!-- LEFT -->
 
-            NavigateRequested?.Invoke(input);
-        }
-    }
-}
+            <StackPanel
+                Grid.Column="0"
+                Orientation="Horizontal"
+                VerticalAlignment="Center">
+
+                <!-- BACK -->
+
+                <Button
+                    x:Name="BackButton"
+                    Width="20"
+                    Height="20"
+                    Margin="0,0,3,0">
+
+                    <TextBlock
+                        Text="←"
+                        FontSize="10"
+                        Foreground="#AEB4BC"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+
+                </Button>
+
+                <!-- FORWARD -->
+
+                <Button
+                    x:Name="ForwardButton"
+                    Width="20"
+                    Height="20"
+                    Margin="0,0,3,0">
+
+                    <TextBlock
+                        Text="→"
+                        FontSize="10"
+                        Foreground="#AEB4BC"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+
+                </Button>
+
+                <!-- REFRESH -->
+
+                <Button
+                    x:Name="RefreshButton"
+                    Width="20"
+                    Height="20"
+                    Margin="0,0,6,0">
+
+                    <TextBlock
+                        Text="↻"
+                        FontSize="10"
+                        Foreground="#AEB4BC"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+
+                </Button>
+
+            </StackPanel>
+
+            <!-- OMNIBOX -->
+
+            <Border
+                Grid.Column="1"
+                Height="24"
+                Background="#17181B"
+                BorderBrush="#26282D"
+                BorderThickness="1"
+                CornerRadius="6"
+                VerticalAlignment="Center">
+
+                <Grid>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="26"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- SECURITY -->
+
+                    <TextBlock
+                        Grid.Column="0"
+                        Text="◦"
+                        FontSize="12"
+                        Foreground="#5EA1FF"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"/>
+
+                    <!-- ADDRESS -->
+
+                    <TextBox
+                        x:Name="AddressBar"
+                        Grid.Column="1"
+                        Margin="0,0,8,0"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        CaretBrush="White"
+                        FontSize="11"
+                        Foreground="#E6E6E6"
+                        VerticalContentAlignment="Center"
+                        Padding="0"/>
+
+                </Grid>
+
+            </Border>
+
+            <!-- RIGHT -->
+
+            <Border
+                Grid.Column="2"
+                Width="8"
+                Height="8"
+                Margin="8,0,0,0"
+                Background="#4C8DFF"
+                CornerRadius="4"
+                VerticalAlignment="Center"/>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>
