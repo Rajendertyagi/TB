@@ -2,6 +2,7 @@
     x:Class="RTBrowser.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     StartupUri="MainWindow.xaml">
 
     <Application.Resources>
@@ -10,13 +11,9 @@
 
             <ResourceDictionary.MergedDictionaries>
 
-                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/Colors.xaml" />
+                <ui:ThemesDictionary Theme="Dark" />
 
-                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/Spacing.xaml" />
-
-                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/Typography.xaml" />
-
-                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/DesignTokens.xaml" />
+                <ui:ControlsDictionary />
 
             </ResourceDictionary.MergedDictionaries>
 
