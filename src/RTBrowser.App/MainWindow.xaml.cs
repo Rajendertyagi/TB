@@ -55,7 +55,7 @@ namespace RTBrowser.App
                 await BrowserHost.EnsureCoreWebView2Async();
             }
 
-            BrowserHost.CoreWebView2.Settings
+            BrowserHost.CoreWebView2?.Settings
                 .AreDefaultContextMenusEnabled = false;
 
             BrowserHost.CoreWebView2.NavigationStarting +=
@@ -97,7 +97,9 @@ namespace RTBrowser.App
             get
             {
                 if (_activeTab == null)
+                {
                     return null;
+                }
 
                 return _webViews[_activeTab.Id];
             }
@@ -107,7 +109,9 @@ namespace RTBrowser.App
             string url)
         {
             if (ActiveWebView?.CoreWebView2 == null)
+            {
                 return;
+            }
 
             AddressBar.Text = url;
 
@@ -148,7 +152,9 @@ namespace RTBrowser.App
             KeyEventArgs e)
         {
             if (e.Key != Key.Enter)
+            {
                 return;
+            }
 
             NavigateTo(
                 NormalizeInput(AddressBar.Text));
@@ -163,6 +169,10 @@ namespace RTBrowser.App
 
             StatusText.Text =
                 "Loading...";
+
+            LoggerService.Info(
+                "Navigation",
+                $"Navigation started: {e.Uri}");
         }
 
         private void OnNavigationCompleted(
@@ -182,6 +192,12 @@ namespace RTBrowser.App
                 e.IsSuccess
                 ? "Ready"
                 : "Navigation failed";
+
+            LoggerService.Info(
+                "Navigation",
+                e.IsSuccess
+                    ? "Navigation completed successfully"
+                    : $"Navigation failed: {e.WebErrorStatus}");
         }
 
         private void OnDocumentTitleChanged(
@@ -189,16 +205,25 @@ namespace RTBrowser.App
             object e)
         {
             if (ActiveWebView?.CoreWebView2 == null)
+            {
                 return;
+            }
 
             string title =
                 ActiveWebView.CoreWebView2.DocumentTitle;
 
-            _activeTab!.Title = title;
+            if (_activeTab != null)
+            {
+                _activeTab.Title = title;
+            }
 
             PageTitleText.Text = title;
 
             Title = $"{title} - RTBrowser";
+
+            LoggerService.Info(
+                "Tabs",
+                $"Title changed: {title}");
         }
 
         private void RestoreWindowState()
@@ -215,6 +240,10 @@ namespace RTBrowser.App
                 state.IsMaximized
                 ? WindowState.Maximized
                 : WindowState.Normal;
+
+            LoggerService.Info(
+                "Window",
+                "Window state restored");
         }
 
         private void SaveWindowState()
@@ -231,6 +260,10 @@ namespace RTBrowser.App
                 };
 
             WindowStateService.Save(state);
+
+            LoggerService.Info(
+                "Window",
+                "Window state saved");
         }
 
         private void OnBackClicked(
@@ -240,6 +273,10 @@ namespace RTBrowser.App
             if (ActiveWebView?.CoreWebView2?.CanGoBack == true)
             {
                 ActiveWebView.CoreWebView2.GoBack();
+
+                LoggerService.Info(
+                    "Navigation",
+                    "Back button pressed");
             }
         }
 
@@ -250,6 +287,10 @@ namespace RTBrowser.App
             if (ActiveWebView?.CoreWebView2?.CanGoForward == true)
             {
                 ActiveWebView.CoreWebView2.GoForward();
+
+                LoggerService.Info(
+                    "Navigation",
+                    "Forward button pressed");
             }
         }
 
@@ -258,6 +299,10 @@ namespace RTBrowser.App
             RoutedEventArgs e)
         {
             ActiveWebView?.CoreWebView2?.Reload();
+
+            LoggerService.Info(
+                "Navigation",
+                "Refresh button pressed");
         }
 
         private void OnHomeClicked(
@@ -265,6 +310,10 @@ namespace RTBrowser.App
             RoutedEventArgs e)
         {
             NavigateTo(HomeUrl);
+
+            LoggerService.Info(
+                "Navigation",
+                "Home button pressed");
         }
 
         private void OnStopClicked(
@@ -272,6 +321,10 @@ namespace RTBrowser.App
             RoutedEventArgs e)
         {
             ActiveWebView?.CoreWebView2?.Stop();
+
+            LoggerService.Info(
+                "Navigation",
+                "Stop button pressed");
         }
 
         private async void OnAddTabClicked(
@@ -279,6 +332,10 @@ namespace RTBrowser.App
             RoutedEventArgs e)
         {
             await CreateNewTab(HomeUrl);
+
+            LoggerService.Info(
+                "Tabs",
+                "New tab button pressed");
         }
 
         private void OnMinimizeClicked(
@@ -287,6 +344,10 @@ namespace RTBrowser.App
         {
             WindowState =
                 WindowState.Minimized;
+
+            LoggerService.Info(
+                "Window",
+                "Window minimized");
         }
 
         private void OnMaximizeClicked(
@@ -297,12 +358,22 @@ namespace RTBrowser.App
                 WindowState == WindowState.Maximized
                 ? WindowState.Normal
                 : WindowState.Maximized;
+
+            LoggerService.Info(
+                "Window",
+                WindowState == WindowState.Maximized
+                    ? "Window maximized"
+                    : "Window restored");
         }
 
         private void OnCloseClicked(
             object sender,
             RoutedEventArgs e)
         {
+            LoggerService.Info(
+                "Window",
+                "Close button pressed");
+
             Close();
         }
 
