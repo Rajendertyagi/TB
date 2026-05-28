@@ -2,7 +2,7 @@
     x:Class="RTBrowser.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"
+    xmlns:webview="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
     Title="RTBrowser"
     Width="1720"
     Height="920"
@@ -162,7 +162,9 @@
                                 <TextBlock
                                     Text="—"
                                     FontSize="12"
-                                    Foreground="#D0D0D0" />
+                                    Foreground="#D0D0D0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
 
                             </Button>
 
@@ -176,7 +178,9 @@
                                 <TextBlock
                                     Text="▢"
                                     FontSize="10"
-                                    Foreground="#D0D0D0" />
+                                    Foreground="#D0D0D0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
 
                             </Button>
 
@@ -190,7 +194,9 @@
                                 <TextBlock
                                     Text="✕"
                                     FontSize="11"
-                                    Foreground="#D0D0D0" />
+                                    Foreground="#D0D0D0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
 
                             </Button>
 
@@ -362,8 +368,9 @@
                 CornerRadius="8"
                 ClipToBounds="True">
 
-                <ContentControl
-                    x:Name="BrowserHost" />
+                <webview:WebView2
+                    x:Name="BrowserHost"
+                    DefaultBackgroundColor="Transparent" />
 
             </Border>
 
