@@ -33,12 +33,12 @@
 
             </Grid.RowDefinitions>
 
-            <!-- TITLE BAR -->
+            <!-- TITLEBAR -->
 
             <ui:BrowserTitleBar
                 Grid.Row="0"/>
 
-            <!-- NAVIGATION BAR -->
+            <!-- NAVIGATION -->
 
             <ui:NavigationBar
                 Grid.Row="1"/>
@@ -46,9 +46,10 @@
             <!-- WEBVIEW -->
 
             <ui:WebViewContainer
+                x:Name="WebViewContainer"
                 Grid.Row="2"/>
 
-            <!-- STATUS BAR -->
+            <!-- STATUSBAR -->
 
             <ui:StatusBar
                 Grid.Row="3"/>
