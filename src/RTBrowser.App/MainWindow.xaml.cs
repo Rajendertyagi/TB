@@ -7,6 +7,7 @@ using RTBrowser.Services;
 using RTBrowser.UI.Controls;
 
 using System;
+using System.Linq;
 using System.Windows;
 
 namespace RTBrowser.App
@@ -44,6 +45,9 @@ namespace RTBrowser.App
 
             BrowserTitleBar.CloseTabRequested +=
                 OnCloseTabRequested;
+
+            BrowserTitleBar.TabSelected +=
+                OnTabSelected;
         }
 
         private async void OnLoaded(
@@ -66,6 +70,34 @@ namespace RTBrowser.App
             LoggerService.Info(
                 "Tabs",
                 "New tab requested");
+        }
+
+        private void OnTabSelected(
+            Guid tabId)
+        {
+            _sessionManager.SetActiveSession(tabId);
+
+            if (_sessionManager.ActiveSession == null)
+            {
+                return;
+            }
+
+            WebViewContainer.SetBrowser(
+                _sessionManager
+                    .ActiveSession
+                    .WebView);
+
+            NavigationBar.SetAddress(
+                _sessionManager
+                    .ActiveSession
+                    .Tab
+                    .Url);
+
+            RenderTabs();
+
+            LoggerService.Info(
+                "Tabs",
+                $"Activated tab: {tabId}");
         }
 
         private void OnCloseTabRequested()
@@ -99,6 +131,8 @@ namespace RTBrowser.App
                     .ActiveSession
                     .Tab
                     .Url);
+
+            RenderTabs();
 
             LoggerService.Info(
                 "Tabs",
@@ -155,9 +189,20 @@ namespace RTBrowser.App
 
             NavigationBar.SetAddress(url);
 
+            RenderTabs();
+
             LoggerService.Info(
                 "Tabs",
                 $"Created tab: {tab.Id}");
+        }
+
+        private void RenderTabs()
+        {
+            BrowserTitleBar.RenderTabs(
+                _sessionManager
+                    .Sessions
+                    .Select(x => x.Tab)
+                    .ToList());
         }
 
         private TabSession? ActiveSession =>
@@ -301,6 +346,8 @@ namespace RTBrowser.App
 
             Title =
                 $"{title} - RTBrowser";
+
+            RenderTabs();
 
             LoggerService.Info(
                 "Tabs",
