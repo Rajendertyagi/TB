@@ -16,12 +16,7 @@ namespace RTBrowser.UI.Controls
                 System.TimeSpan.FromSeconds(1);
 
             _timer.Tick +=
-                (_, _) =>
-                {
-                    TimeText.Text =
-                        System.DateTime.Now
-                            .ToString("HH:mm:ss");
-                };
+                OnTimerTick;
 
             _timer.Start();
         }
@@ -30,7 +25,16 @@ namespace RTBrowser.UI.Controls
             string text)
         {
             StatusText.Text =
-                text;
+                text.ToUpperInvariant();
+        }
+
+        private void OnTimerTick(
+            object? sender,
+            System.EventArgs e)
+        {
+            TimeText.Text =
+                System.DateTime.Now
+                    .ToString("HH:mm:ss");
         }
     }
 }
