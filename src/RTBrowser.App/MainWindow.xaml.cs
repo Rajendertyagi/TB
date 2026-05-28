@@ -272,27 +272,7 @@ namespace RTBrowser.App
         private string NormalizeInput(
             string input)
         {
-            input = input.Trim();
-
-            bool looksLikeUrl =
-                input.Contains('.')
-                && !input.Contains(' ');
-
-            if (looksLikeUrl)
-            {
-                if (!input.StartsWith("http://")
-                    && !input.StartsWith("https://"))
-                {
-                    input =
-                        "https://" + input;
-                }
-
-                return input;
-            }
-
-            return
-                "https://www.google.com/search?q="
-                + Uri.EscapeDataString(input);
+            return UrlHelper.Normalize(input);
         }
 
         private void OnNavigationStarting(
