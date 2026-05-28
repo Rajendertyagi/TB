@@ -10,66 +10,455 @@
     MinWidth="1200"
     MinHeight="700"
     WindowStartupLocation="CenterScreen"
-    Background="{StaticResource BackgroundPrimaryBrush}">
+    WindowStyle="None"
+    ResizeMode="CanResize"
+    Background="#0F0F10">
 
-    <Grid>
+    <Border
+        BorderBrush="#1F1F22"
+        BorderThickness="1"
+        CornerRadius="10"
+        Background="#0F0F10">
 
-        <Grid.RowDefinitions>
+        <Grid>
 
-            <RowDefinition Height="30" />
+            <Grid.RowDefinitions>
 
-            <RowDefinition Height="30" />
+                <!-- COMPACT TOP CHROME -->
 
-            <RowDefinition Height="38" />
+                <RowDefinition Height="74" />
 
-            <RowDefinition Height="*" />
+                <!-- WEBVIEW -->
 
-            <RowDefinition Height="22" />
+                <RowDefinition Height="*" />
 
-        </Grid.RowDefinitions>
+                <!-- STATUS -->
 
-        <!-- TITLE BAR -->
+                <RowDefinition Height="24" />
 
-        <controls:BrowserTitleBar
-            Grid.Row="0" />
+            </Grid.RowDefinitions>
 
-        <!-- TAB BAR -->
+            <!-- ========================================= -->
+            <!-- TOP CHROME -->
+            <!-- ========================================= -->
 
-        <controls:CompactTabView
-            Grid.Row="1" />
+            <Border
+                Grid.Row="0"
+                Background="#111214"
+                BorderBrush="#1E1F22"
+                BorderThickness="0,0,0,1">
 
-        <!-- OMNIBOX -->
+                <Grid>
 
-        <Border
-            Grid.Row="2"
-            Background="{StaticResource BackgroundPrimaryBrush}"
-            Padding="8,4">
+                    <Grid.RowDefinitions>
 
-            <controls:CompactOmnibox
-                x:Name="Omnibox" />
+                        <!-- TABS -->
 
-        </Border>
+                        <RowDefinition Height="34" />
 
-        <!-- WEBVIEW -->
+                        <!-- NAVIGATION -->
 
-        <Border
-            Grid.Row="3"
-            Margin="8"
-            CornerRadius="8"
-            ClipToBounds="True"
-            Background="#111111">
+                        <RowDefinition Height="40" />
 
-            <webview:WebView2
-                x:Name="BrowserView"
-                DefaultBackgroundColor="Transparent" />
+                    </Grid.RowDefinitions>
 
-        </Border>
+                    <!-- ========================================= -->
+                    <!-- TAB BAR -->
+                    <!-- ========================================= -->
 
-        <!-- STATUS BAR -->
+                    <Grid
+                        Grid.Row="0"
+                        Background="#111214"
+                        MouseLeftButtonDown="OnWindowDrag">
 
-        <controls:StatusBar
-            Grid.Row="4" />
+                        <Grid.ColumnDefinitions>
 
-    </Grid>
+                            <ColumnDefinition Width="*" />
+
+                            <ColumnDefinition Width="Auto" />
+
+                        </Grid.ColumnDefinitions>
+
+                        <!-- LEFT TABS -->
+
+                        <StackPanel
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="8,0,0,0">
+
+                            <!-- ACTIVE TAB -->
+
+                            <Border
+                                Width="220"
+                                Height="28"
+                                Background="#1A1B1E"
+                                CornerRadius="8,8,0,0"
+                                Margin="0,0,4,0">
+
+                                <Grid>
+
+                                    <Grid.ColumnDefinitions>
+
+                                        <ColumnDefinition Width="Auto"/>
+
+                                        <ColumnDefinition Width="*"/>
+
+                                        <ColumnDefinition Width="Auto"/>
+
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock
+                                        Grid.Column="0"
+                                        Text="🌐"
+                                        Margin="10,0,8,0"
+                                        VerticalAlignment="Center"
+                                        FontSize="11" />
+
+                                    <TextBlock
+                                        x:Name="PageTitleText"
+                                        Grid.Column="1"
+                                        Text="New Tab"
+                                        VerticalAlignment="Center"
+                                        FontSize="12"
+                                        Foreground="White"
+                                        TextTrimming="CharacterEllipsis" />
+
+                                    <Button
+                                        Grid.Column="2"
+                                        Width="18"
+                                        Height="18"
+                                        Margin="0,0,8,0"
+                                        Background="Transparent"
+                                        BorderThickness="0">
+
+                                        <TextBlock
+                                            Text="✕"
+                                            FontSize="10"
+                                            Foreground="#9B9B9B"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center" />
+
+                                    </Button>
+
+                                </Grid>
+
+                            </Border>
+
+                            <!-- ADD TAB -->
+
+                            <Button
+                                Width="28"
+                                Height="28"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="+"
+                                    FontSize="15"
+                                    Foreground="#BDBDBD"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center" />
+
+                            </Button>
+
+                        </StackPanel>
+
+                        <!-- WINDOW BUTTONS -->
+
+                        <StackPanel
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,4,0">
+
+                            <Button
+                                Width="42"
+                                Height="28"
+                                Click="OnMinimizeClicked"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="—"
+                                    FontSize="12"
+                                    Foreground="#D0D0D0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+
+                            </Button>
+
+                            <Button
+                                Width="42"
+                                Height="28"
+                                Click="OnMaximizeClicked"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="▢"
+                                    FontSize="10"
+                                    Foreground="#D0D0D0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+
+                            </Button>
+
+                            <Button
+                                Width="42"
+                                Height="28"
+                                Click="OnCloseClicked"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="✕"
+                                    FontSize="11"
+                                    Foreground="#D0D0D0"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center" />
+
+                            </Button>
+
+                        </StackPanel>
+
+                    </Grid>
+
+                    <!-- ========================================= -->
+                    <!-- NAV BAR -->
+                    <!-- ========================================= -->
+
+                    <Grid
+                        Grid.Row="1"
+                        Margin="10,0,10,6">
+
+                        <Grid.ColumnDefinitions>
+
+                            <ColumnDefinition Width="Auto"/>
+
+                            <ColumnDefinition Width="*"/>
+
+                        </Grid.ColumnDefinitions>
+
+                        <!-- NAVIGATION -->
+
+                        <StackPanel
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,8,0">
+
+                            <Button
+                                x:Name="BackButton"
+                                Width="30"
+                                Height="30"
+                                Click="OnBackClicked"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="←"
+                                    FontSize="12"
+                                    Foreground="#D8D8D8"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+                            </Button>
+
+                            <Button
+                                x:Name="ForwardButton"
+                                Width="30"
+                                Height="30"
+                                Click="OnForwardClicked"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="→"
+                                    FontSize="12"
+                                    Foreground="#D8D8D8"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+                            </Button>
+
+                            <Button
+                                x:Name="RefreshButton"
+                                Width="30"
+                                Height="30"
+                                Click="OnRefreshClicked"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="↻"
+                                    FontSize="12"
+                                    Foreground="#D8D8D8"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+                            </Button>
+
+                            <Button
+                                x:Name="HomeButton"
+                                Width="30"
+                                Height="30"
+                                Click="OnHomeClicked"
+                                Background="Transparent"
+                                BorderThickness="0">
+
+                                <TextBlock
+                                    Text="⌂"
+                                    FontSize="12"
+                                    Foreground="#D8D8D8"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+
+                            </Button>
+
+                        </StackPanel>
+
+                        <!-- OMNIBOX -->
+
+                        <Border
+                            Grid.Column="1"
+                            Height="32"
+                            Background="#1B1C1F"
+                            CornerRadius="16"
+                            BorderBrush="#2A2B30"
+                            BorderThickness="1">
+
+                            <Grid>
+
+                                <Grid.ColumnDefinitions>
+
+                                    <ColumnDefinition Width="Auto"/>
+
+                                    <ColumnDefinition Width="*"/>
+
+                                    <ColumnDefinition Width="Auto"/>
+
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock
+                                    Grid.Column="0"
+                                    Text="🔒"
+                                    Margin="12,0,8,0"
+                                    VerticalAlignment="Center"
+                                    FontSize="11"
+                                    Foreground="#A0A0A0"/>
+
+                                <TextBox
+                                    x:Name="AddressBar"
+                                    Grid.Column="1"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="White"
+                                    FontSize="13"
+                                    VerticalContentAlignment="Center"
+                                    KeyDown="OnAddressBarKeyDown"/>
+
+                                <Button
+                                    Grid.Column="2"
+                                    Width="32"
+                                    Height="30"
+                                    Click="OnStopClicked"
+                                    Background="Transparent"
+                                    BorderThickness="0">
+
+                                    <TextBlock
+                                        Text="✕"
+                                        FontSize="11"
+                                        Foreground="#C0C0C0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Button>
+
+                            </Grid>
+
+                        </Border>
+
+                    </Grid>
+
+                </Grid>
+
+            </Border>
+
+            <!-- ========================================= -->
+            <!-- LOADING BAR -->
+            <!-- ========================================= -->
+
+            <ProgressBar
+                x:Name="LoadingBar"
+                Grid.Row="0"
+                Height="2"
+                VerticalAlignment="Bottom"
+                Minimum="0"
+                Maximum="100"
+                Visibility="Collapsed"
+                IsIndeterminate="True"/>
+
+            <!-- ========================================= -->
+            <!-- WEBVIEW -->
+            <!-- ========================================= -->
+
+            <Border
+                Grid.Row="1"
+                Margin="8"
+                Background="#111111"
+                CornerRadius="8"
+                ClipToBounds="True">
+
+                <webview:WebView2
+                    x:Name="BrowserView"
+                    DefaultBackgroundColor="Transparent"/>
+
+            </Border>
+
+            <!-- ========================================= -->
+            <!-- STATUS BAR -->
+            <!-- ========================================= -->
+
+            <Border
+                Grid.Row="2"
+                Background="#101113"
+                BorderBrush="#1E1F22"
+                BorderThickness="0,1,0,0">
+
+                <Grid>
+
+                    <Grid.ColumnDefinitions>
+
+                        <ColumnDefinition Width="*" />
+
+                        <ColumnDefinition Width="Auto" />
+
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock
+                        Grid.Column="0"
+                        x:Name="StatusText"
+                        Margin="10,0"
+                        VerticalAlignment="Center"
+                        FontSize="11"
+                        Foreground="#8F9093"
+                        Text="Ready" />
+
+                    <TextBlock
+                        Grid.Column="1"
+                        Margin="0,0,10,0"
+                        VerticalAlignment="Center"
+                        FontSize="11"
+                        Foreground="#8F9093"
+                        Text="RTBrowser" />
+
+                </Grid>
+
+            </Border>
+
+        </Grid>
+
+    </Border>
 
 </Window>
