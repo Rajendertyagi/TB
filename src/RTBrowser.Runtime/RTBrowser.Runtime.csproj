@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <TargetFramework>
+      net8.0-windows
+    </TargetFramework>
+
+    <UseWPF>
+      true
+    </UseWPF>
+
+    <Nullable>
+      enable
+    </Nullable>
+
+    <ImplicitUsings>
+      enable
+    </ImplicitUsings>
+
+    <AssemblyName>
+      RTBrowser.Runtime
+    </AssemblyName>
+
+    <RootNamespace>
+      RTBrowser.Runtime
+    </RootNamespace>
+
+  </PropertyGroup>
+
+  <!-- ========================================= -->
+  <!-- PROJECT REFERENCES -->
+  <!-- ========================================= -->
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
+
+  </ItemGroup>
+
+</Project>
