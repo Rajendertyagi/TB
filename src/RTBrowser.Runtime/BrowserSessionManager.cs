@@ -134,6 +134,18 @@ namespace RTBrowser.Runtime
                     next.Tab));
         }
 
+        public int IndexOfActiveSession()
+        {
+            if (ActiveSession == null)
+            {
+                return -1;
+            }
+
+            return
+                _sessions.FindIndex(
+                    x => x.Id == ActiveSession.Id);
+        }
+
         public TabSession? GetSession(
             Guid tabId)
         {
