@@ -1,109 +1,70 @@
 using RTBrowser.Services;
 
 using System;
-using System.IO;
+using System.Threading;
 using System.Windows;
 
 namespace RTBrowser.App
 {
     public partial class App : Application
     {
-        private LoggerService? _logger;
-
-        private PerformanceMonitor? _performance;
+        private static Mutex? _mutex;
 
         protected override void OnStartup(
             StartupEventArgs e)
         {
-            base.OnStartup(e);
+            const string mutexName =
+                "RTBrowser.SingleInstance";
 
-            InitializeServices();
+            bool createdNew;
 
-            ConfigureGlobalExceptionHandling();
+            _mutex = new Mutex(
+                true,
+                mutexName,
+                out createdNew);
 
-            _logger?.Info(
-                "RTBrowser startup initialized.");
-        }
-
-        private void InitializeServices()
-        {
-            _logger =
-                new LoggerService();
-
-            _performance =
-                new PerformanceMonitor();
-
-            PrepareApplicationDirectories();
-        }
-
-        private void PrepareApplicationDirectories()
-        {
-            CreateDirectory("Logs");
-
-            CreateDirectory("Session");
-
-            CreateDirectory("WebViewData");
-
-            CreateDirectory("Cache");
-
-            CreateDirectory("Downloads");
-        }
-
-        private void CreateDirectory(
-            string folderName)
-        {
-            string path =
-                Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    folderName);
-
-            if (!Directory.Exists(path))
+            if (!createdNew)
             {
-                Directory.CreateDirectory(path);
-            }
-        }
+                MessageBox.Show(
+                    "RTBrowser is already running.",
+                    "RTBrowser");
 
-        private void ConfigureGlobalExceptionHandling()
-        {
-            DispatcherUnhandledException +=
-                App_DispatcherUnhandledException;
+                Current.Shutdown();
+
+                return;
+            }
+
+            LoggerService.Info(
+                "Application",
+                "Application startup");
 
             AppDomain.CurrentDomain.UnhandledException +=
-                CurrentDomain_UnhandledException;
-        }
+                OnUnhandledException;
 
-        private void App_DispatcherUnhandledException(
-            object sender,
-            System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
-        {
-            _logger?.Error(e.Exception);
-
-            MessageBox.Show(
-                e.Exception.Message,
-                "RTBrowser Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-
-            e.Handled = true;
-        }
-
-        private void CurrentDomain_UnhandledException(
-            object sender,
-            UnhandledExceptionEventArgs e)
-        {
-            if (e.ExceptionObject is Exception exception)
-            {
-                _logger?.Error(exception);
-            }
+            base.OnStartup(e);
         }
 
         protected override void OnExit(
             ExitEventArgs e)
         {
-            _logger?.Info(
-                "RTBrowser exited successfully.");
+            LoggerService.Info(
+                "Application",
+                "Application shutdown");
+
+            _mutex?.ReleaseMutex();
+
+            _mutex?.Dispose();
 
             base.OnExit(e);
+        }
+
+        private void OnUnhandledException(
+            object sender,
+            UnhandledExceptionEventArgs e)
+        {
+            LoggerService.Error(
+                "Crash",
+                e.ExceptionObject.ToString() ?? "Unknown crash");
         }
     }
 }
