@@ -12,22 +12,22 @@
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     ResizeMode="CanResize"
-    Background="#0D0D0E">
+    Background="#0C0D0F">
 
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome
             CaptionHeight="0"
             CornerRadius="0"
             GlassFrameThickness="0"
-            ResizeBorderThickness="5"
+            ResizeBorderThickness="4"
             UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
 
     <Border
-        Background="#0D0D0E"
-        BorderBrush="#1B1C1F"
+        Background="#0C0D0F"
+        BorderBrush="#18191C"
         BorderThickness="1"
-        CornerRadius="8"
+        CornerRadius="7"
         SnapsToDevicePixels="True">
 
         <Grid>
@@ -48,31 +48,30 @@
 
             </Grid.RowDefinitions>
 
-            <!-- TAB STRIP -->
+            <!-- TOP CHROME -->
 
-            <Grid
+            <Border
                 Grid.Row="0"
-                Background="#101113">
+                Background="#101113"
+                BorderBrush="#1A1B1E"
+                BorderThickness="0,0,0,1">
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
+                <Grid>
 
-                <!-- DRAG REGION -->
+                    <!-- DRAG REGION -->
 
-                <Border
-                    Grid.Column="0"
-                    Background="Transparent"
-                    shell:WindowChrome.IsHitTestVisibleInChrome="False"/>
+                    <Border
+                        Background="Transparent"
+                        shell:WindowChrome.IsHitTestVisibleInChrome="False"/>
 
-                <!-- TITLEBAR -->
+                    <!-- TITLEBAR -->
 
-                <ui:BrowserTitleBar
-                    x:Name="BrowserTitleBar"
-                    Grid.ColumnSpan="2"/>
+                    <ui:BrowserTitleBar
+                        x:Name="BrowserTitleBar"/>
 
-            </Grid>
+                </Grid>
+
+            </Border>
 
             <!-- NAVIGATION -->
 
@@ -80,17 +79,16 @@
                 x:Name="NavigationBar"
                 Grid.Row="1"/>
 
-            <!-- WEBVIEW -->
+            <!-- CONTENT -->
 
-            <Border
+            <Grid
                 Grid.Row="2"
-                Margin="0"
-                Background="#0D0D0E">
+                Background="#0C0D0F">
 
                 <ui:WebViewContainer
                     x:Name="WebViewContainer"/>
 
-            </Border>
+            </Grid>
 
             <!-- STATUSBAR -->
 
