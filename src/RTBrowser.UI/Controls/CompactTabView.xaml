@@ -2,9 +2,6 @@
     x:Class="RTBrowser.UI.Controls.CompactTabView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
     Height="{StaticResource TabBarHeight}">
 
     <Border
@@ -12,23 +9,15 @@
 
         <Grid Height="{StaticResource TabBarHeight}">
 
-            <!-- ========================================= -->
-            <!-- TAB STRIP -->
-            <!-- ========================================= -->
-
             <ScrollViewer
                 HorizontalScrollBarVisibility="Hidden"
-                VerticalScrollBarVisibility="Disabled"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Center">
+                VerticalScrollBarVisibility="Disabled">
 
                 <StackPanel
                     Orientation="Horizontal"
-                    Margin="{StaticResource Spacing8},0">
+                    Margin="8,0">
 
-                    <!-- ========================================= -->
                     <!-- ACTIVE TAB -->
-                    <!-- ========================================= -->
 
                     <Border
                         Width="180"
@@ -45,17 +34,14 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- FAVICON -->
-
-                            <FontIcon
+                            <TextBlock
                                 Grid.Column="0"
-                                Glyph="&#xE774;"
+                                Text=""
+                                FontFamily="Segoe Fluent Icons"
                                 FontSize="12"
                                 Margin="10,0,8,0"
                                 VerticalAlignment="Center"
                                 Foreground="{StaticResource TextPrimaryBrush}" />
-
-                            <!-- TITLE -->
 
                             <TextBlock
                                 Grid.Column="1"
@@ -66,22 +52,21 @@
                                 FontSize="{StaticResource FontTabs}"
                                 Foreground="{StaticResource TextPrimaryBrush}" />
 
-                            <!-- CLOSE -->
-
                             <Button
                                 Grid.Column="2"
                                 Width="20"
                                 Height="20"
                                 Margin="4,0,6,0"
                                 Background="Transparent"
-                                BorderThickness="0"
-                                Padding="0"
-                                VerticalAlignment="Center">
+                                BorderThickness="0">
 
-                                <FontIcon
-                                    Glyph="&#xE711;"
-                                    FontSize="{StaticResource TabCloseIconSize}"
-                                    Foreground="{StaticResource TextSecondaryBrush}" />
+                                <TextBlock
+                                    Text=""
+                                    FontFamily="Segoe Fluent Icons"
+                                    FontSize="10"
+                                    Foreground="{StaticResource TextSecondaryBrush}"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Center" />
 
                             </Button>
 
@@ -89,9 +74,7 @@
 
                     </Border>
 
-                    <!-- ========================================= -->
                     <!-- INACTIVE TAB -->
-                    <!-- ========================================= -->
 
                     <Border
                         Width="160"
@@ -107,17 +90,14 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- FAVICON -->
-
-                            <FontIcon
+                            <TextBlock
                                 Grid.Column="0"
-                                Glyph="&#xE774;"
+                                Text=""
+                                FontFamily="Segoe Fluent Icons"
                                 FontSize="12"
                                 Margin="10,0,8,0"
                                 VerticalAlignment="Center"
                                 Foreground="{StaticResource TextSecondaryBrush}" />
-
-                            <!-- TITLE -->
 
                             <TextBlock
                                 Grid.Column="1"
@@ -132,21 +112,21 @@
 
                     </Border>
 
-                    <!-- ========================================= -->
-                    <!-- ADD TAB BUTTON -->
-                    <!-- ========================================= -->
+                    <!-- ADD TAB -->
 
                     <Button
                         Width="28"
                         Height="26"
                         Background="Transparent"
-                        BorderThickness="0"
-                        Padding="0">
+                        BorderThickness="0">
 
-                        <FontIcon
-                            Glyph="&#xE710;"
+                        <TextBlock
+                            Text=""
+                            FontFamily="Segoe Fluent Icons"
                             FontSize="12"
-                            Foreground="{StaticResource TextSecondaryBrush}" />
+                            Foreground="{StaticResource TextSecondaryBrush}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Center" />
 
                     </Button>
 
