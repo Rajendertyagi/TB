@@ -1,53 +1,50 @@
-<UserControl
-    x:Class="RTBrowser.UI.Controls.StatusBar"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Height="18">
+using Microsoft.Web.WebView2.Wpf;
 
-    <Border
-        Background="#101113"
-        BorderBrush="#1A1B1E"
-        BorderThickness="0,1,0,0">
+using System.Windows;
+using System.Windows.Controls;
 
-        <Grid Margin="8,0,8,0">
+namespace RTBrowser.UI.Controls
+{
+    public partial class WebViewContainer : UserControl
+    {
+        public WebViewContainer()
+        {
+            InitializeComponent();
+        }
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        public WebView2? Browser =>
+            ContentHost.Children.Count > 0
+                ? ContentHost.Children[0] as WebView2
+                : null;
 
-            <!-- LEFT -->
+        public void SetBrowser(
+            WebView2 browser)
+        {
+            if (ContentHost.Children.Contains(browser))
+            {
+                return;
+            }
 
-            <StackPanel
-                Grid.Column="0"
-                Orientation="Horizontal"
-                VerticalAlignment="Center">
+            ContentHost.Children.Clear();
 
-                <TextBlock
-                    x:Name="StatusText"
-                    FontSize="10"
-                    Foreground="#7E848D"
-                    Text="READY"/>
+            browser.HorizontalAlignment =
+                HorizontalAlignment.Stretch;
 
-            </StackPanel>
+            browser.VerticalAlignment =
+                VerticalAlignment.Stretch;
 
-            <!-- RIGHT -->
+            browser.Margin =
+                new Thickness(0);
 
-            <StackPanel
-                Grid.Column="1"
-                Orientation="Horizontal"
-                VerticalAlignment="Center">
+            browser.Focusable =
+                true;
 
-                <TextBlock
-                    x:Name="TimeText"
-                    FontSize="10"
-                    Foreground="#7E848D"
-                    Text="00:00:00"/>
+            ContentHost.Children.Add(browser);
+        }
 
-            </StackPanel>
-
-        </Grid>
-
-    </Border>
-
-</UserControl>
+        public void Clear()
+        {
+            ContentHost.Children.Clear();
+        }
+    }
+}
