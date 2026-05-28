@@ -1,7 +1,8 @@
 <Application
     x:Class="RTBrowser.App.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    StartupUri="MainWindow.xaml">
 
     <Application.Resources>
 
@@ -9,21 +10,13 @@
 
             <ResourceDictionary.MergedDictionaries>
 
-                <!-- ========================================= -->
-                <!-- DESIGN SYSTEM -->
-                <!-- ========================================= -->
+                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/Colors.xaml" />
 
-                <ResourceDictionary
-                    Source="/RTBrowser.UI;component/Themes/DesignTokens.xaml" />
+                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/Spacing.xaml" />
 
-                <ResourceDictionary
-                    Source="/RTBrowser.UI;component/Themes/Colors.xaml" />
+                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/Typography.xaml" />
 
-                <ResourceDictionary
-                    Source="/RTBrowser.UI;component/Themes/Typography.xaml" />
-
-                <ResourceDictionary
-                    Source="/RTBrowser.UI;component/Themes/Spacing.xaml" />
+                <ResourceDictionary Source="/RTBrowser.UI;component/Themes/DesignTokens.xaml" />
 
             </ResourceDictionary.MergedDictionaries>
 
