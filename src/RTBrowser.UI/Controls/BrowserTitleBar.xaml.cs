@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -6,6 +7,8 @@ namespace RTBrowser.UI.Controls
 {
     public partial class BrowserTitleBar : UserControl
     {
+        public event Action? NewTabRequested;
+
         public BrowserTitleBar()
         {
             InitializeComponent();
@@ -62,6 +65,13 @@ namespace RTBrowser.UI.Controls
             RoutedEventArgs e)
         {
             Window.GetWindow(this)?.Close();
+        }
+
+        private void OnNewTab(
+            object sender,
+            RoutedEventArgs e)
+        {
+            NewTabRequested?.Invoke();
         }
     }
 }
