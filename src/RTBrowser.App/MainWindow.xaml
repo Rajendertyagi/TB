@@ -16,7 +16,7 @@
 
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome
-            CaptionHeight="0"
+            CaptionHeight="40"
             CornerRadius="0"
             GlassFrameThickness="0"
             ResizeBorderThickness="6"
@@ -24,25 +24,45 @@
     </shell:WindowChrome.WindowChrome>
 
     <Border
+        Margin="0"
         Background="#0D0D0E"
         BorderBrush="#202126"
         BorderThickness="1"
-        CornerRadius="12">
+        CornerRadius="12"
+        SnapsToDevicePixels="True">
 
         <Grid>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="38"/>
-                <RowDefinition Height="44"/>
+                <RowDefinition Height="40"/>
+                <RowDefinition Height="46"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="24"/>
             </Grid.RowDefinitions>
 
             <!-- TITLEBAR -->
 
-            <ui:BrowserTitleBar
-                x:Name="BrowserTitleBar"
-                Grid.Row="0"/>
+            <Grid Grid.Row="0">
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- DRAG REGION -->
+
+                <Border
+                    Grid.Column="0"
+                    Background="Transparent"
+                    shell:WindowChrome.IsHitTestVisibleInChrome="False"/>
+
+                <!-- TITLEBAR CONTROL -->
+
+                <ui:BrowserTitleBar
+                    x:Name="BrowserTitleBar"
+                    Grid.ColumnSpan="2"/>
+
+            </Grid>
 
             <!-- NAVIGATION -->
 
