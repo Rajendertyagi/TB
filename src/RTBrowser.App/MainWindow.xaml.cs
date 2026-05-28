@@ -7,7 +7,7 @@ using RTBrowser.Services;
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Forms.Integration;
 using System.Windows.Input;
 
 namespace RTBrowser.App
@@ -18,6 +18,9 @@ namespace RTBrowser.App
             "https://www.google.com";
 
         private readonly List<BrowserTab> _tabs =
+            new();
+
+        private readonly Dictionary<Guid, WebView2> _webViews =
             new();
 
         private BrowserTab? _activeTab;
@@ -67,7 +70,6 @@ namespace RTBrowser.App
             {
                 Url = url,
                 Title = "New Tab",
-                WebView = webView,
                 IsActive = true
             };
 
@@ -77,6 +79,8 @@ namespace RTBrowser.App
             }
 
             _tabs.Add(tab);
+
+            _webViews[tab.Id] = webView;
 
             _activeTab = tab;
 
@@ -89,15 +93,26 @@ namespace RTBrowser.App
                 $"Tab created: {tab.Id}");
         }
 
+        private WebView2? ActiveWebView
+        {
+            get
+            {
+                if (_activeTab == null)
+                    return null;
+
+                return _webViews[_activeTab.Id];
+            }
+        }
+
         private void NavigateTo(
             string url)
         {
-            if (_activeTab?.WebView == null)
+            if (ActiveWebView == null)
                 return;
 
             AddressBar.Text = url;
 
-            _activeTab.WebView.CoreWebView2.Navigate(url);
+            ActiveWebView.CoreWebView2.Navigate(url);
 
             LoggerService.Info(
                 "Navigation",
@@ -158,10 +173,10 @@ namespace RTBrowser.App
             LoadingBar.Visibility =
                 Visibility.Collapsed;
 
-            if (_activeTab?.WebView?.Source != null)
+            if (ActiveWebView?.Source != null)
             {
                 AddressBar.Text =
-                    _activeTab.WebView.Source.ToString();
+                    ActiveWebView.Source.ToString();
             }
 
             StatusText.Text =
@@ -174,13 +189,13 @@ namespace RTBrowser.App
             object? sender,
             object e)
         {
-            if (_activeTab?.WebView == null)
+            if (ActiveWebView == null)
                 return;
 
             string title =
-                _activeTab.WebView.CoreWebView2.DocumentTitle;
+                ActiveWebView.CoreWebView2.DocumentTitle;
 
-            _activeTab.Title = title;
+            _activeTab!.Title = title;
 
             PageTitleText.Text = title;
 
@@ -223,21 +238,21 @@ namespace RTBrowser.App
             object sender,
             RoutedEventArgs e)
         {
-            _activeTab?.WebView?.CoreWebView2.GoBack();
+            ActiveWebView?.CoreWebView2.GoBack();
         }
 
         private void OnForwardClicked(
             object sender,
             RoutedEventArgs e)
         {
-            _activeTab?.WebView?.CoreWebView2.GoForward();
+            ActiveWebView?.CoreWebView2.GoForward();
         }
 
         private void OnRefreshClicked(
             object sender,
             RoutedEventArgs e)
         {
-            _activeTab?.WebView?.CoreWebView2.Reload();
+            ActiveWebView?.CoreWebView2.Reload();
         }
 
         private void OnHomeClicked(
@@ -251,7 +266,7 @@ namespace RTBrowser.App
             object sender,
             RoutedEventArgs e)
         {
-            _activeTab?.WebView?.CoreWebView2.Stop();
+            ActiveWebView?.CoreWebView2.Stop();
         }
 
         private async void OnAddTabClicked(
