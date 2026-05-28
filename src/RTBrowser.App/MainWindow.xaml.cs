@@ -16,7 +16,7 @@ namespace RTBrowser.App
         private const string HomeUrl =
             "https://www.google.com";
 
-        private readonly TabManager _tabManager =
+        private readonly BrowserSessionManager _sessionManager =
             new();
 
         public MainWindow()
@@ -41,6 +41,9 @@ namespace RTBrowser.App
 
             BrowserTitleBar.NewTabRequested +=
                 OnNewTabRequested;
+
+            BrowserTitleBar.CloseTabRequested +=
+                OnCloseTabRequested;
         }
 
         private async void OnLoaded(
@@ -65,11 +68,55 @@ namespace RTBrowser.App
                 "New tab requested");
         }
 
+        private void OnCloseTabRequested()
+        {
+            if (_sessionManager.ActiveSession == null)
+            {
+                return;
+            }
+
+            Guid tabId =
+                _sessionManager
+                    .ActiveSession
+                    .Id;
+
+            _sessionManager.CloseSession(tabId);
+
+            if (_sessionManager.ActiveSession == null)
+            {
+                Close();
+
+                return;
+            }
+
+            WebViewContainer.SetBrowser(
+                _sessionManager
+                    .ActiveSession
+                    .WebView);
+
+            NavigationBar.SetAddress(
+                _sessionManager
+                    .ActiveSession
+                    .Tab
+                    .Url);
+
+            LoggerService.Info(
+                "Tabs",
+                $"Closed tab: {tabId}");
+        }
+
         private async System.Threading.Tasks.Task CreateNewTab(
             string url)
         {
             WebView2 webView =
-                new();
+                new()
+                {
+                    HorizontalAlignment =
+                        HorizontalAlignment.Stretch,
+
+                    VerticalAlignment =
+                        VerticalAlignment.Stretch
+                };
 
             await webView
                 .EnsureCoreWebView2Async();
@@ -87,14 +134,24 @@ namespace RTBrowser.App
                 OnDocumentTitleChanged;
 
             BrowserTab tab =
-                _tabManager.CreateTab(
-                    webView,
-                    url);
+                new()
+                {
+                    Title = "New Tab",
+                    Url = url,
+                    IsActive = true,
+                    WebView = webView
+                };
+
+            TabSession session =
+                new(tab);
+
+            _sessionManager.AddSession(
+                session);
 
             WebViewContainer.SetBrowser(
                 webView);
 
-            webView.CoreWebView2.Navigate(url);
+            session.Navigate(url);
 
             NavigationBar.SetAddress(url);
 
@@ -103,11 +160,11 @@ namespace RTBrowser.App
                 $"Created tab: {tab.Id}");
         }
 
-        private BrowserTab? ActiveTab =>
-            _tabManager.ActiveTab;
+        private TabSession? ActiveSession =>
+            _sessionManager.ActiveSession;
 
         private WebView2? ActiveWebView =>
-            ActiveTab?.WebView;
+            ActiveSession?.WebView;
 
         private void OnNavigateRequested(
             string input)
@@ -121,21 +178,14 @@ namespace RTBrowser.App
         private void NavigateTo(
             string url)
         {
-            if (ActiveWebView?.CoreWebView2 == null)
+            if (ActiveSession == null)
             {
                 return;
             }
 
-            ActiveWebView
-                .CoreWebView2
-                .Navigate(url);
+            ActiveSession.Navigate(url);
 
             NavigationBar.SetAddress(url);
-
-            if (ActiveTab != null)
-            {
-                ActiveTab.Url = url;
-            }
 
             LoggerService.Info(
                 "Navigation",
@@ -231,6 +281,11 @@ namespace RTBrowser.App
             object? sender,
             object e)
         {
+            if (ActiveSession == null)
+            {
+                return;
+            }
+
             if (ActiveWebView?.CoreWebView2 == null)
             {
                 return;
@@ -241,10 +296,8 @@ namespace RTBrowser.App
                     .CoreWebView2
                     .DocumentTitle;
 
-            if (ActiveTab != null)
-            {
-                ActiveTab.Title = title;
-            }
+            ActiveSession.Tab.Title =
+                title;
 
             Title =
                 $"{title} - RTBrowser";
