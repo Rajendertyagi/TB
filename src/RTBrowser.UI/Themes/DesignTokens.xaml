@@ -1,1 +1,6 @@
-
+<x:Double x:Key="Spacing2">2</x:Double>
+<x:Double x:Key="Spacing4">4</x:Double>
+<x:Double x:Key="Spacing6">6</x:Double>
+<x:Double x:Key="Spacing8">8</x:Double>
+<x:Double x:Key="Spacing12">12</x:Double>
+<x:Double x:Key="Spacing16">16</x:Double>
