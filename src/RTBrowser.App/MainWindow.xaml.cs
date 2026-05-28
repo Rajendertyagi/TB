@@ -50,21 +50,30 @@ namespace RTBrowser.App
         private async Task CreateNewTab(
             string url)
         {
-            if (BrowserHost.CoreWebView2 == null)
+            if (WebViewContainer.Browser.CoreWebView2 == null)
             {
-                await BrowserHost.EnsureCoreWebView2Async();
+                await WebViewContainer.Browser
+                    .EnsureCoreWebView2Async();
             }
 
-            BrowserHost.CoreWebView2?.Settings
+            WebViewContainer.Browser
+                .CoreWebView2?
+                .Settings
                 .AreDefaultContextMenusEnabled = false;
 
-            BrowserHost.CoreWebView2.NavigationStarting +=
+            WebViewContainer.Browser
+                .CoreWebView2
+                .NavigationStarting +=
                 OnNavigationStarting;
 
-            BrowserHost.CoreWebView2.NavigationCompleted +=
+            WebViewContainer.Browser
+                .CoreWebView2
+                .NavigationCompleted +=
                 OnNavigationCompleted;
 
-            BrowserHost.CoreWebView2.DocumentTitleChanged +=
+            WebViewContainer.Browser
+                .CoreWebView2
+                .DocumentTitleChanged +=
                 OnDocumentTitleChanged;
 
             var tab = new BrowserTab
@@ -81,7 +90,8 @@ namespace RTBrowser.App
 
             _tabs.Add(tab);
 
-            _webViews[tab.Id] = BrowserHost;
+            _webViews[tab.Id] =
+                WebViewContainer.Browser;
 
             _activeTab = tab;
 
@@ -113,9 +123,9 @@ namespace RTBrowser.App
                 return;
             }
 
-            AddressBar.Text = url;
-
-            ActiveWebView.CoreWebView2.Navigate(url);
+            ActiveWebView
+                .CoreWebView2
+                .Navigate(url);
 
             LoggerService.Info(
                 "Navigation",
@@ -147,29 +157,10 @@ namespace RTBrowser.App
                 + Uri.EscapeDataString(input);
         }
 
-        private void OnAddressBarKeyDown(
-            object sender,
-            KeyEventArgs e)
-        {
-            if (e.Key != Key.Enter)
-            {
-                return;
-            }
-
-            NavigateTo(
-                NormalizeInput(AddressBar.Text));
-        }
-
         private void OnNavigationStarting(
             object? sender,
             CoreWebView2NavigationStartingEventArgs e)
         {
-            LoadingBar.Visibility =
-                Visibility.Visible;
-
-            StatusText.Text =
-                "Loading...";
-
             LoggerService.Info(
                 "Navigation",
                 $"Navigation started: {e.Uri}");
@@ -179,24 +170,10 @@ namespace RTBrowser.App
             object? sender,
             CoreWebView2NavigationCompletedEventArgs e)
         {
-            LoadingBar.Visibility =
-                Visibility.Collapsed;
-
-            if (ActiveWebView?.Source != null)
-            {
-                AddressBar.Text =
-                    ActiveWebView.Source.ToString();
-            }
-
-            StatusText.Text =
-                e.IsSuccess
-                ? "Ready"
-                : "Navigation failed";
-
             LoggerService.Info(
                 "Navigation",
                 e.IsSuccess
-                    ? "Navigation completed successfully"
+                    ? "Navigation completed"
                     : $"Navigation failed: {e.WebErrorStatus}");
         }
 
@@ -210,14 +187,14 @@ namespace RTBrowser.App
             }
 
             string title =
-                ActiveWebView.CoreWebView2.DocumentTitle;
+                ActiveWebView
+                    .CoreWebView2
+                    .DocumentTitle;
 
             if (_activeTab != null)
             {
                 _activeTab.Title = title;
             }
-
-            PageTitleText.Text = title;
 
             Title = $"{title} - RTBrowser";
 
@@ -266,115 +243,15 @@ namespace RTBrowser.App
                 "Window state saved");
         }
 
-        private void OnBackClicked(
-            object sender,
-            RoutedEventArgs e)
+        private void OnClosed(
+            object? sender,
+            EventArgs e)
         {
-            if (ActiveWebView?.CoreWebView2?.CanGoBack == true)
-            {
-                ActiveWebView.CoreWebView2.GoBack();
-
-                LoggerService.Info(
-                    "Navigation",
-                    "Back button pressed");
-            }
-        }
-
-        private void OnForwardClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            if (ActiveWebView?.CoreWebView2?.CanGoForward == true)
-            {
-                ActiveWebView.CoreWebView2.GoForward();
-
-                LoggerService.Info(
-                    "Navigation",
-                    "Forward button pressed");
-            }
-        }
-
-        private void OnRefreshClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            ActiveWebView?.CoreWebView2?.Reload();
-
-            LoggerService.Info(
-                "Navigation",
-                "Refresh button pressed");
-        }
-
-        private void OnHomeClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            NavigateTo(HomeUrl);
-
-            LoggerService.Info(
-                "Navigation",
-                "Home button pressed");
-        }
-
-        private void OnStopClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            ActiveWebView?.CoreWebView2?.Stop();
-
-            LoggerService.Info(
-                "Navigation",
-                "Stop button pressed");
-        }
-
-        private async void OnAddTabClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            await CreateNewTab(HomeUrl);
-
-            LoggerService.Info(
-                "Tabs",
-                "New tab button pressed");
-        }
-
-        private void OnMinimizeClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            WindowState =
-                WindowState.Minimized;
+            SaveWindowState();
 
             LoggerService.Info(
                 "Window",
-                "Window minimized");
-        }
-
-        private void OnMaximizeClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            WindowState =
-                WindowState == WindowState.Maximized
-                ? WindowState.Normal
-                : WindowState.Maximized;
-
-            LoggerService.Info(
-                "Window",
-                WindowState == WindowState.Maximized
-                    ? "Window maximized"
-                    : "Window restored");
-        }
-
-        private void OnCloseClicked(
-            object sender,
-            RoutedEventArgs e)
-        {
-            LoggerService.Info(
-                "Window",
-                "Close button pressed");
-
-            Close();
+                "Main window closed");
         }
 
         private void OnWindowDrag(
@@ -386,17 +263,6 @@ namespace RTBrowser.App
             {
                 DragMove();
             }
-        }
-
-        private void OnClosed(
-            object? sender,
-            EventArgs e)
-        {
-            SaveWindowState();
-
-            LoggerService.Info(
-                "Window",
-                "Main window closed");
         }
     }
 }
