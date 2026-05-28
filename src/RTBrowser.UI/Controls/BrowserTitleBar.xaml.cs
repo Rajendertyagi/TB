@@ -9,6 +9,8 @@ namespace RTBrowser.UI.Controls
     {
         public event Action? NewTabRequested;
 
+        public event Action? CloseTabRequested;
+
         public BrowserTitleBar()
         {
             InitializeComponent();
@@ -56,8 +58,8 @@ namespace RTBrowser.UI.Controls
 
             window.WindowState =
                 window.WindowState == WindowState.Maximized
-                ? WindowState.Normal
-                : WindowState.Maximized;
+                    ? WindowState.Normal
+                    : WindowState.Maximized;
         }
 
         private void OnClose(
@@ -72,6 +74,13 @@ namespace RTBrowser.UI.Controls
             RoutedEventArgs e)
         {
             NewTabRequested?.Invoke();
+        }
+
+        private void OnCloseTab(
+            object sender,
+            RoutedEventArgs e)
+        {
+            CloseTabRequested?.Invoke();
         }
     }
 }
