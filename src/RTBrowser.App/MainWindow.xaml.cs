@@ -6,8 +6,8 @@ using RTBrowser.Services;
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms.Integration;
 using System.Windows.Input;
 
 namespace RTBrowser.App
@@ -47,7 +47,7 @@ namespace RTBrowser.App
             await CreateNewTab(HomeUrl);
         }
 
-        private async System.Threading.Tasks.Task CreateNewTab(
+        private async Task CreateNewTab(
             string url)
         {
             var webView = new WebView2();
@@ -84,7 +84,7 @@ namespace RTBrowser.App
 
             _activeTab = tab;
 
-            BrowserHost.Child = webView;
+            BrowserHost.Content = webView;
 
             NavigateTo(url);
 
