@@ -19,9 +19,25 @@ namespace RTBrowser.UI.Controls
         public void SetBrowser(
             WebView2 browser)
         {
+            if (ContentHost.Children.Contains(browser))
+            {
+                return;
+            }
+
             ContentHost.Children.Clear();
 
+            browser.HorizontalAlignment =
+                System.Windows.HorizontalAlignment.Stretch;
+
+            browser.VerticalAlignment =
+                System.Windows.VerticalAlignment.Stretch;
+
             ContentHost.Children.Add(browser);
+        }
+
+        public void Clear()
+        {
+            ContentHost.Children.Clear();
         }
     }
 }
