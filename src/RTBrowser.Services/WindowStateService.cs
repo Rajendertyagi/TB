@@ -1,5 +1,3 @@
-using RTBrowser.Core;
-
 using System;
 using System.IO;
 using System.Text.Json;
@@ -8,37 +6,46 @@ namespace RTBrowser.Services
 {
     public static class WindowStateService
     {
-        private static readonly string StateDirectory =
+        private static readonly string _stateDirectory =
             Path.Combine(
-                AppDomain.CurrentDomain.BaseDirectory,
-                "Runtime");
+                AppContext.BaseDirectory,
+                "state");
 
-        private static readonly string StateFilePath =
+        private static readonly string _stateFile =
             Path.Combine(
-                StateDirectory,
-                "WindowState.json");
+                _stateDirectory,
+                "window-state.json");
+
+        static WindowStateService()
+        {
+            Directory.CreateDirectory(
+                _stateDirectory);
+        }
 
         public static WindowStateModel Load()
         {
             try
             {
-                if (!File.Exists(StateFilePath))
+                if (!File.Exists(_stateFile))
                 {
-                    return new WindowStateModel();
+                    return DefaultState();
                 }
 
                 string json =
-                    File.ReadAllText(StateFilePath);
+                    File.ReadAllText(_stateFile);
 
-                var state =
-                    JsonSerializer.Deserialize<WindowStateModel>(json);
+                WindowStateModel? state =
+                    JsonSerializer.Deserialize<WindowStateModel>(
+                        json);
 
-                return state
-                    ?? new WindowStateModel();
+                return
+                    state
+                    ??
+                    DefaultState();
             }
             catch
             {
-                return new WindowStateModel();
+                return DefaultState();
             }
         }
 
@@ -47,8 +54,6 @@ namespace RTBrowser.Services
         {
             try
             {
-                Directory.CreateDirectory(StateDirectory);
-
                 string json =
                     JsonSerializer.Serialize(
                         state,
@@ -58,12 +63,25 @@ namespace RTBrowser.Services
                         });
 
                 File.WriteAllText(
-                    StateFilePath,
+                    _stateFile,
                     json);
             }
             catch
             {
             }
+        }
+
+        private static WindowStateModel DefaultState()
+        {
+            return
+                new WindowStateModel
+                {
+                    Width = 1720,
+                    Height = 920,
+                    Left = 100,
+                    Top = 60,
+                    IsMaximized = false
+                };
         }
     }
 }
