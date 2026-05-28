@@ -11,12 +11,17 @@ namespace RTBrowser.UI.Controls
             InitializeComponent();
         }
 
-        public WebView2 Browser
+        public WebView2? Browser =>
+            ContentHost.Children.Count > 0
+                ? ContentHost.Children[0] as WebView2
+                : null;
+
+        public void SetBrowser(
+            WebView2 browser)
         {
-            get
-            {
-                return BrowserHost;
-            }
+            ContentHost.Children.Clear();
+
+            ContentHost.Children.Add(browser);
         }
     }
 }
