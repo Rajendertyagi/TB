@@ -10,12 +10,13 @@
         <Border
             Margin="0"
             Background="#0C0D0F"
-            BorderBrush="#151619"
+            BorderBrush="#141518"
             BorderThickness="0">
 
             <Grid
                 x:Name="ContentHost"
-                ClipToBounds="True"/>
+                ClipToBounds="True"
+                SnapsToDevicePixels="True"/>
 
         </Border>
 
