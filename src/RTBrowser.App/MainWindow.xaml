@@ -60,24 +60,13 @@
             Grid.Row="2"
             Background="{StaticResource BackgroundSecondaryBrush}">
 
-            <!-- PLACEHOLDER -->
-            <!-- WEBVIEW2 COMES HERE LATER -->
-
             <Border
                 Margin="8"
                 Background="{StaticResource SurfaceBrush}"
                 CornerRadius="{StaticResource RadiusLarge}">
 
-                <Grid>
-
-                    <TextBlock
-                        Text="RTBrowser Runtime Placeholder"
-                        Style="{StaticResource ToolbarTextStyle}"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Foreground="{StaticResource TextSecondaryBrush}" />
-
-                </Grid>
+                <Grid
+                    x:Name="WebViewContainer" />
 
             </Border>
 
