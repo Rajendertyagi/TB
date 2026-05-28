@@ -14,9 +14,6 @@ namespace RTBrowser.App
 {
     public partial class MainWindow : Window
     {
-        private const string HomeUrl =
-            "https://www.google.com";
-
         private readonly BrowserSessionManager _sessionManager =
             new();
 
@@ -60,12 +57,14 @@ namespace RTBrowser.App
                 "Window",
                 "Main window loaded");
 
-            await CreateNewTab(HomeUrl);
+            await CreateNewTab(
+                Constants.HomeUrl);
         }
 
         private async void OnNewTabRequested()
         {
-            await CreateNewTab(HomeUrl);
+            await CreateNewTab(
+                Constants.HomeUrl);
 
             LoggerService.Info(
                 "Tabs",
@@ -75,7 +74,8 @@ namespace RTBrowser.App
         private void OnTabSelected(
             Guid tabId)
         {
-            _sessionManager.SetActiveSession(tabId);
+            _sessionManager.SetActiveSession(
+                tabId);
 
             if (_sessionManager.ActiveSession == null)
             {
@@ -92,7 +92,8 @@ namespace RTBrowser.App
         private void OnCloseTabRequested(
             Guid tabId)
         {
-            _sessionManager.CloseSession(tabId);
+            _sessionManager.CloseSession(
+                tabId);
 
             if (!_sessionManager.HasSessions)
             {
@@ -114,10 +115,15 @@ namespace RTBrowser.App
             WebView2 webView =
                 CreateWebView();
 
-            await webView
-                .EnsureCoreWebView2Async();
+            CoreWebView2Environment environment =
+                await WebViewEnvironmentFactory
+                    .GetAsync();
 
-            ConfigureWebView(webView);
+            await webView.EnsureCoreWebView2Async(
+                environment);
+
+            ConfigureWebView(
+                webView);
 
             BrowserTab tab =
                 new()
@@ -129,7 +135,8 @@ namespace RTBrowser.App
                 };
 
             TabSession session =
-                _sessionManager.CreateSession(tab);
+                _sessionManager.CreateSession(
+                    tab);
 
             session.Navigate(url);
 
@@ -151,7 +158,10 @@ namespace RTBrowser.App
                     VerticalAlignment =
                         VerticalAlignment.Stretch,
 
-                    Focusable = true
+                    Focusable = true,
+
+                    DefaultBackgroundColor =
+                        System.Drawing.Color.Transparent
                 };
         }
 
@@ -205,7 +215,7 @@ namespace RTBrowser.App
                 ActiveSession.Tab.Url);
 
             Title =
-                $"{ActiveSession.Tab.Title} - RTBrowser";
+                $"{ActiveSession.Tab.Title} - {Constants.BrowserName}";
 
             RenderTabs();
         }
@@ -226,7 +236,7 @@ namespace RTBrowser.App
             string input)
         {
             string url =
-                NormalizeInput(input);
+                UrlHelper.Normalize(input);
 
             if (ActiveSession == null)
             {
@@ -269,12 +279,6 @@ namespace RTBrowser.App
                 "Refresh pressed");
         }
 
-        private string NormalizeInput(
-            string input)
-        {
-            return UrlHelper.Normalize(input);
-        }
-
         private void OnNavigationStarting(
             object? sender,
             CoreWebView2NavigationStartingEventArgs e)
@@ -294,7 +298,11 @@ namespace RTBrowser.App
 
             if (session.Tab.IsActive)
             {
-                NavigationBar.SetAddress(e.Uri);
+                NavigationBar.SetAddress(
+                    e.Uri);
+
+                StatusBar.SetStatus(
+                    "Loading...");
             }
 
             RenderTabs();
@@ -317,6 +325,14 @@ namespace RTBrowser.App
             }
 
             session.SetLoading(false);
+
+            if (session.Tab.IsActive)
+            {
+                StatusBar.SetStatus(
+                    e.IsSuccess
+                        ? "Ready"
+                        : "Navigation Failed");
+            }
 
             RenderTabs();
 
@@ -353,7 +369,7 @@ namespace RTBrowser.App
             if (session.Tab.IsActive)
             {
                 Title =
-                    $"{session.Tab.Title} - RTBrowser";
+                    $"{session.Tab.Title} - {Constants.BrowserName}";
             }
 
             RenderTabs();
@@ -383,10 +399,17 @@ namespace RTBrowser.App
             WindowStateModel state =
                 WindowStateService.Load();
 
-            Width = state.Width;
-            Height = state.Height;
-            Left = state.Left;
-            Top = state.Top;
+            Width =
+                state.Width;
+
+            Height =
+                state.Height;
+
+            Left =
+                state.Left;
+
+            Top =
+                state.Top;
 
             WindowState =
                 state.IsMaximized
@@ -412,7 +435,8 @@ namespace RTBrowser.App
                         WindowState.Maximized
                 };
 
-            WindowStateService.Save(state);
+            WindowStateService.Save(
+                state);
 
             LoggerService.Info(
                 "Window",
