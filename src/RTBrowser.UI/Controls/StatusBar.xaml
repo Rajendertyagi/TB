@@ -24,6 +24,7 @@
                 VerticalAlignment="Center">
 
                 <TextBlock
+                    x:Name="StatusText"
                     FontSize="10"
                     Foreground="#7E848D"
                     Text="READY"/>
@@ -38,9 +39,10 @@
                 VerticalAlignment="Center">
 
                 <TextBlock
+                    x:Name="TimeText"
                     FontSize="10"
                     Foreground="#7E848D"
-                    Text="RTBrowser"/>
+                    Text="00:00:00"/>
 
             </StackPanel>
 
