@@ -38,8 +38,9 @@ namespace RTBrowser.UI.Controls
                 Border border =
                     CreateTab(tab);
 
-                _tabBorders[tab.Id] =
-                    border;
+                _tabBorders.Add(
+                    tab.Id,
+                    border);
 
                 TabsHost.Children.Add(border);
             }
@@ -51,21 +52,21 @@ namespace RTBrowser.UI.Controls
             Border border =
                 new()
                 {
-                    Width = 220,
+                    Width = 210,
                     Height = 24,
-                    Margin = new Thickness(0, 0, 5, 0),
+                    Margin = new Thickness(0, 0, 4, 0),
                     CornerRadius = new CornerRadius(5, 5, 0, 0),
                     BorderThickness = new Thickness(1),
                     Background =
                         tab.IsActive
                             ? Brush("#18191C")
-                            : Brush("#121316"),
+                            : Brush("#111214"),
                     BorderBrush =
                         tab.IsActive
-                            ? Brush("#2E3136")
-                            : Brush("#1E2024"),
-                    Tag = tab.Id,
-                    Cursor = Cursors.Hand
+                            ? Brush("#2A2D32")
+                            : Brush("#1B1D21"),
+                    Cursor = Cursors.Hand,
+                    Tag = tab.Id
                 };
 
             Grid grid =
@@ -78,7 +79,10 @@ namespace RTBrowser.UI.Controls
                 });
 
             grid.ColumnDefinitions.Add(
-                new ColumnDefinition());
+                new ColumnDefinition
+                {
+                    Width = new GridLength(1, GridUnitType.Star)
+                });
 
             grid.ColumnDefinitions.Add(
                 new ColumnDefinition
@@ -89,91 +93,109 @@ namespace RTBrowser.UI.Controls
             Border indicator =
                 new()
                 {
-                    Width = 7,
-                    Height = 7,
+                    Width = 6,
+                    Height = 6,
                     Margin = new Thickness(8, 0, 6, 0),
-                    CornerRadius = new CornerRadius(4),
-                    Background =
-                        tab.IsActive
-                            ? Brush("#4C8DFF")
-                            : Brush("#43464C"),
+                    CornerRadius = new CornerRadius(3),
                     VerticalAlignment =
-                        VerticalAlignment.Center
+                        VerticalAlignment.Center,
+                    Background =
+                        tab.IsLoading
+                            ? Brush("#FFB347")
+                            : tab.IsActive
+                                ? Brush("#4C8DFF")
+                                : Brush("#44474E")
                 };
 
             TextBlock title =
                 new()
                 {
-                    Text = tab.Title,
-                    FontSize = 11,
-                    Foreground =
-                        tab.IsActive
-                            ? Brush("#E7E7E7")
-                            : Brush("#9CA1A9"),
+                    Text =
+                        string.IsNullOrWhiteSpace(tab.Title)
+                            ? "New Tab"
+                            : tab.Title,
+                    FontSize = 10.5,
+                    FontWeight = FontWeights.Medium,
                     VerticalAlignment =
                         VerticalAlignment.Center,
+                    Foreground =
+                        tab.IsActive
+                            ? Brush("#ECECEC")
+                            : Brush("#9A9EA5"),
                     TextTrimming =
                         TextTrimming.CharacterEllipsis
                 };
 
-            Button close =
+            Button closeButton =
                 new()
                 {
-                    Width = 18,
-                    Height = 18,
+                    Width = 16,
+                    Height = 16,
                     Margin = new Thickness(0, 0, 6, 0),
                     Background = Brushes.Transparent,
                     BorderThickness = new Thickness(0),
                     Cursor = Cursors.Hand,
-                    Tag = tab.Id,
-                    Content =
-                        new TextBlock
-                        {
-                            Text = "✕",
-                            FontSize = 9,
-                            Foreground =
-                                Brush("#8E949D"),
-                            HorizontalAlignment =
-                                HorizontalAlignment.Center,
-                            VerticalAlignment =
-                                VerticalAlignment.Center
-                        }
+                    Focusable = false,
+                    Tag = tab.Id
                 };
 
-            close.Click += OnDynamicCloseTab;
+            TextBlock closeText =
+                new()
+                {
+                    Text = "✕",
+                    FontSize = 8,
+                    HorizontalAlignment =
+                        HorizontalAlignment.Center,
+                    VerticalAlignment =
+                        VerticalAlignment.Center,
+                    Foreground =
+                        tab.IsActive
+                            ? Brush("#9DA3AB")
+                            : Brush("#6F737A")
+                };
+
+            closeButton.Content =
+                closeText;
+
+            closeButton.Click +=
+                OnDynamicCloseTab;
+
+            border.MouseLeftButtonDown +=
+                OnTabClicked;
 
             border.MouseEnter +=
                 (_, _) =>
                 {
-                    if (!tab.IsActive)
+                    if (tab.IsActive)
                     {
-                        border.Background =
-                            Brush("#17181B");
+                        return;
                     }
+
+                    border.Background =
+                        Brush("#17181B");
                 };
 
             border.MouseLeave +=
                 (_, _) =>
                 {
-                    if (!tab.IsActive)
+                    if (tab.IsActive)
                     {
-                        border.Background =
-                            Brush("#121316");
+                        return;
                     }
+
+                    border.Background =
+                        Brush("#111214");
                 };
 
             Grid.SetColumn(indicator, 0);
             Grid.SetColumn(title, 1);
-            Grid.SetColumn(close, 2);
+            Grid.SetColumn(closeButton, 2);
 
             grid.Children.Add(indicator);
             grid.Children.Add(title);
-            grid.Children.Add(close);
+            grid.Children.Add(closeButton);
 
             border.Child = grid;
-
-            border.MouseLeftButtonDown +=
-                OnTabClicked;
 
             return border;
         }
