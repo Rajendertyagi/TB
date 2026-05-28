@@ -4,29 +4,31 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:webview="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf">
 
-    <Border
-        Margin="8,8,8,4"
-        CornerRadius="10"
-        Background="#111111"
-        BorderBrush="#1D1F25"
-        BorderThickness="1"
-        ClipToBounds="True">
+    <Grid Background="#0D0D0E">
 
-        <Grid>
+        <Border
+            Margin="8,8,8,6"
+            Background="#111214"
+            BorderBrush="#23252B"
+            BorderThickness="1"
+            CornerRadius="12">
 
-            <Border
-                CornerRadius="10"
-                Background="#111111"
-                ClipToBounds="True">
+            <Grid ClipToBounds="True">
+
+                <Border
+                    Margin="0"
+                    Background="#111214"
+                    CornerRadius="12"/>
 
                 <webview:WebView2
                     x:Name="BrowserHost"
-                    DefaultBackgroundColor="Transparent" />
+                    Margin="1"
+                    DefaultBackgroundColor="Transparent"/>
 
-            </Border>
+            </Grid>
 
-        </Grid>
+        </Border>
 
-    </Border>
+    </Grid>
 
 </UserControl>
