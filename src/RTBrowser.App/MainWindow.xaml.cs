@@ -44,6 +44,9 @@ namespace RTBrowser.App
 
             NavigationBar.RefreshRequested +=
                 OnRefreshRequested;
+
+            BrowserTitleBar.NewTabRequested +=
+                OnNewTabRequested;
         }
 
         private async void OnLoaded(
@@ -57,6 +60,15 @@ namespace RTBrowser.App
                 "Main window loaded");
 
             await CreateNewTab(HomeUrl);
+        }
+
+        private async void OnNewTabRequested()
+        {
+            await CreateNewTab(HomeUrl);
+
+            LoggerService.Info(
+                "Tabs",
+                "New tab requested");
         }
 
         private async Task CreateNewTab(
@@ -172,7 +184,9 @@ namespace RTBrowser.App
                 return;
             }
 
-            ActiveWebView.CoreWebView2.Navigate(url);
+            ActiveWebView
+                .CoreWebView2
+                .Navigate(url);
 
             NavigationBar.SetAddress(url);
 
