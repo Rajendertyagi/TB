@@ -1,0 +1,70 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <OutputType>
+      WinExe
+    </OutputType>
+
+    <TargetFramework>
+      net8.0-windows
+    </TargetFramework>
+
+    <UseWPF>
+      true
+    </UseWPF>
+
+    <Nullable>
+      enable
+    </Nullable>
+
+    <ImplicitUsings>
+      enable
+    </ImplicitUsings>
+
+    <AssemblyName>
+      RTBrowser.App
+    </AssemblyName>
+
+    <RootNamespace>
+      RTBrowser.App
+    </RootNamespace>
+
+    <StartupObject>
+      RTBrowser.App.App
+    </StartupObject>
+
+  </PropertyGroup>
+
+  <!-- ========================================= -->
+  <!-- PROJECT REFERENCES -->
+  <!-- ========================================= -->
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\RTBrowser.UI\RTBrowser.UI.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Runtime\RTBrowser.Runtime.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Services\RTBrowser.Services.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.WebView\RTBrowser.WebView.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Telemetry\RTBrowser.Telemetry.csproj" />
+
+  </ItemGroup>
+
+  <!-- ========================================= -->
+  <!-- WEBVIEW2 -->
+  <!-- ========================================= -->
+
+  <ItemGroup>
+
+    <PackageReference Include="Microsoft.Web.WebView2"
+                      Version="1.0.2792.45" />
+
+  </ItemGroup>
+
+</Project>
