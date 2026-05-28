@@ -12,48 +12,39 @@
 
     <ImplicitUsings>enable</ImplicitUsings>
 
-    <LangVersion>preview</LangVersion>
-
-    <SatelliteResourceLanguages>
-      en-US
-    </SatelliteResourceLanguages>
-
-    <AssemblyName>RTBrowser.App</AssemblyName>
-
-    <RootNamespace>RTBrowser.App</RootNamespace>
-
-    <StartupObject>RTBrowser.App.App</StartupObject>
-
-    <Platforms>x64</Platforms>
-
     <PlatformTarget>x64</PlatformTarget>
 
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
-    <Prefer32Bit>false</Prefer32Bit>
+    <SelfContained>false</SelfContained>
+
+    <UseWindowsForms>false</UseWindowsForms>
+
+    <LangVersion>preview</LangVersion>
+
+    <ApplicationManifest>app.manifest</ApplicationManifest>
 
   </PropertyGroup>
 
   <ItemGroup>
 
-    <ProjectReference Include="..\RTBrowser.UI\RTBrowser.UI.csproj" />
+    <PackageReference Include="Microsoft.Web.WebView2"
+                      Version="1.0.3240.44" />
 
-    <ProjectReference Include="..\RTBrowser.Runtime\RTBrowser.Runtime.csproj" />
-
-    <ProjectReference Include="..\RTBrowser.Services\RTBrowser.Services.csproj" />
-
-    <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
-
-    <ProjectReference Include="..\RTBrowser.WebView\RTBrowser.WebView.csproj" />
-
-    <ProjectReference Include="..\RTBrowser.Telemetry\RTBrowser.Telemetry.csproj" />
+    <PackageReference Include="Wpf.Ui"
+                      Version="4.0.2" />
 
   </ItemGroup>
 
   <ItemGroup>
 
-    <PackageReference Include="Microsoft.Web.WebView2"
-                      Version="1.0.3124.44" />
+    <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Services\RTBrowser.Services.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Runtime\RTBrowser.Runtime.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.WebView\RTBrowser.WebView.csproj" />
 
   </ItemGroup>
 
