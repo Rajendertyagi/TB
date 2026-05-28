@@ -45,7 +45,8 @@
             Background="{StaticResource BackgroundPrimaryBrush}"
             Padding="8,4">
 
-            <controls:CompactOmnibox />
+            <controls:CompactOmnibox
+                x:Name="Omnibox" />
 
         </Border>
 
