@@ -8,6 +8,19 @@
 
         <ResourceDictionary>
 
+            <ResourceDictionary.MergedDictionaries>
+
+                <ResourceDictionary
+                    Source="/RTBrowser.UI;component/Themes/Colors.xaml"/>
+
+                <ResourceDictionary
+                    Source="/RTBrowser.UI;component/Themes/Typography.xaml"/>
+
+                <ResourceDictionary
+                    Source="/RTBrowser.UI;component/Themes/Spacing.xaml"/>
+
+            </ResourceDictionary.MergedDictionaries>
+
         </ResourceDictionary>
 
     </Application.Resources>
