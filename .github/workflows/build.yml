@@ -48,10 +48,8 @@ jobs:
       - name: Cache NuGet Packages
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.nuget/packages
-          key: >
-            ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
@@ -60,10 +58,7 @@ jobs:
       # =========================================
 
       - name: Restore Dependencies
-        run: >
-          dotnet restore
-          RTBrowser.sln
-          --runtime win-x64
+        run: dotnet restore RTBrowser.sln
 
       # =========================================
       # BUILD
@@ -74,8 +69,6 @@ jobs:
           dotnet build
           RTBrowser.sln
           --configuration Release
-          --runtime win-x64
-          --self-contained false
           --no-restore
 
       # =========================================
