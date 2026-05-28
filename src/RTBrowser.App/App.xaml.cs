@@ -1,47 +1,26 @@
 using RTBrowser.Services;
 
 using System;
-using System.Threading;
 using System.Windows;
 
 namespace RTBrowser.App
 {
     public partial class App : Application
     {
-        private static Mutex? _mutex;
-
         protected override void OnStartup(
             StartupEventArgs e)
         {
-            const string mutexName =
-                "RTBrowser.SingleInstance";
-
-            bool createdNew;
-
-            _mutex = new Mutex(
-                true,
-                mutexName,
-                out createdNew);
-
-            if (!createdNew)
-            {
-                MessageBox.Show(
-                    "RTBrowser is already running.",
-                    "RTBrowser");
-
-                Current.Shutdown();
-
-                return;
-            }
-
-            LoggerService.Info(
-                "Application",
-                "Application startup");
+            base.OnStartup(e);
 
             AppDomain.CurrentDomain.UnhandledException +=
                 OnUnhandledException;
 
-            base.OnStartup(e);
+            DispatcherUnhandledException +=
+                OnDispatcherUnhandledException;
+
+            LoggerService.Info(
+                "Application",
+                "Application startup");
         }
 
         protected override void OnExit(
@@ -50,10 +29,6 @@ namespace RTBrowser.App
             LoggerService.Info(
                 "Application",
                 "Application shutdown");
-
-            _mutex?.ReleaseMutex();
-
-            _mutex?.Dispose();
 
             base.OnExit(e);
         }
@@ -64,7 +39,19 @@ namespace RTBrowser.App
         {
             LoggerService.Error(
                 "Crash",
-                e.ExceptionObject.ToString() ?? "Unknown crash");
+                e.ExceptionObject?.ToString()
+                ?? "Unknown fatal exception");
+        }
+
+        private void OnDispatcherUnhandledException(
+            object sender,
+            System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            LoggerService.Error(
+                "Crash",
+                e.Exception.ToString());
+
+            e.Handled = true;
         }
     }
 }
