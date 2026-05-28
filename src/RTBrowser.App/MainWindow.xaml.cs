@@ -1,9 +1,13 @@
 using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Wpf;
 
+using RTBrowser.Core;
 using RTBrowser.Services;
 
 using System;
+using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace RTBrowser.App
@@ -12,6 +16,11 @@ namespace RTBrowser.App
     {
         private const string HomeUrl =
             "https://www.google.com";
+
+        private readonly List<BrowserTab> _tabs =
+            new();
+
+        private BrowserTab? _activeTab;
 
         public MainWindow()
         {
@@ -26,68 +35,73 @@ namespace RTBrowser.App
             object sender,
             RoutedEventArgs e)
         {
-            try
+            RestoreWindowState();
+
+            LoggerService.Info(
+                "Window",
+                "Main window loaded");
+
+            await CreateNewTab(HomeUrl);
+        }
+
+        private async System.Threading.Tasks.Task CreateNewTab(
+            string url)
+        {
+            var webView = new WebView2();
+
+            await webView.EnsureCoreWebView2Async();
+
+            webView.CoreWebView2.Settings
+                .AreDefaultContextMenusEnabled = false;
+
+            webView.CoreWebView2.NavigationStarting +=
+                OnNavigationStarting;
+
+            webView.CoreWebView2.NavigationCompleted +=
+                OnNavigationCompleted;
+
+            webView.CoreWebView2.DocumentTitleChanged +=
+                OnDocumentTitleChanged;
+
+            var tab = new BrowserTab
             {
-                LoggerService.Info(
-                    "Window",
-                    "Main window loaded");
+                Url = url,
+                Title = "New Tab",
+                WebView = webView,
+                IsActive = true
+            };
 
-                await BrowserView.EnsureCoreWebView2Async();
-
-                BrowserView.CoreWebView2.Settings
-                    .AreDefaultContextMenusEnabled = false;
-
-                BrowserView.CoreWebView2.Settings
-                    .AreDevToolsEnabled = true;
-
-                BrowserView.CoreWebView2.Settings
-                    .IsStatusBarEnabled = false;
-
-                BrowserView.CoreWebView2.NavigationStarting +=
-                    OnNavigationStarting;
-
-                BrowserView.CoreWebView2.NavigationCompleted +=
-                    OnNavigationCompleted;
-
-                BrowserView.CoreWebView2.DocumentTitleChanged +=
-                    OnDocumentTitleChanged;
-
-                NavigateTo(HomeUrl);
-            }
-            catch (Exception ex)
+            foreach (var existingTab in _tabs)
             {
-                LoggerService.Error(
-                    "Startup",
-                    ex.ToString());
-
-                MessageBox.Show(
-                    ex.ToString(),
-                    "RTBrowser Startup Error");
+                existingTab.IsActive = false;
             }
+
+            _tabs.Add(tab);
+
+            _activeTab = tab;
+
+            BrowserHost.Child = webView;
+
+            NavigateTo(url);
+
+            LoggerService.Info(
+                "Tabs",
+                $"Tab created: {tab.Id}");
         }
 
         private void NavigateTo(
             string url)
         {
-            try
-            {
-                LoggerService.Info(
-                    "Navigation",
-                    $"Navigate: {url}");
+            if (_activeTab?.WebView == null)
+                return;
 
-                AddressBar.Text = url;
+            AddressBar.Text = url;
 
-                BrowserView.CoreWebView2.Navigate(url);
+            _activeTab.WebView.CoreWebView2.Navigate(url);
 
-                StatusText.Text =
-                    $"Loading {url}";
-            }
-            catch (Exception ex)
-            {
-                LoggerService.Error(
-                    "Navigation",
-                    ex.ToString());
-            }
+            LoggerService.Info(
+                "Navigation",
+                $"Navigate: {url}");
         }
 
         private string NormalizeInput(
@@ -122,10 +136,8 @@ namespace RTBrowser.App
             if (e.Key != Key.Enter)
                 return;
 
-            string url =
-                NormalizeInput(AddressBar.Text);
-
-            NavigateTo(url);
+            NavigateTo(
+                NormalizeInput(AddressBar.Text));
         }
 
         private void OnNavigationStarting(
@@ -137,10 +149,6 @@ namespace RTBrowser.App
 
             StatusText.Text =
                 "Loading...";
-
-            LoggerService.Info(
-                "Navigation",
-                $"Started: {e.Uri}");
         }
 
         private void OnNavigationCompleted(
@@ -150,97 +158,92 @@ namespace RTBrowser.App
             LoadingBar.Visibility =
                 Visibility.Collapsed;
 
-            if (BrowserView.Source != null)
+            if (_activeTab?.WebView?.Source != null)
             {
                 AddressBar.Text =
-                    BrowserView.Source.ToString();
+                    _activeTab.WebView.Source.ToString();
             }
 
-            if (e.IsSuccess)
-            {
-                StatusText.Text =
-                    "Ready";
-
-                LoggerService.Info(
-                    "Navigation",
-                    $"Completed: {BrowserView.Source}");
-            }
-            else
-            {
-                StatusText.Text =
-                    "Navigation failed";
-
-                LoggerService.Error(
-                    "Navigation",
-                    e.WebErrorStatus.ToString());
-            }
+            StatusText.Text =
+                e.IsSuccess
+                ? "Ready"
+                : "Navigation failed";
         }
 
         private void OnDocumentTitleChanged(
             object? sender,
             object e)
         {
-            try
-            {
-                string title =
-                    BrowserView.CoreWebView2.DocumentTitle;
+            if (_activeTab?.WebView == null)
+                return;
 
-                PageTitleText.Text = title;
+            string title =
+                _activeTab.WebView.CoreWebView2.DocumentTitle;
 
-                Title = $"{title} - RTBrowser";
-            }
-            catch
-            {
-            }
+            _activeTab.Title = title;
+
+            PageTitleText.Text = title;
+
+            Title = $"{title} - RTBrowser";
+        }
+
+        private void RestoreWindowState()
+        {
+            var state =
+                WindowStateService.Load();
+
+            Width = state.Width;
+            Height = state.Height;
+            Left = state.Left;
+            Top = state.Top;
+
+            WindowState =
+                state.IsMaximized
+                ? WindowState.Maximized
+                : WindowState.Normal;
+        }
+
+        private void SaveWindowState()
+        {
+            var state =
+                new WindowStateModel
+                {
+                    Width = Width,
+                    Height = Height,
+                    Left = Left,
+                    Top = Top,
+                    IsMaximized =
+                        WindowState == WindowState.Maximized
+                };
+
+            WindowStateService.Save(state);
         }
 
         private void OnBackClicked(
             object sender,
             RoutedEventArgs e)
         {
-            LoggerService.Info(
-                "UI",
-                "Back pressed");
-
-            if (BrowserView.CoreWebView2.CanGoBack)
-            {
-                BrowserView.CoreWebView2.GoBack();
-            }
+            _activeTab?.WebView?.CoreWebView2.GoBack();
         }
 
         private void OnForwardClicked(
             object sender,
             RoutedEventArgs e)
         {
-            LoggerService.Info(
-                "UI",
-                "Forward pressed");
-
-            if (BrowserView.CoreWebView2.CanGoForward)
-            {
-                BrowserView.CoreWebView2.GoForward();
-            }
+            _activeTab?.WebView?.CoreWebView2.GoForward();
         }
 
         private void OnRefreshClicked(
             object sender,
             RoutedEventArgs e)
         {
-            LoggerService.Info(
-                "UI",
-                "Refresh pressed");
-
-            BrowserView.CoreWebView2.Reload();
+            _activeTab?.WebView?.CoreWebView2.Reload();
         }
 
         private void OnHomeClicked(
             object sender,
             RoutedEventArgs e)
         {
-            LoggerService.Info(
-                "UI",
-                "Home pressed");
-
             NavigateTo(HomeUrl);
         }
 
@@ -248,11 +251,14 @@ namespace RTBrowser.App
             object sender,
             RoutedEventArgs e)
         {
-            LoggerService.Info(
-                "UI",
-                "Stop pressed");
+            _activeTab?.WebView?.CoreWebView2.Stop();
+        }
 
-            BrowserView.CoreWebView2.Stop();
+        private async void OnAddTabClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            await CreateNewTab(HomeUrl);
         }
 
         private void OnMinimizeClicked(
@@ -295,6 +301,8 @@ namespace RTBrowser.App
             object? sender,
             EventArgs e)
         {
+            SaveWindowState();
+
             LoggerService.Info(
                 "Window",
                 "Main window closed");
