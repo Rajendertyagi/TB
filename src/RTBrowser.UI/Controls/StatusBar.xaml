@@ -2,43 +2,47 @@
     x:Class="RTBrowser.UI.Controls.StatusBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Height="24">
+    Height="18">
 
     <Border
         Background="#101113"
-        BorderBrush="#1E1F22"
+        BorderBrush="#1A1B1E"
         BorderThickness="0,1,0,0">
 
-        <Grid>
+        <Grid Margin="8,0,8,0">
 
             <Grid.ColumnDefinitions>
-
                 <ColumnDefinition Width="*" />
-
                 <ColumnDefinition Width="Auto" />
-
             </Grid.ColumnDefinitions>
 
             <!-- LEFT -->
 
-            <TextBlock
-                x:Name="StatusText"
+            <StackPanel
                 Grid.Column="0"
-                Margin="10,0"
-                VerticalAlignment="Center"
-                FontSize="11"
-                Foreground="#8F9093"
-                Text="Ready" />
+                Orientation="Horizontal"
+                VerticalAlignment="Center">
+
+                <TextBlock
+                    FontSize="10"
+                    Foreground="#7E848D"
+                    Text="READY"/>
+
+            </StackPanel>
 
             <!-- RIGHT -->
 
-            <TextBlock
+            <StackPanel
                 Grid.Column="1"
-                Margin="0,0,10,0"
-                VerticalAlignment="Center"
-                FontSize="11"
-                Foreground="#8F9093"
-                Text="RTBrowser" />
+                Orientation="Horizontal"
+                VerticalAlignment="Center">
+
+                <TextBlock
+                    FontSize="10"
+                    Foreground="#7E848D"
+                    Text="RTBrowser"/>
+
+            </StackPanel>
 
         </Grid>
 
