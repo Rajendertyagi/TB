@@ -14,7 +14,7 @@ namespace RTBrowser.UI.Controls
     {
         public event Action? NewTabRequested;
 
-        public event Action? CloseTabRequested;
+        public event Action<Guid>? CloseTabRequested;
 
         public event Action<Guid>? TabSelected;
 
@@ -59,12 +59,13 @@ namespace RTBrowser.UI.Controls
                     Background =
                         tab.IsActive
                             ? Brush("#18191C")
-                            : Brush("#131417"),
+                            : Brush("#121316"),
                     BorderBrush =
                         tab.IsActive
                             ? Brush("#2E3136")
-                            : Brush("#202226"),
-                    Tag = tab.Id
+                            : Brush("#1E2024"),
+                    Tag = tab.Id,
+                    Cursor = Cursors.Hand
                 };
 
             Grid grid =
@@ -88,14 +89,14 @@ namespace RTBrowser.UI.Controls
             Border indicator =
                 new()
                 {
-                    Width = 8,
-                    Height = 8,
+                    Width = 7,
+                    Height = 7,
                     Margin = new Thickness(8, 0, 6, 0),
                     CornerRadius = new CornerRadius(4),
                     Background =
                         tab.IsActive
                             ? Brush("#4C8DFF")
-                            : Brush("#4A4D52"),
+                            : Brush("#43464C"),
                     VerticalAlignment =
                         VerticalAlignment.Center
                 };
@@ -106,7 +107,9 @@ namespace RTBrowser.UI.Controls
                     Text = tab.Title,
                     FontSize = 11,
                     Foreground =
-                        Brush("#E8E8E8"),
+                        tab.IsActive
+                            ? Brush("#E7E7E7")
+                            : Brush("#9CA1A9"),
                     VerticalAlignment =
                         VerticalAlignment.Center,
                     TextTrimming =
@@ -129,7 +132,7 @@ namespace RTBrowser.UI.Controls
                             Text = "✕",
                             FontSize = 9,
                             Foreground =
-                                Brush("#A4A7AD"),
+                                Brush("#8E949D"),
                             HorizontalAlignment =
                                 HorizontalAlignment.Center,
                             VerticalAlignment =
@@ -138,6 +141,26 @@ namespace RTBrowser.UI.Controls
                 };
 
             close.Click += OnDynamicCloseTab;
+
+            border.MouseEnter +=
+                (_, _) =>
+                {
+                    if (!tab.IsActive)
+                    {
+                        border.Background =
+                            Brush("#17181B");
+                    }
+                };
+
+            border.MouseLeave +=
+                (_, _) =>
+                {
+                    if (!tab.IsActive)
+                    {
+                        border.Background =
+                            Brush("#121316");
+                    }
+                };
 
             Grid.SetColumn(indicator, 0);
             Grid.SetColumn(title, 1);
@@ -176,17 +199,19 @@ namespace RTBrowser.UI.Controls
             object sender,
             RoutedEventArgs e)
         {
+            e.Handled = true;
+
             if (sender is not Button button)
             {
                 return;
             }
 
-            if (button.Tag is not Guid)
+            if (button.Tag is not Guid tabId)
             {
                 return;
             }
 
-            CloseTabRequested?.Invoke();
+            CloseTabRequested?.Invoke(tabId);
         }
 
         private Brush Brush(
