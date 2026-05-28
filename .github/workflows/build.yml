@@ -1,72 +1,106 @@
-name: Build and Release Portable Browser
+name: RTBrowser CI
 
 on:
+
   push:
     branches:
       - main
+      - develop
+
+  pull_request:
+    branches:
+      - main
+      - develop
+
   workflow_dispatch:
 
-permissions:
-  contents: write
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-  DOTNET_NOLOGO: true
-  DOTNET_CLI_TELEMETRY_OPTOUT: true
-
 jobs:
+
   build:
+
     runs-on: windows-latest
+
+    permissions:
+      contents: read
+
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v5
 
-    - name: Setup .NET 10
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: '10.0.x'
+      # =========================================
+      # CHECKOUT
+      # =========================================
 
-    - name: Restore & Publish
-      run: |
-        dotnet restore src/TradingBrowser/TradingBrowser.csproj
-        dotnet publish src/TradingBrowser/TradingBrowser.csproj -c Release -r win-x64 -o ./publish --verbosity detailed
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Download WebView2 Bootstrapper
-      shell: pwsh
-      run: |
-        Invoke-WebRequest -Uri "https://go.microsoft.com/fwlink/p/?LinkId=2124703" -OutFile "./publish/WebView2Bootstrapper.exe"
+      # =========================================
+      # SETUP .NET 10
+      # =========================================
 
-    - name: Create Portable Folders
-      shell: pwsh
-      run: |
-        New-Item -ItemType Directory -Force -Path "./publish/UserData"
-        New-Item -ItemType Directory -Force -Path "./publish/logs"
-        New-Item -ItemType Directory -Force -Path "./publish/Downloads"
-        New-Item -ItemType Directory -Force -Path "./publish/Scripts"
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
-    - name: Package Zip
-      id: package
-      shell: pwsh
-      run: |
-        $zipName = "TradingBrowser-v${{ github.run_number }}-win-x64.zip"
-        Compress-Archive -Path "./publish/*" -DestinationPath "./$zipName"
-        "ZIP_NAME=$zipName" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+      # =========================================
+      # CACHE NUGET
+      # =========================================
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v7
-      with:
-        name: TradingBrowser-Portable
-        path: ./${{ steps.package.outputs.ZIP_NAME }}
-        retention-days: 7
-        compression-level: 0
+      - name: Cache NuGet Packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.nuget/packages
+          key: >
+            ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-    - name: Create GitHub Release
-      if: github.ref == 'refs/heads/main'
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        gh release create "v${{ github.run_number }}" \
-          "./${{ steps.package.outputs.ZIP_NAME }}" \
-          --title "Release v${{ github.run_number }}" \
-          --generate-notes
+      # =========================================
+      # RESTORE
+      # =========================================
+
+      - name: Restore Dependencies
+        run: >
+          dotnet restore
+          RTBrowser.sln
+          --runtime win-x64
+
+      # =========================================
+      # BUILD
+      # =========================================
+
+      - name: Build RTBrowser
+        run: >
+          dotnet build
+          RTBrowser.sln
+          --configuration Release
+          --runtime win-x64
+          --self-contained false
+          --no-restore
+
+      # =========================================
+      # PUBLISH PORTABLE X64
+      # =========================================
+
+      - name: Publish Portable Build
+        run: >
+          dotnet publish
+          src/RTBrowser.App/RTBrowser.App.csproj
+          --configuration Release
+          --runtime win-x64
+          --self-contained false
+          -p:PublishSingleFile=false
+          -p:PublishTrimmed=false
+          -p:DebugType=None
+          -p:DebugSymbols=false
+          --output publish/win-x64
+
+      # =========================================
+      # UPLOAD ARTIFACT
+      # =========================================
+
+      - name: Upload Portable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: RTBrowser-win-x64-portable
+          path: publish/win-x64/
