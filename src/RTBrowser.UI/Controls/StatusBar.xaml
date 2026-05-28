@@ -2,9 +2,6 @@
     x:Class="RTBrowser.UI.Controls.StatusBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
     Height="{StaticResource StatusBarHeight}">
 
     <Border
@@ -18,92 +15,85 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
 
-            <!-- ========================================= -->
-            <!-- LEFT STATUS ICONS -->
-            <!-- ========================================= -->
+            <!-- LEFT -->
 
             <StackPanel
                 Grid.Column="0"
                 Orientation="Horizontal"
                 VerticalAlignment="Center"
-                Margin="{StaticResource Spacing8},0">
-
-                <!-- DOWNLOAD STATUS -->
+                Margin="8,0">
 
                 <Button
                     Width="22"
                     Height="22"
+                    Margin="0,0,4,0"
                     Background="Transparent"
-                    BorderThickness="0"
-                    Padding="0"
-                    Margin="0,0,4,0">
+                    BorderThickness="0">
 
-                    <FontIcon
-                        Glyph="&#xE896;"
-                        FontSize="{StaticResource StatusIconSize}"
-                        Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock
+                        Text=""
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="11"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
 
                 </Button>
 
-                <!-- TILES STATUS -->
-
                 <Button
                     Width="22"
                     Height="22"
                     Background="Transparent"
-                    BorderThickness="0"
-                    Padding="0">
+                    BorderThickness="0">
 
-                    <FontIcon
-                        Glyph="&#xECA5;"
-                        FontSize="{StaticResource StatusIconSize}"
-                        Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock
+                        Text=""
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="11"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
 
                 </Button>
 
             </StackPanel>
 
-            <!-- ========================================= -->
-            <!-- RIGHT CONTROLS -->
-            <!-- ========================================= -->
+            <!-- RIGHT -->
 
             <StackPanel
                 Grid.Column="2"
                 Orientation="Horizontal"
                 VerticalAlignment="Center"
-                Margin="0,0,{StaticResource Spacing8},0">
-
-                <!-- ZOOM -->
+                Margin="0,0,8,0">
 
                 <Button
-                    Background="Transparent"
-                    BorderThickness="0"
                     Height="22"
+                    Margin="0,0,4,0"
                     Padding="6,0"
-                    Margin="0,0,4,0">
+                    Background="Transparent"
+                    BorderThickness="0">
 
                     <TextBlock
                         Text="100%"
                         FontFamily="{StaticResource AppFontFamily}"
                         FontSize="{StaticResource FontStatus}"
-                        Foreground="{StaticResource TextSecondaryBrush}"
-                        VerticalAlignment="Center" />
+                        Foreground="{StaticResource TextSecondaryBrush}" />
 
                 </Button>
-
-                <!-- FULLSCREEN -->
 
                 <Button
                     Width="22"
                     Height="22"
                     Background="Transparent"
-                    BorderThickness="0"
-                    Padding="0">
+                    BorderThickness="0">
 
-                    <FontIcon
-                        Glyph="&#xE740;"
-                        FontSize="{StaticResource StatusIconSize}"
-                        Foreground="{StaticResource TextSecondaryBrush}" />
+                    <TextBlock
+                        Text=""
+                        FontFamily="Segoe Fluent Icons"
+                        FontSize="11"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
 
                 </Button>
 
