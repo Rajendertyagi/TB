@@ -29,10 +29,10 @@
   <ItemGroup>
 
     <PackageReference Include="Microsoft.Web.WebView2"
-                      Version="1.0.3240.44" />
+                      Version="1.0.3967.48" />
 
     <PackageReference Include="Wpf.Ui"
-                      Version="4.0.2" />
+                      Version="3.4.2.7" />
 
   </ItemGroup>
 
