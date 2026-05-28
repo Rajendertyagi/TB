@@ -2,82 +2,72 @@
     x:Class="RTBrowser.App.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="clr-namespace:RTBrowser.UI.Controls;assembly=RTBrowser.UI"
-    mc:Ignorable="d"
-
+    xmlns:webview="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
     Title="RTBrowser"
-    Width="1600"
-    Height="900"
-
+    Width="1720"
+    Height="920"
     MinWidth="1200"
     MinHeight="700"
+    WindowStartupLocation="CenterScreen"
+    Background="{StaticResource BackgroundPrimaryBrush}">
 
-    Background="{StaticResource BackgroundPrimaryBrush}"
-
-    WindowStyle="None"
-    ResizeMode="CanResize"
-    AllowsTransparency="False">
-
-    <Grid Background="{StaticResource BackgroundPrimaryBrush}">
+    <Grid>
 
         <Grid.RowDefinitions>
 
-            <!-- TITLEBAR -->
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="30" />
 
-            <!-- TAB STRIP -->
-            <RowDefinition Height="30"/>
+            <RowDefinition Height="30" />
 
-            <!-- WEB CONTENT -->
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="38" />
 
-            <!-- STATUS BAR -->
-            <RowDefinition Height="22"/>
+            <RowDefinition Height="*" />
+
+            <RowDefinition Height="22" />
 
         </Grid.RowDefinitions>
 
-        <!-- ========================================= -->
         <!-- TITLE BAR -->
-        <!-- ========================================= -->
 
         <controls:BrowserTitleBar
             Grid.Row="0" />
 
-        <!-- ========================================= -->
-        <!-- TAB VIEW -->
-        <!-- ========================================= -->
+        <!-- TAB BAR -->
 
         <controls:CompactTabView
             Grid.Row="1" />
 
-        <!-- ========================================= -->
-        <!-- MAIN CONTENT -->
-        <!-- ========================================= -->
+        <!-- OMNIBOX -->
 
-        <Grid
+        <Border
             Grid.Row="2"
-            Background="{StaticResource BackgroundSecondaryBrush}">
+            Background="{StaticResource BackgroundPrimaryBrush}"
+            Padding="8,4">
 
-            <Border
-                Margin="8"
-                Background="{StaticResource SurfaceBrush}"
-                CornerRadius="{StaticResource RadiusLarge}">
+            <controls:CompactOmnibox />
 
-                <Grid
-                    x:Name="WebViewContainer" />
+        </Border>
 
-            </Border>
+        <!-- WEBVIEW -->
 
-        </Grid>
+        <Border
+            Grid.Row="3"
+            Margin="8"
+            CornerRadius="8"
+            ClipToBounds="True"
+            Background="#111111">
 
-        <!-- ========================================= -->
+            <webview:WebView2
+                x:Name="BrowserView"
+                DefaultBackgroundColor="Transparent" />
+
+        </Border>
+
         <!-- STATUS BAR -->
-        <!-- ========================================= -->
 
         <controls:StatusBar
-            Grid.Row="3" />
+            Grid.Row="4" />
 
     </Grid>
 
