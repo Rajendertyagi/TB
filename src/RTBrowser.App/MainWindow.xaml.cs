@@ -4,11 +4,15 @@ using RTBrowser.Services;
 
 using System;
 using System.Windows;
+using System.Windows.Input;
 
 namespace RTBrowser.App
 {
     public partial class MainWindow : Window
     {
+        private const string HomeUrl =
+            "https://www.google.com";
+
         public MainWindow()
         {
             InitializeComponent();
@@ -16,9 +20,6 @@ namespace RTBrowser.App
             Loaded += OnLoaded;
 
             Closed += OnClosed;
-
-            Omnibox.NavigateRequested +=
-                OnNavigateRequested;
         }
 
         private async void OnLoaded(
@@ -48,7 +49,10 @@ namespace RTBrowser.App
                 BrowserView.CoreWebView2.NavigationCompleted +=
                     OnNavigationCompleted;
 
-                NavigateTo("https://www.google.com");
+                BrowserView.CoreWebView2.DocumentTitleChanged +=
+                    OnDocumentTitleChanged;
+
+                NavigateTo(HomeUrl);
             }
             catch (Exception ex)
             {
@@ -62,13 +66,28 @@ namespace RTBrowser.App
             }
         }
 
-        private void OnNavigateRequested(
-            string input)
+        private void NavigateTo(
+            string url)
         {
-            string url =
-                NormalizeInput(input);
+            try
+            {
+                LoggerService.Info(
+                    "Navigation",
+                    $"Navigate: {url}");
 
-            NavigateTo(url);
+                AddressBar.Text = url;
+
+                BrowserView.CoreWebView2.Navigate(url);
+
+                StatusText.Text =
+                    $"Loading {url}";
+            }
+            catch (Exception ex)
+            {
+                LoggerService.Error(
+                    "Navigation",
+                    ex.ToString());
+            }
         }
 
         private string NormalizeInput(
@@ -96,66 +115,179 @@ namespace RTBrowser.App
                 + Uri.EscapeDataString(input);
         }
 
-        private void NavigateTo(
-            string url)
+        private void OnAddressBarKeyDown(
+            object sender,
+            KeyEventArgs e)
         {
-            try
-            {
-                LoggerService.Info(
-                    "Navigation",
-                    $"Navigating to {url}");
+            if (e.Key != Key.Enter)
+                return;
 
-                Omnibox.SetAddress(url);
+            string url =
+                NormalizeInput(AddressBar.Text);
 
-                BrowserView.CoreWebView2.Navigate(url);
-            }
-            catch (Exception ex)
-            {
-                LoggerService.Error(
-                    "Navigation",
-                    ex.ToString());
-            }
+            NavigateTo(url);
         }
 
         private void OnNavigationStarting(
             object? sender,
             CoreWebView2NavigationStartingEventArgs e)
         {
+            LoadingBar.Visibility =
+                Visibility.Visible;
+
+            StatusText.Text =
+                "Loading...";
+
             LoggerService.Info(
                 "Navigation",
-                $"Navigation started: {e.Uri}");
+                $"Started: {e.Uri}");
         }
 
         private void OnNavigationCompleted(
             object? sender,
             CoreWebView2NavigationCompletedEventArgs e)
         {
-            try
-            {
-                if (BrowserView.Source != null)
-                {
-                    Omnibox.SetAddress(
-                        BrowserView.Source.ToString());
-                }
+            LoadingBar.Visibility =
+                Visibility.Collapsed;
 
-                if (e.IsSuccess)
-                {
-                    LoggerService.Info(
-                        "Navigation",
-                        $"Navigation completed: {BrowserView.Source}");
-                }
-                else
-                {
-                    LoggerService.Error(
-                        "Navigation",
-                        $"Navigation failed: {e.WebErrorStatus}");
-                }
-            }
-            catch (Exception ex)
+            if (BrowserView.Source != null)
             {
+                AddressBar.Text =
+                    BrowserView.Source.ToString();
+            }
+
+            if (e.IsSuccess)
+            {
+                StatusText.Text =
+                    "Ready";
+
+                LoggerService.Info(
+                    "Navigation",
+                    $"Completed: {BrowserView.Source}");
+            }
+            else
+            {
+                StatusText.Text =
+                    "Navigation failed";
+
                 LoggerService.Error(
                     "Navigation",
-                    ex.ToString());
+                    e.WebErrorStatus.ToString());
+            }
+        }
+
+        private void OnDocumentTitleChanged(
+            object? sender,
+            object e)
+        {
+            try
+            {
+                string title =
+                    BrowserView.CoreWebView2.DocumentTitle;
+
+                PageTitleText.Text = title;
+
+                Title = $"{title} - RTBrowser";
+            }
+            catch
+            {
+            }
+        }
+
+        private void OnBackClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            LoggerService.Info(
+                "UI",
+                "Back pressed");
+
+            if (BrowserView.CoreWebView2.CanGoBack)
+            {
+                BrowserView.CoreWebView2.GoBack();
+            }
+        }
+
+        private void OnForwardClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            LoggerService.Info(
+                "UI",
+                "Forward pressed");
+
+            if (BrowserView.CoreWebView2.CanGoForward)
+            {
+                BrowserView.CoreWebView2.GoForward();
+            }
+        }
+
+        private void OnRefreshClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            LoggerService.Info(
+                "UI",
+                "Refresh pressed");
+
+            BrowserView.CoreWebView2.Reload();
+        }
+
+        private void OnHomeClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            LoggerService.Info(
+                "UI",
+                "Home pressed");
+
+            NavigateTo(HomeUrl);
+        }
+
+        private void OnStopClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            LoggerService.Info(
+                "UI",
+                "Stop pressed");
+
+            BrowserView.CoreWebView2.Stop();
+        }
+
+        private void OnMinimizeClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            WindowState =
+                WindowState.Minimized;
+        }
+
+        private void OnMaximizeClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            WindowState =
+                WindowState == WindowState.Maximized
+                ? WindowState.Normal
+                : WindowState.Maximized;
+        }
+
+        private void OnCloseClicked(
+            object sender,
+            RoutedEventArgs e)
+        {
+            Close();
+        }
+
+        private void OnWindowDrag(
+            object sender,
+            MouseButtonEventArgs e)
+        {
+            if (e.LeftButton ==
+                MouseButtonState.Pressed)
+            {
+                DragMove();
             }
         }
 
