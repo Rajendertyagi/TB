@@ -6,7 +6,7 @@ namespace RTBrowser.Runtime
 {
     public sealed class MemoryPressureMonitor : IDisposable
     {
-        private readonly Timer _timer;
+        private readonly System.Timers.Timer _timer;
 
         public event Action? MemoryPressureDetected;
 
@@ -16,7 +16,8 @@ namespace RTBrowser.Runtime
 
         public MemoryPressureMonitor()
         {
-            _timer = new Timer(CheckIntervalMs);
+            _timer =
+                new System.Timers.Timer(CheckIntervalMs);
 
             _timer.Elapsed += OnTimerElapsed;
         }
