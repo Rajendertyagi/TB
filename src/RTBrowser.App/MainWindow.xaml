@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:webview="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+    xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
     Title="RTBrowser"
     Width="1720"
     Height="920"
@@ -23,23 +24,15 @@
 
             <Grid.RowDefinitions>
 
-                <!-- TOP CHROME -->
-
                 <RowDefinition Height="74" />
 
-                <!-- WEBVIEW -->
-
                 <RowDefinition Height="*" />
-
-                <!-- STATUS -->
 
                 <RowDefinition Height="24" />
 
             </Grid.RowDefinitions>
 
-            <!-- ========================================= -->
             <!-- TOP CHROME -->
-            <!-- ========================================= -->
 
             <Border
                 Grid.Row="0"
@@ -57,9 +50,7 @@
 
                     </Grid.RowDefinitions>
 
-                    <!-- ========================================= -->
                     <!-- TAB BAR -->
-                    <!-- ========================================= -->
 
                     <Grid
                         Grid.Row="0"
@@ -81,8 +72,6 @@
                             Orientation="Horizontal"
                             VerticalAlignment="Center"
                             Margin="8,0,0,0">
-
-                            <!-- ACTIVE TAB -->
 
                             <Border
                                 Width="220"
@@ -139,8 +128,6 @@
                                 </Grid>
 
                             </Border>
-
-                            <!-- ADD TAB -->
 
                             <Button
                                 Width="28"
@@ -220,9 +207,7 @@
 
                     </Grid>
 
-                    <!-- ========================================= -->
                     <!-- NAV BAR -->
-                    <!-- ========================================= -->
 
                     <Grid
                         Grid.Row="1"
@@ -236,7 +221,7 @@
 
                         </Grid.ColumnDefinitions>
 
-                        <!-- NAVIGATION -->
+                        <!-- NAV BUTTONS -->
 
                         <StackPanel
                             Grid.Column="0"
@@ -386,7 +371,7 @@
                 CornerRadius="8"
                 ClipToBounds="True">
 
-                <WindowsFormsHost
+                <wfi:WindowsFormsHost
                     x:Name="BrowserHost" />
 
             </Border>
