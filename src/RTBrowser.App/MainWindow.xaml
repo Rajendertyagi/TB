@@ -7,7 +7,7 @@
     Title="RTBrowser"
     Width="1720"
     Height="920"
-    MinWidth="1200"
+    MinWidth="1180"
     MinHeight="700"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
@@ -16,33 +16,43 @@
 
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome
-            CaptionHeight="40"
+            CaptionHeight="0"
             CornerRadius="0"
             GlassFrameThickness="0"
-            ResizeBorderThickness="6"
+            ResizeBorderThickness="5"
             UseAeroCaptionButtons="False" />
     </shell:WindowChrome.WindowChrome>
 
     <Border
-        Margin="0"
         Background="#0D0D0E"
-        BorderBrush="#202126"
+        BorderBrush="#1B1C1F"
         BorderThickness="1"
-        CornerRadius="12"
+        CornerRadius="8"
         SnapsToDevicePixels="True">
 
         <Grid>
 
             <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="46"/>
+
+                <!-- HELIUM TAB STRIP -->
+                <RowDefinition Height="30"/>
+
+                <!-- FLOATING OMNIBOX -->
+                <RowDefinition Height="30"/>
+
+                <!-- CONTENT -->
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="24"/>
+
+                <!-- STATUS -->
+                <RowDefinition Height="18"/>
+
             </Grid.RowDefinitions>
 
-            <!-- TITLEBAR -->
+            <!-- TAB STRIP -->
 
-            <Grid Grid.Row="0">
+            <Grid
+                Grid.Row="0"
+                Background="#101113">
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -56,7 +66,7 @@
                     Background="Transparent"
                     shell:WindowChrome.IsHitTestVisibleInChrome="False"/>
 
-                <!-- TITLEBAR CONTROL -->
+                <!-- TITLEBAR -->
 
                 <ui:BrowserTitleBar
                     x:Name="BrowserTitleBar"
@@ -72,9 +82,15 @@
 
             <!-- WEBVIEW -->
 
-            <ui:WebViewContainer
-                x:Name="WebViewContainer"
-                Grid.Row="2"/>
+            <Border
+                Grid.Row="2"
+                Margin="0"
+                Background="#0D0D0E">
+
+                <ui:WebViewContainer
+                    x:Name="WebViewContainer"/>
+
+            </Border>
 
             <!-- STATUSBAR -->
 
