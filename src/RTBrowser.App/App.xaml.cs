@@ -7,10 +7,24 @@ namespace RTBrowser.App
 {
     public partial class App : Application
     {
+        private readonly SingleInstanceService _singleInstance =
+            new();
+
         protected override void OnStartup(
             StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            bool acquired =
+                _singleInstance.TryAcquire(
+                    "RTBrowser");
+
+            if (!acquired)
+            {
+                Shutdown();
+
+                return;
+            }
 
             DirectoryBootstrapper.Initialize();
 
@@ -28,6 +42,8 @@ namespace RTBrowser.App
         protected override void OnExit(
             ExitEventArgs e)
         {
+            _singleInstance.Dispose();
+
             LoggerService.Info(
                 "Application",
                 "Application shutdown");
