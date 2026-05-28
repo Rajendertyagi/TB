@@ -1,182 +1,97 @@
-<UserControl
-    x:Class="RTBrowser.UI.Controls.NavigationBar"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Height="46">
+using System;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
 
-    <UserControl.Resources>
+namespace RTBrowser.UI.Controls
+{
+    public partial class NavigationBar : UserControl
+    {
+        public event Action<string>? NavigateRequested;
 
-        <Style TargetType="Button">
+        public event Action? BackRequested;
 
-            <Setter Property="Background" Value="Transparent"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="Cursor" Value="Hand"/>
+        public event Action? ForwardRequested;
 
-            <Style.Triggers>
+        public event Action? RefreshRequested;
 
-                <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="0.82"/>
-                </Trigger>
+        public NavigationBar()
+        {
+            InitializeComponent();
 
-                <Trigger Property="IsPressed" Value="True">
-                    <Setter Property="Opacity" Value="0.65"/>
-                </Trigger>
+            AddressBar.KeyDown +=
+                OnAddressBarKeyDown;
 
-            </Style.Triggers>
+            AddressBar.GotFocus +=
+                OnAddressBarFocused;
 
-        </Style>
+            AddressBar.LostFocus +=
+                OnAddressBarLostFocus;
 
-    </UserControl.Resources>
+            BackButton.Click +=
+                (_, _) => BackRequested?.Invoke();
 
-    <Border
-        Background="#111214"
-        BorderBrush="#1E1F22"
-        BorderThickness="0,0,0,1">
+            ForwardButton.Click +=
+                (_, _) => ForwardRequested?.Invoke();
 
-        <Grid Margin="10,5,10,5">
+            RefreshButton.Click +=
+                (_, _) => RefreshRequested?.Invoke();
+        }
 
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
+        public void SetAddress(
+            string url)
+        {
+            AddressBar.Text = url;
+        }
 
-            <!-- LEFT -->
+        private void OnAddressBarFocused(
+            object sender,
+            System.Windows.RoutedEventArgs e)
+        {
+            OmniboxBorder.BorderBrush =
+                Brush("#4C8DFF");
 
-            <StackPanel
-                Grid.Column="0"
-                Orientation="Horizontal"
-                VerticalAlignment="Center">
+            OmniboxBorder.Background =
+                Brush("#1A1C20");
+        }
 
-                <Button
-                    x:Name="BackButton"
-                    Width="32"
-                    Height="32"
-                    Margin="0,0,4,0">
+        private void OnAddressBarLostFocus(
+            object sender,
+            System.Windows.RoutedEventArgs e)
+        {
+            OmniboxBorder.BorderBrush =
+                Brush("#26282D");
 
-                    <Border
-                        Width="28"
-                        Height="28"
-                        Background="#1C1D21"
-                        CornerRadius="14">
+            OmniboxBorder.Background =
+                Brush("#17181B");
+        }
 
-                        <TextBlock
-                            Text="←"
-                            FontSize="12"
-                            Foreground="#D0D0D0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
+        private void OnAddressBarKeyDown(
+            object sender,
+            KeyEventArgs e)
+        {
+            if (e.Key != Key.Enter)
+            {
+                return;
+            }
 
-                    </Border>
+            string input =
+                AddressBar.Text.Trim();
 
-                </Button>
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return;
+            }
 
-                <Button
-                    x:Name="ForwardButton"
-                    Width="32"
-                    Height="32"
-                    Margin="0,0,4,0">
+            NavigateRequested?.Invoke(input);
+        }
 
-                    <Border
-                        Width="28"
-                        Height="28"
-                        Background="#1C1D21"
-                        CornerRadius="14">
-
-                        <TextBlock
-                            Text="→"
-                            FontSize="12"
-                            Foreground="#D0D0D0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                    </Border>
-
-                </Button>
-
-                <Button
-                    x:Name="RefreshButton"
-                    Width="32"
-                    Height="32"
-                    Margin="0,0,10,0">
-
-                    <Border
-                        Width="28"
-                        Height="28"
-                        Background="#1C1D21"
-                        CornerRadius="14">
-
-                        <TextBlock
-                            Text="↻"
-                            FontSize="12"
-                            Foreground="#D0D0D0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"/>
-
-                    </Border>
-
-                </Button>
-
-            </StackPanel>
-
-            <!-- OMNIBOX -->
-
-            <Border
-                Grid.Column="1"
-                Height="38"
-                Background="#1A1C20"
-                BorderBrush="#31343A"
-                BorderThickness="1"
-                CornerRadius="19"
-                VerticalAlignment="Center">
-
-                <Grid>
-
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="40"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- SECURITY -->
-
-                    <TextBlock
-                        Grid.Column="0"
-                        Text="🔒"
-                        FontSize="11"
-                        Foreground="#A1A5AD"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"/>
-
-                    <!-- ADDRESS -->
-
-                    <TextBox
-                        x:Name="AddressBar"
-                        Grid.Column="1"
-                        Margin="0,0,12,0"
-                        BorderThickness="0"
-                        Background="Transparent"
-                        Foreground="White"
-                        FontSize="13"
-                        CaretBrush="White"
-                        VerticalContentAlignment="Center"
-                        Padding="0"/>
-
-                </Grid>
-
-            </Border>
-
-            <!-- RIGHT -->
-
-            <Ellipse
-                Grid.Column="2"
-                Width="10"
-                Height="10"
-                Margin="12,0,0,0"
-                Fill="#2F81F7"
-                VerticalAlignment="Center"/>
-
-        </Grid>
-
-    </Border>
-
-</UserControl>
+        private Brush Brush(
+            string hex)
+        {
+            return
+                (Brush)new BrushConverter()
+                    .ConvertFrom(hex)!;
+        }
+    }
+}
