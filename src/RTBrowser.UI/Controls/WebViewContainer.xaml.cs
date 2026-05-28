@@ -1,5 +1,6 @@
 using Microsoft.Web.WebView2.Wpf;
 
+using System.Windows;
 using System.Windows.Controls;
 
 namespace RTBrowser.UI.Controls
@@ -27,10 +28,16 @@ namespace RTBrowser.UI.Controls
             ContentHost.Children.Clear();
 
             browser.HorizontalAlignment =
-                System.Windows.HorizontalAlignment.Stretch;
+                HorizontalAlignment.Stretch;
 
             browser.VerticalAlignment =
-                System.Windows.VerticalAlignment.Stretch;
+                VerticalAlignment.Stretch;
+
+            browser.Margin =
+                new Thickness(0);
+
+            browser.Focusable =
+                true;
 
             ContentHost.Children.Add(browser);
         }
