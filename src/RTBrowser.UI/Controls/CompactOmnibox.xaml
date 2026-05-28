@@ -31,6 +31,7 @@
             <!-- ADDRESS -->
 
             <TextBox
+                x:Name="AddressBar"
                 Grid.Column="1"
                 Background="Transparent"
                 BorderThickness="0"
@@ -38,6 +39,7 @@
                 FontFamily="{StaticResource AppFontFamily}"
                 FontSize="{StaticResource FontToolbar}"
                 Foreground="{StaticResource TextPrimaryBrush}"
+                CaretBrush="{StaticResource TextPrimaryBrush}"
                 Text="https://www.google.com" />
 
             <!-- SECURITY -->
