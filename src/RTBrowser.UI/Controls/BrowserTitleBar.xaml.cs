@@ -1,72 +1,138 @@
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+<UserControl
+    x:Class="RTBrowser.UI.Controls.BrowserTitleBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Height="{StaticResource TitleBarHeight}">
 
-namespace RTBrowser.UI.Controls
-{
-    public partial class BrowserTitleBar : UserControl
-    {
-        public BrowserTitleBar()
-        {
-            InitializeComponent();
+    <Border
+        Background="{StaticResource BackgroundPrimaryBrush}">
 
-            Loaded += BrowserTitleBar_Loaded;
-        }
+        <Grid Height="{StaticResource TitleBarHeight}">
 
-        private void BrowserTitleBar_Loaded(object sender, RoutedEventArgs e)
-        {
-            ConfigureTitleBar();
-        }
+            <Grid.ColumnDefinitions>
 
-        private void ConfigureTitleBar()
-        {
-            // Reserved for future:
-            // - snap layout integration
-            // - custom window controls
-            // - window button behavior
-        }
+                <ColumnDefinition Width="*" />
 
-        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
-        {
-            base.OnMouseLeftButtonDown(e);
+                <ColumnDefinition Width="Auto" />
 
-            if (e.ClickCount == 2)
-            {
-                ToggleWindowState();
-                return;
-            }
+            </Grid.ColumnDefinitions>
 
-            DragWindow();
-        }
+            <!-- LEFT -->
 
-        private void DragWindow()
-        {
-            Window parentWindow = Window.GetWindow(this);
+            <StackPanel
+                Grid.Column="0"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="8,0">
 
-            if (parentWindow == null)
-                return;
+                <Button
+                    Width="28"
+                    Height="28"
+                    Margin="0,0,4,0"
+                    Background="Transparent"
+                    BorderThickness="0">
 
-            try
-            {
-                parentWindow.DragMove();
-            }
-            catch
-            {
-                // Ignore drag exceptions
-            }
-        }
+                    <TextBlock
+                        Text="⌂"
+                        FontSize="12"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
 
-        private void ToggleWindowState()
-        {
-            Window parentWindow = Window.GetWindow(this);
+                </Button>
 
-            if (parentWindow == null)
-                return;
+                <Button
+                    Width="28"
+                    Height="28"
+                    Margin="0,0,4,0"
+                    Background="Transparent"
+                    BorderThickness="0">
 
-            parentWindow.WindowState =
-                parentWindow.WindowState == WindowState.Maximized
-                    ? WindowState.Normal
-                    : WindowState.Maximized;
-        }
-    }
-}
+                    <TextBlock
+                        Text="←"
+                        FontSize="12"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
+
+                </Button>
+
+                <Button
+                    Width="28"
+                    Height="28"
+                    Margin="0,0,4,0"
+                    Background="Transparent"
+                    BorderThickness="0">
+
+                    <TextBlock
+                        Text="→"
+                        FontSize="12"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
+
+                </Button>
+
+                <Button
+                    Width="28"
+                    Height="28"
+                    Background="Transparent"
+                    BorderThickness="0">
+
+                    <TextBlock
+                        Text="↻"
+                        FontSize="12"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
+
+                </Button>
+
+            </StackPanel>
+
+            <!-- RIGHT -->
+
+            <StackPanel
+                Grid.Column="1"
+                Orientation="Horizontal"
+                VerticalAlignment="Center"
+                Margin="0,0,8,0">
+
+                <Button
+                    Width="28"
+                    Height="28"
+                    Margin="0,0,4,0"
+                    Background="Transparent"
+                    BorderThickness="0">
+
+                    <TextBlock
+                        Text="◻"
+                        FontSize="11"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
+
+                </Button>
+
+                <Button
+                    Width="28"
+                    Height="28"
+                    Background="Transparent"
+                    BorderThickness="0">
+
+                    <TextBlock
+                        Text="✕"
+                        FontSize="11"
+                        Foreground="{StaticResource TextSecondaryBrush}"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center" />
+
+                </Button>
+
+            </StackPanel>
+
+        </Grid>
+
+    </Border>
+
+</UserControl>
