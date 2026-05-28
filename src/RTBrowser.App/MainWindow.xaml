@@ -11,23 +11,23 @@
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     ResizeMode="CanResize"
-    Background="#0F0F10">
+    Background="#0D0D0E">
 
     <Border
-        BorderBrush="#1F1F22"
+        BorderBrush="#202126"
         BorderThickness="1"
         CornerRadius="10"
-        Background="#0F0F10">
+        Background="#0D0D0E">
 
         <Grid>
 
             <Grid.RowDefinitions>
 
-                <RowDefinition Height="74" />
+                <RowDefinition Height="74"/>
 
-                <RowDefinition Height="*" />
+                <RowDefinition Height="*"/>
 
-                <RowDefinition Height="24" />
+                <RowDefinition Height="24"/>
 
             </Grid.RowDefinitions>
 
@@ -43,13 +43,13 @@
 
                     <Grid.RowDefinitions>
 
-                        <RowDefinition Height="34" />
+                        <RowDefinition Height="34"/>
 
-                        <RowDefinition Height="40" />
+                        <RowDefinition Height="40"/>
 
                     </Grid.RowDefinitions>
 
-                    <!-- TAB BAR -->
+                    <!-- TAB STRIP -->
 
                     <Grid
                         Grid.Row="0"
@@ -58,11 +58,13 @@
 
                         <Grid.ColumnDefinitions>
 
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*"/>
 
-                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto"/>
 
                         </Grid.ColumnDefinitions>
+
+                        <!-- LEFT -->
 
                         <StackPanel
                             Grid.Column="0"
@@ -70,12 +72,16 @@
                             VerticalAlignment="Center"
                             Margin="8,0,0,0">
 
+                            <!-- ACTIVE TAB -->
+
                             <Border
-                                Width="220"
+                                Width="240"
                                 Height="28"
-                                Background="#1A1B1E"
+                                Background="#1C1D21"
                                 CornerRadius="8,8,0,0"
-                                Margin="0,0,4,0">
+                                Margin="0,0,4,0"
+                                BorderBrush="#2C7DFF"
+                                BorderThickness="1">
 
                                 <Grid>
 
@@ -89,12 +95,17 @@
 
                                     </Grid.ColumnDefinitions>
 
-                                    <TextBlock
-                                        Grid.Column="0"
-                                        Text="🌐"
+                                    <!-- FAVICON -->
+
+                                    <Border
+                                        Width="14"
+                                        Height="14"
                                         Margin="10,0,8,0"
                                         VerticalAlignment="Center"
-                                        FontSize="11" />
+                                        CornerRadius="7"
+                                        Background="#4285F4"/>
+
+                                    <!-- TITLE -->
 
                                     <TextBlock
                                         x:Name="PageTitleText"
@@ -102,43 +113,57 @@
                                         Text="New Tab"
                                         VerticalAlignment="Center"
                                         FontSize="12"
+                                        FontWeight="SemiBold"
                                         Foreground="White"
-                                        TextTrimming="CharacterEllipsis" />
+                                        TextTrimming="CharacterEllipsis"/>
 
-                                    <Button
+                                    <!-- CLOSE -->
+
+                                    <Border
                                         Grid.Column="2"
                                         Width="18"
                                         Height="18"
                                         Margin="0,0,8,0"
-                                        Background="Transparent"
-                                        BorderThickness="0">
+                                        CornerRadius="4"
+                                        Background="Transparent">
 
                                         <TextBlock
                                             Text="✕"
                                             FontSize="10"
-                                            Foreground="#9B9B9B"
-                                            VerticalAlignment="Center"
-                                            HorizontalAlignment="Center" />
+                                            Foreground="#A8A8A8"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
 
-                                    </Button>
+                                    </Border>
 
                                 </Grid>
 
                             </Border>
 
+                            <!-- ADD TAB -->
+
                             <Button
                                 Width="28"
                                 Height="28"
+                                Click="OnAddTabClicked"
                                 Background="Transparent"
                                 BorderThickness="0"
-                                Click="OnAddTabClicked">
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="+"
-                                    FontSize="15"
-                                    Foreground="#BDBDBD"
-                                    VerticalAlignment="Center"
-                                    HorizontalAlignment="Center" />
+                                <Border
+                                    Width="22"
+                                    Height="22"
+                                    CornerRadius="6"
+                                    Background="#191A1D">
+
+                                    <TextBlock
+                                        Text="+"
+                                        FontSize="15"
+                                        Foreground="#D0D0D0"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
@@ -152,51 +177,78 @@
                             VerticalAlignment="Center"
                             Margin="0,0,4,0">
 
+                            <!-- MIN -->
+
                             <Button
-                                Width="42"
-                                Height="28"
+                                Width="46"
+                                Height="30"
                                 Click="OnMinimizeClicked"
                                 Background="Transparent"
-                                BorderThickness="0">
+                                BorderThickness="0"
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="—"
-                                    FontSize="12"
-                                    Foreground="#D0D0D0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
+                                <Border
+                                    Background="Transparent"
+                                    CornerRadius="6">
+
+                                    <TextBlock
+                                        Text="—"
+                                        FontSize="11"
+                                        Foreground="#D8D8D8"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
+                            <!-- MAX -->
+
                             <Button
-                                Width="42"
-                                Height="28"
+                                Width="46"
+                                Height="30"
                                 Click="OnMaximizeClicked"
                                 Background="Transparent"
-                                BorderThickness="0">
+                                BorderThickness="0"
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="▢"
-                                    FontSize="10"
-                                    Foreground="#D0D0D0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
+                                <Border
+                                    Background="Transparent"
+                                    CornerRadius="6">
+
+                                    <TextBlock
+                                        Text="▢"
+                                        FontSize="10"
+                                        Foreground="#D8D8D8"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
+                            <!-- CLOSE -->
+
                             <Button
-                                Width="42"
-                                Height="28"
+                                Width="46"
+                                Height="30"
                                 Click="OnCloseClicked"
                                 Background="Transparent"
-                                BorderThickness="0">
+                                BorderThickness="0"
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="✕"
-                                    FontSize="11"
-                                    Foreground="#D0D0D0"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center" />
+                                <Border
+                                    Background="Transparent"
+                                    CornerRadius="6">
+
+                                    <TextBlock
+                                        Text="✕"
+                                        FontSize="11"
+                                        Foreground="#D8D8D8"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
@@ -204,7 +256,7 @@
 
                     </Grid>
 
-                    <!-- NAV BAR -->
+                    <!-- NAVBAR -->
 
                     <Grid
                         Grid.Row="1"
@@ -231,12 +283,23 @@
                                 Height="30"
                                 Click="OnBackClicked"
                                 Background="Transparent"
-                                BorderThickness="0">
+                                BorderThickness="0"
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="←"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
+                                <Border
+                                    Width="26"
+                                    Height="26"
+                                    CornerRadius="13"
+                                    Background="#18191C">
+
+                                    <TextBlock
+                                        Text="←"
+                                        FontSize="12"
+                                        Foreground="#E1E1E1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
@@ -245,12 +308,23 @@
                                 Height="30"
                                 Click="OnForwardClicked"
                                 Background="Transparent"
-                                BorderThickness="0">
+                                BorderThickness="0"
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="→"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
+                                <Border
+                                    Width="26"
+                                    Height="26"
+                                    CornerRadius="13"
+                                    Background="#18191C">
+
+                                    <TextBlock
+                                        Text="→"
+                                        FontSize="12"
+                                        Foreground="#E1E1E1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
@@ -259,12 +333,23 @@
                                 Height="30"
                                 Click="OnRefreshClicked"
                                 Background="Transparent"
-                                BorderThickness="0">
+                                BorderThickness="0"
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="↻"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
+                                <Border
+                                    Width="26"
+                                    Height="26"
+                                    CornerRadius="13"
+                                    Background="#18191C">
+
+                                    <TextBlock
+                                        Text="↻"
+                                        FontSize="12"
+                                        Foreground="#E1E1E1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
@@ -273,12 +358,23 @@
                                 Height="30"
                                 Click="OnHomeClicked"
                                 Background="Transparent"
-                                BorderThickness="0">
+                                BorderThickness="0"
+                                Cursor="Hand">
 
-                                <TextBlock
-                                    Text="⌂"
-                                    FontSize="12"
-                                    Foreground="#D8D8D8"/>
+                                <Border
+                                    Width="26"
+                                    Height="26"
+                                    CornerRadius="13"
+                                    Background="#18191C">
+
+                                    <TextBlock
+                                        Text="⌂"
+                                        FontSize="12"
+                                        Foreground="#E1E1E1"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"/>
+
+                                </Border>
 
                             </Button>
 
@@ -288,10 +384,10 @@
 
                         <Border
                             Grid.Column="1"
-                            Height="32"
-                            Background="#1B1C1F"
-                            CornerRadius="16"
-                            BorderBrush="#2A2B30"
+                            Height="34"
+                            CornerRadius="17"
+                            Background="#17181B"
+                            BorderBrush="#2B2D33"
                             BorderThickness="1">
 
                             <Grid>
@@ -306,13 +402,17 @@
 
                                 </Grid.ColumnDefinitions>
 
+                                <!-- SECURITY -->
+
                                 <TextBlock
                                     Grid.Column="0"
                                     Text="🔒"
                                     Margin="12,0,8,0"
                                     VerticalAlignment="Center"
-                                    FontSize="11"
-                                    Foreground="#A0A0A0"/>
+                                    Foreground="#9EA3AA"
+                                    FontSize="11"/>
+
+                                <!-- ADDRESS -->
 
                                 <TextBox
                                     x:Name="AddressBar"
@@ -324,20 +424,16 @@
                                     VerticalContentAlignment="Center"
                                     KeyDown="OnAddressBarKeyDown"/>
 
-                                <Button
+                                <!-- LOADING DOT -->
+
+                                <Border
                                     Grid.Column="2"
-                                    Width="32"
-                                    Height="30"
-                                    Click="OnStopClicked"
-                                    Background="Transparent"
-                                    BorderThickness="0">
-
-                                    <TextBlock
-                                        Text="✕"
-                                        FontSize="11"
-                                        Foreground="#C0C0C0"/>
-
-                                </Button>
+                                    Width="10"
+                                    Height="10"
+                                    Margin="0,0,14,0"
+                                    VerticalAlignment="Center"
+                                    CornerRadius="5"
+                                    Background="#2C7DFF"/>
 
                             </Grid>
 
@@ -356,6 +452,8 @@
                 Grid.Row="0"
                 Height="2"
                 VerticalAlignment="Bottom"
+                Foreground="#2C7DFF"
+                Background="Transparent"
                 Visibility="Collapsed"
                 IsIndeterminate="True"/>
 
@@ -363,18 +461,33 @@
 
             <Border
                 Grid.Row="1"
-                Margin="8"
+                Margin="8,8,8,4"
+                CornerRadius="10"
                 Background="#111111"
-                CornerRadius="8"
+                BorderBrush="#1D1F25"
+                BorderThickness="1"
                 ClipToBounds="True">
 
-                <webview:WebView2
-                    x:Name="BrowserHost"
-                    DefaultBackgroundColor="Transparent" />
+                <Grid>
+
+                    <!-- CLIPPING LAYER -->
+
+                    <Border
+                        CornerRadius="10"
+                        Background="#111111"
+                        ClipToBounds="True">
+
+                        <webview:WebView2
+                            x:Name="BrowserHost"
+                            DefaultBackgroundColor="Transparent"/>
+
+                    </Border>
+
+                </Grid>
 
             </Border>
 
-            <!-- STATUS BAR -->
+            <!-- STATUSBAR -->
 
             <Border
                 Grid.Row="2"
@@ -386,9 +499,9 @@
 
                     <Grid.ColumnDefinitions>
 
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*"/>
 
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto"/>
 
                     </Grid.ColumnDefinitions>
 
@@ -399,7 +512,7 @@
                         VerticalAlignment="Center"
                         FontSize="11"
                         Foreground="#8F9093"
-                        Text="Ready" />
+                        Text="Ready"/>
 
                     <TextBlock
                         Grid.Column="1"
@@ -407,7 +520,7 @@
                         VerticalAlignment="Center"
                         FontSize="11"
                         Foreground="#8F9093"
-                        Text="RTBrowser" />
+                        Text="RTBrowser"/>
 
                 </Grid>
 
