@@ -25,29 +25,35 @@ namespace RTBrowser.Runtime
         public event EventHandler<BrowserTabEventArgs>?
             ActiveSessionChanged;
 
-        public void AddSession(
-            TabSession session)
+        public TabSession CreateSession(
+            BrowserTab tab)
         {
-            foreach (TabSession existing in _sessions)
+            foreach (TabSession session in _sessions)
             {
-                existing.Deactivate();
+                session.Deactivate();
             }
 
-            session.Activate();
+            TabSession newSession =
+                new(tab);
 
-            _sessions.Add(session);
+            newSession.Activate();
 
-            ActiveSession = session;
+            _sessions.Add(newSession);
+
+            ActiveSession =
+                newSession;
 
             SessionCreated?.Invoke(
                 this,
                 new BrowserTabEventArgs(
-                    session.Tab));
+                    tab));
 
             ActiveSessionChanged?.Invoke(
                 this,
                 new BrowserTabEventArgs(
-                    session.Tab));
+                    tab));
+
+            return newSession;
         }
 
         public void SetActiveSession(
@@ -69,7 +75,8 @@ namespace RTBrowser.Runtime
 
             target.Activate();
 
-            ActiveSession = target;
+            ActiveSession =
+                target;
 
             ActiveSessionChanged?.Invoke(
                 this,
@@ -118,7 +125,8 @@ namespace RTBrowser.Runtime
 
             next.Activate();
 
-            ActiveSession = next;
+            ActiveSession =
+                next;
 
             ActiveSessionChanged?.Invoke(
                 this,
@@ -129,8 +137,15 @@ namespace RTBrowser.Runtime
         public TabSession? GetSession(
             Guid tabId)
         {
-            return _sessions.FirstOrDefault(
-                x => x.Id == tabId);
+            return
+                _sessions.FirstOrDefault(
+                    x => x.Id == tabId);
         }
+
+        public bool HasSessions =>
+            _sessions.Count > 0;
+
+        public int SessionCount =>
+            _sessions.Count;
     }
 }
