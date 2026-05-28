@@ -52,6 +52,13 @@ namespace RTBrowser.UI.Controls
             AddressBar.Text = url;
         }
 
+        public void FocusAddressBar()
+        {
+            AddressBar.Focus();
+
+            AddressBar.SelectAll();
+        }
+
         private void OnAddressBarFocused(
             object sender,
             System.Windows.RoutedEventArgs e)
