@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+
+    <TargetFramework>
+      net8.0-windows
+    </TargetFramework>
+
+    <Nullable>
+      enable
+    </Nullable>
+
+    <ImplicitUsings>
+      enable
+    </ImplicitUsings>
+
+    <AssemblyName>
+      RTBrowser.Telemetry
+    </AssemblyName>
+
+    <RootNamespace>
+      RTBrowser.Telemetry
+    </RootNamespace>
+
+  </PropertyGroup>
+
+  <!-- ========================================= -->
+  <!-- PROJECT REFERENCES -->
+  <!-- ========================================= -->
+
+  <ItemGroup>
+
+    <ProjectReference Include="..\RTBrowser.Runtime\RTBrowser.Runtime.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
+
+  </ItemGroup>
+
+</Project>
