@@ -1,49 +1,50 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!-- ========================================= -->
     <!-- CORE SPACING SCALE -->
     <!-- ========================================= -->
 
-    <x:Double x:Key="Spacing0">
+    <sys:Double x:Key="Spacing0">
         0
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing2">
+    <sys:Double x:Key="Spacing2">
         2
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing4">
+    <sys:Double x:Key="Spacing4">
         4
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing6">
+    <sys:Double x:Key="Spacing6">
         6
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing8">
+    <sys:Double x:Key="Spacing8">
         8
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing12">
+    <sys:Double x:Key="Spacing12">
         12
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing16">
+    <sys:Double x:Key="Spacing16">
         16
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing20">
+    <sys:Double x:Key="Spacing20">
         20
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="Spacing24">
+    <sys:Double x:Key="Spacing24">
         24
-    </x:Double>
+    </sys:Double>
 
     <!-- ========================================= -->
-    <!-- STANDARD THICKNESS -->
+    <!-- PADDING -->
     <!-- ========================================= -->
 
     <Thickness x:Key="PaddingTiny">
@@ -63,12 +64,8 @@
     </Thickness>
 
     <!-- ========================================= -->
-    <!-- CONTROL PADDINGS -->
+    <!-- CONTROL PADDING -->
     <!-- ========================================= -->
-
-    <Thickness x:Key="ToolbarButtonPadding">
-        0
-    </Thickness>
 
     <Thickness x:Key="OmniboxPadding">
         10,0
@@ -99,7 +96,7 @@
     </Thickness>
 
     <!-- ========================================= -->
-    <!-- LAYOUT SPACING -->
+    <!-- SHELL -->
     <!-- ========================================= -->
 
     <Thickness x:Key="ShellHorizontalMargin">
@@ -111,19 +108,19 @@
     </Thickness>
 
     <!-- ========================================= -->
-    <!-- COMPACT SIZE TOKENS -->
+    <!-- CONTROL SIZES -->
     <!-- ========================================= -->
 
-    <x:Double x:Key="CompactButtonSize">
+    <sys:Double x:Key="CompactButtonSize">
         28
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="StatusButtonSize">
+    <sys:Double x:Key="StatusButtonSize">
         22
-    </x:Double>
+    </sys:Double>
 
-    <x:Double x:Key="TabHeight">
+    <sys:Double x:Key="TabHeight">
         26
-    </x:Double>
+    </sys:Double>
 
 </ResourceDictionary>
