@@ -1,285 +1,458 @@
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.Wpf;
+
 using RTBrowser.Core;
+using RTBrowser.Runtime;
+using RTBrowser.Services;
+using RTBrowser.UI.Controls;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 
-namespace RTBrowser.UI.Controls
+namespace RTBrowser.App
 {
-    public partial class BrowserTitleBar : UserControl
+    public partial class MainWindow : Window
     {
-        public event Action? NewTabRequested;
+        private const string HomeUrl =
+            "https://www.google.com";
 
-        public event Action<Guid>? CloseTabRequested;
-
-        public event Action<Guid>? TabSelected;
-
-        private readonly Dictionary<Guid, Border> _tabBorders =
+        private readonly BrowserSessionManager _sessionManager =
             new();
 
-        public BrowserTitleBar()
+        public MainWindow()
         {
             InitializeComponent();
+
+            Loaded += OnLoaded;
+
+            Closed += OnClosed;
+
+            NavigationBar.NavigateRequested +=
+                OnNavigateRequested;
+
+            NavigationBar.BackRequested +=
+                OnBackRequested;
+
+            NavigationBar.ForwardRequested +=
+                OnForwardRequested;
+
+            NavigationBar.RefreshRequested +=
+                OnRefreshRequested;
+
+            BrowserTitleBar.NewTabRequested +=
+                OnNewTabRequested;
+
+            BrowserTitleBar.CloseTabRequested +=
+                OnCloseTabRequested;
+
+            BrowserTitleBar.TabSelected +=
+                OnTabSelected;
         }
 
-        public void RenderTabs(
-            IReadOnlyList<BrowserTab> tabs)
-        {
-            TabsHost.Children.Clear();
-
-            _tabBorders.Clear();
-
-            foreach (BrowserTab tab in tabs)
-            {
-                Border border =
-                    CreateTab(tab);
-
-                _tabBorders[tab.Id] =
-                    border;
-
-                TabsHost.Children.Add(border);
-            }
-        }
-
-        private Border CreateTab(
-            BrowserTab tab)
-        {
-            Border border =
-                new()
-                {
-                    Width = 220,
-                    Height = 24,
-                    Margin = new Thickness(0, 0, 5, 0),
-                    CornerRadius = new CornerRadius(5, 5, 0, 0),
-                    BorderThickness = new Thickness(1),
-                    Background =
-                        tab.IsActive
-                            ? Brush("#18191C")
-                            : Brush("#121316"),
-                    BorderBrush =
-                        tab.IsActive
-                            ? Brush("#2E3136")
-                            : Brush("#1E2024"),
-                    Tag = tab.Id,
-                    Cursor = Cursors.Hand
-                };
-
-            Grid grid =
-                new();
-
-            grid.ColumnDefinitions.Add(
-                new ColumnDefinition
-                {
-                    Width = GridLength.Auto
-                });
-
-            grid.ColumnDefinitions.Add(
-                new ColumnDefinition());
-
-            grid.ColumnDefinitions.Add(
-                new ColumnDefinition
-                {
-                    Width = GridLength.Auto
-                });
-
-            Border indicator =
-                new()
-                {
-                    Width = 7,
-                    Height = 7,
-                    Margin = new Thickness(8, 0, 6, 0),
-                    CornerRadius = new CornerRadius(4),
-                    Background =
-                        tab.IsActive
-                            ? Brush("#4C8DFF")
-                            : Brush("#43464C"),
-                    VerticalAlignment =
-                        VerticalAlignment.Center
-                };
-
-            TextBlock title =
-                new()
-                {
-                    Text = tab.Title,
-                    FontSize = 11,
-                    Foreground =
-                        tab.IsActive
-                            ? Brush("#E7E7E7")
-                            : Brush("#9CA1A9"),
-                    VerticalAlignment =
-                        VerticalAlignment.Center,
-                    TextTrimming =
-                        TextTrimming.CharacterEllipsis
-                };
-
-            Button close =
-                new()
-                {
-                    Width = 18,
-                    Height = 18,
-                    Margin = new Thickness(0, 0, 6, 0),
-                    Background = Brushes.Transparent,
-                    BorderThickness = new Thickness(0),
-                    Cursor = Cursors.Hand,
-                    Tag = tab.Id,
-                    Content =
-                        new TextBlock
-                        {
-                            Text = "✕",
-                            FontSize = 9,
-                            Foreground =
-                                Brush("#8E949D"),
-                            HorizontalAlignment =
-                                HorizontalAlignment.Center,
-                            VerticalAlignment =
-                                VerticalAlignment.Center
-                        }
-                };
-
-            close.Click += OnDynamicCloseTab;
-
-            border.MouseEnter +=
-                (_, _) =>
-                {
-                    if (!tab.IsActive)
-                    {
-                        border.Background =
-                            Brush("#17181B");
-                    }
-                };
-
-            border.MouseLeave +=
-                (_, _) =>
-                {
-                    if (!tab.IsActive)
-                    {
-                        border.Background =
-                            Brush("#121316");
-                    }
-                };
-
-            Grid.SetColumn(indicator, 0);
-            Grid.SetColumn(title, 1);
-            Grid.SetColumn(close, 2);
-
-            grid.Children.Add(indicator);
-            grid.Children.Add(title);
-            grid.Children.Add(close);
-
-            border.Child = grid;
-
-            border.MouseLeftButtonDown +=
-                OnTabClicked;
-
-            return border;
-        }
-
-        private void OnTabClicked(
-            object sender,
-            MouseButtonEventArgs e)
-        {
-            if (sender is not Border border)
-            {
-                return;
-            }
-
-            if (border.Tag is not Guid tabId)
-            {
-                return;
-            }
-
-            TabSelected?.Invoke(tabId);
-        }
-
-        private void OnDynamicCloseTab(
+        private async void OnLoaded(
             object sender,
             RoutedEventArgs e)
         {
-            e.Handled = true;
+            RestoreWindowState();
 
-            if (sender is not Button button)
-            {
-                return;
-            }
+            LoggerService.Info(
+                "Window",
+                "Main window loaded");
 
-            if (button.Tag is not Guid tabId)
-            {
-                return;
-            }
-
-            CloseTabRequested?.Invoke(tabId);
+            await CreateNewTab(HomeUrl);
         }
 
-        private Brush Brush(
-            string hex)
+        private async void OnNewTabRequested()
+        {
+            await CreateNewTab(HomeUrl);
+
+            LoggerService.Info(
+                "Tabs",
+                "New tab requested");
+        }
+
+        private void OnTabSelected(
+            Guid tabId)
+        {
+            _sessionManager.SetActiveSession(tabId);
+
+            if (_sessionManager.ActiveSession == null)
+            {
+                return;
+            }
+
+            SyncActiveSession();
+
+            LoggerService.Info(
+                "Tabs",
+                $"Activated tab: {tabId}");
+        }
+
+        private void OnCloseTabRequested(
+            Guid tabId)
+        {
+            _sessionManager.CloseSession(tabId);
+
+            if (!_sessionManager.HasSessions)
+            {
+                Close();
+
+                return;
+            }
+
+            SyncActiveSession();
+
+            LoggerService.Info(
+                "Tabs",
+                $"Closed tab: {tabId}");
+        }
+
+        private async System.Threading.Tasks.Task CreateNewTab(
+            string url)
+        {
+            WebView2 webView =
+                CreateWebView();
+
+            await webView
+                .EnsureCoreWebView2Async();
+
+            ConfigureWebView(webView);
+
+            BrowserTab tab =
+                new()
+                {
+                    Title = "New Tab",
+                    Url = url,
+                    IsActive = true,
+                    WebView = webView
+                };
+
+            TabSession session =
+                _sessionManager.CreateSession(tab);
+
+            session.Navigate(url);
+
+            SyncActiveSession();
+
+            LoggerService.Info(
+                "Tabs",
+                $"Created tab: {tab.Id}");
+        }
+
+        private WebView2 CreateWebView()
         {
             return
-                (Brush)new BrushConverter()
-                    .ConvertFrom(hex)!;
+                new WebView2
+                {
+                    HorizontalAlignment =
+                        HorizontalAlignment.Stretch,
+
+                    VerticalAlignment =
+                        VerticalAlignment.Stretch,
+
+                    Focusable = true
+                };
         }
 
-        private void OnDragWindow(
-            object sender,
-            MouseButtonEventArgs e)
+        private void ConfigureWebView(
+            WebView2 webView)
         {
-            if (e.LeftButton != MouseButtonState.Pressed)
+            if (webView.CoreWebView2 == null)
             {
                 return;
             }
 
-            Window.GetWindow(this)?.DragMove();
+            CoreWebView2Settings settings =
+                webView.CoreWebView2.Settings;
+
+            settings.AreDefaultContextMenusEnabled =
+                false;
+
+            settings.AreDevToolsEnabled =
+                false;
+
+            settings.IsStatusBarEnabled =
+                false;
+
+            settings.AreBrowserAcceleratorKeysEnabled =
+                true;
+
+            settings.IsZoomControlEnabled =
+                true;
+
+            webView.NavigationStarting +=
+                OnNavigationStarting;
+
+            webView.NavigationCompleted +=
+                OnNavigationCompleted;
+
+            webView.CoreWebView2.DocumentTitleChanged +=
+                OnDocumentTitleChanged;
         }
 
-        private void OnMinimize(
-            object sender,
-            RoutedEventArgs e)
+        private void SyncActiveSession()
         {
-            Window? window =
-                Window.GetWindow(this);
-
-            if (window == null)
+            if (ActiveSession == null)
             {
                 return;
             }
 
-            window.WindowState =
-                WindowState.Minimized;
+            WebViewContainer.SetBrowser(
+                ActiveSession.WebView);
+
+            NavigationBar.SetAddress(
+                ActiveSession.Tab.Url);
+
+            Title =
+                $"{ActiveSession.Tab.Title} - RTBrowser";
+
+            RenderTabs();
         }
 
-        private void OnMaximize(
-            object sender,
-            RoutedEventArgs e)
+        private void RenderTabs()
         {
-            Window? window =
-                Window.GetWindow(this);
+            BrowserTitleBar.RenderTabs(
+                _sessionManager
+                    .Sessions
+                    .Select(x => x.Tab)
+                    .ToList());
+        }
 
-            if (window == null)
+        private TabSession? ActiveSession =>
+            _sessionManager.ActiveSession;
+
+        private void OnNavigateRequested(
+            string input)
+        {
+            string url =
+                NormalizeInput(input);
+
+            if (ActiveSession == null)
             {
                 return;
             }
 
-            window.WindowState =
-                window.WindowState == WindowState.Maximized
-                    ? WindowState.Normal
-                    : WindowState.Maximized;
+            ActiveSession.Navigate(url);
+
+            NavigationBar.SetAddress(url);
+
+            LoggerService.Info(
+                "Navigation",
+                $"Navigate: {url}");
         }
 
-        private void OnClose(
-            object sender,
-            RoutedEventArgs e)
+        private void OnBackRequested()
         {
-            Window.GetWindow(this)?.Close();
+            ActiveSession?.GoBack();
+
+            LoggerService.Info(
+                "Navigation",
+                "Back pressed");
         }
 
-        private void OnNewTab(
-            object sender,
-            RoutedEventArgs e)
+        private void OnForwardRequested()
         {
-            NewTabRequested?.Invoke();
+            ActiveSession?.GoForward();
+
+            LoggerService.Info(
+                "Navigation",
+                "Forward pressed");
+        }
+
+        private void OnRefreshRequested()
+        {
+            ActiveSession?.Reload();
+
+            LoggerService.Info(
+                "Navigation",
+                "Refresh pressed");
+        }
+
+        private string NormalizeInput(
+            string input)
+        {
+            input = input.Trim();
+
+            bool looksLikeUrl =
+                input.Contains('.')
+                && !input.Contains(' ');
+
+            if (looksLikeUrl)
+            {
+                if (!input.StartsWith("http://")
+                    && !input.StartsWith("https://"))
+                {
+                    input =
+                        "https://" + input;
+                }
+
+                return input;
+            }
+
+            return
+                "https://www.google.com/search?q="
+                + Uri.EscapeDataString(input);
+        }
+
+        private void OnNavigationStarting(
+            object? sender,
+            CoreWebView2NavigationStartingEventArgs e)
+        {
+            TabSession? session =
+                FindSession(sender);
+
+            if (session == null)
+            {
+                return;
+            }
+
+            session.SetLoading(true);
+
+            session.Tab.Url =
+                e.Uri;
+
+            if (session.Tab.IsActive)
+            {
+                NavigationBar.SetAddress(e.Uri);
+            }
+
+            RenderTabs();
+
+            LoggerService.Info(
+                "Navigation",
+                $"Navigation started: {e.Uri}");
+        }
+
+        private void OnNavigationCompleted(
+            object? sender,
+            CoreWebView2NavigationCompletedEventArgs e)
+        {
+            TabSession? session =
+                FindSession(sender);
+
+            if (session == null)
+            {
+                return;
+            }
+
+            session.SetLoading(false);
+
+            RenderTabs();
+
+            LoggerService.Info(
+                "Navigation",
+                e.IsSuccess
+                    ? "Navigation completed"
+                    : $"Navigation failed: {e.WebErrorStatus}");
+        }
+
+        private void OnDocumentTitleChanged(
+            object? sender,
+            object e)
+        {
+            if (sender is not CoreWebView2 coreWebView)
+            {
+                return;
+            }
+
+            TabSession? session =
+                _sessionManager
+                    .Sessions
+                    .FirstOrDefault(
+                        x => x.WebView.CoreWebView2 == coreWebView);
+
+            if (session == null)
+            {
+                return;
+            }
+
+            session.UpdateTitle(
+                coreWebView.DocumentTitle);
+
+            if (session.Tab.IsActive)
+            {
+                Title =
+                    $"{session.Tab.Title} - RTBrowser";
+            }
+
+            RenderTabs();
+
+            LoggerService.Info(
+                "Tabs",
+                $"Title changed: {session.Tab.Title}");
+        }
+
+        private TabSession? FindSession(
+            object? sender)
+        {
+            if (sender is not WebView2 webView)
+            {
+                return null;
+            }
+
+            return
+                _sessionManager
+                    .Sessions
+                    .FirstOrDefault(
+                        x => x.WebView == webView);
+        }
+
+        private void RestoreWindowState()
+        {
+            WindowStateModel state =
+                WindowStateService.Load();
+
+            Width = state.Width;
+            Height = state.Height;
+            Left = state.Left;
+            Top = state.Top;
+
+            WindowState =
+                state.IsMaximized
+                    ? WindowState.Maximized
+                    : WindowState.Normal;
+
+            LoggerService.Info(
+                "Window",
+                "Window state restored");
+        }
+
+        private void SaveWindowState()
+        {
+            WindowStateModel state =
+                new()
+                {
+                    Width = Width,
+                    Height = Height,
+                    Left = Left,
+                    Top = Top,
+                    IsMaximized =
+                        WindowState ==
+                        WindowState.Maximized
+                };
+
+            WindowStateService.Save(state);
+
+            LoggerService.Info(
+                "Window",
+                "Window state saved");
+        }
+
+        private void OnClosed(
+            object? sender,
+            EventArgs e)
+        {
+            foreach (TabSession session in _sessionManager.Sessions)
+            {
+                session.Dispose();
+            }
+
+            SaveWindowState();
+
+            LoggerService.Info(
+                "Window",
+                "Main window closed");
         }
     }
 }
