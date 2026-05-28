@@ -3,12 +3,12 @@ using Microsoft.Web.WebView2.Wpf;
 
 using RTBrowser.Core;
 using RTBrowser.Services;
+using RTBrowser.UI.Controls;
 
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Input;
 
 namespace RTBrowser.App
 {
@@ -32,6 +32,18 @@ namespace RTBrowser.App
             Loaded += OnLoaded;
 
             Closed += OnClosed;
+
+            NavigationBar.NavigateRequested +=
+                OnNavigateRequested;
+
+            NavigationBar.BackRequested +=
+                OnBackRequested;
+
+            NavigationBar.ForwardRequested +=
+                OnForwardRequested;
+
+            NavigationBar.RefreshRequested +=
+                OnRefreshRequested;
         }
 
         private async void OnLoaded(
@@ -55,11 +67,6 @@ namespace RTBrowser.App
                 await WebViewContainer.Browser
                     .EnsureCoreWebView2Async();
             }
-
-            WebViewContainer.Browser
-                .CoreWebView2?
-                .Settings
-                .AreDefaultContextMenusEnabled = false;
 
             WebViewContainer.Browser
                 .CoreWebView2
@@ -99,7 +106,7 @@ namespace RTBrowser.App
 
             LoggerService.Info(
                 "Tabs",
-                $"Tab created: {tab.Id}");
+                $"Created tab: {tab.Id}");
         }
 
         private WebView2? ActiveWebView
@@ -115,6 +122,48 @@ namespace RTBrowser.App
             }
         }
 
+        private void OnNavigateRequested(
+            string input)
+        {
+            string url =
+                NormalizeInput(input);
+
+            NavigateTo(url);
+        }
+
+        private void OnBackRequested()
+        {
+            if (ActiveWebView?.CoreWebView2?.CanGoBack == true)
+            {
+                ActiveWebView.CoreWebView2.GoBack();
+
+                LoggerService.Info(
+                    "Navigation",
+                    "Back pressed");
+            }
+        }
+
+        private void OnForwardRequested()
+        {
+            if (ActiveWebView?.CoreWebView2?.CanGoForward == true)
+            {
+                ActiveWebView.CoreWebView2.GoForward();
+
+                LoggerService.Info(
+                    "Navigation",
+                    "Forward pressed");
+            }
+        }
+
+        private void OnRefreshRequested()
+        {
+            ActiveWebView?.Reload();
+
+            LoggerService.Info(
+                "Navigation",
+                "Refresh pressed");
+        }
+
         private void NavigateTo(
             string url)
         {
@@ -123,9 +172,9 @@ namespace RTBrowser.App
                 return;
             }
 
-            ActiveWebView
-                .CoreWebView2
-                .Navigate(url);
+            ActiveWebView.CoreWebView2.Navigate(url);
+
+            NavigationBar.SetAddress(url);
 
             LoggerService.Info(
                 "Navigation",
@@ -161,6 +210,8 @@ namespace RTBrowser.App
             object? sender,
             CoreWebView2NavigationStartingEventArgs e)
         {
+            NavigationBar.SetAddress(e.Uri);
+
             LoggerService.Info(
                 "Navigation",
                 $"Navigation started: {e.Uri}");
@@ -252,17 +303,6 @@ namespace RTBrowser.App
             LoggerService.Info(
                 "Window",
                 "Main window closed");
-        }
-
-        private void OnWindowDrag(
-            object sender,
-            MouseButtonEventArgs e)
-        {
-            if (e.LeftButton ==
-                MouseButtonState.Pressed)
-            {
-                DragMove();
-            }
         }
     }
 }
