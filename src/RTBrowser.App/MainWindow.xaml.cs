@@ -3,7 +3,6 @@ using RTBrowser.Services;
 using RTBrowser.WebView;
 
 using System;
-using System.IO;
 using System.Windows;
 
 namespace RTBrowser.App
@@ -24,13 +23,21 @@ namespace RTBrowser.App
 
         private readonly PerformanceMonitor _performance;
 
+        private readonly RuntimeSettings _settings;
+
         public MainWindow()
         {
             InitializeComponent();
 
+            _settings = new RuntimeSettings();
+
             _runtime = new RuntimeCoordinator();
 
-            _memoryMonitor = new MemoryPressureMonitor();
+            _memoryMonitor = new MemoryPressureMonitor
+            {
+                MemoryThresholdMb =
+                    _settings.MemoryPressureThresholdMb
+            };
 
             _scheduler = new RuntimeScheduler(
                 _runtime,
@@ -65,8 +72,8 @@ namespace RTBrowser.App
 
                 var tab =
                     _runtime.CreateTab(
-                        "https://www.google.com",
-                        "Google");
+                        _settings.HomePage,
+                        "Home");
 
                 var binding =
                     await _webViewRuntime
