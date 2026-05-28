@@ -11,11 +11,12 @@
             <Setter Property="Background" Value="Transparent"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Focusable" Value="False"/>
 
             <Style.Triggers>
 
                 <Trigger Property="IsMouseOver" Value="True">
-                    <Setter Property="Opacity" Value="0.78"/>
+                    <Setter Property="Opacity" Value="0.82"/>
                 </Trigger>
 
                 <Trigger Property="IsPressed" Value="True">
@@ -43,38 +44,55 @@
 
             <!-- LEFT -->
 
-            <StackPanel
+            <DockPanel
                 Grid.Column="0"
-                Orientation="Horizontal"
+                LastChildFill="False"
                 VerticalAlignment="Center"
                 Margin="8,0,0,0">
 
-                <!-- DYNAMIC TABS -->
+                <!-- TABS -->
 
-                <StackPanel
-                    x:Name="TabsHost"
-                    Orientation="Horizontal"
-                    VerticalAlignment="Center"/>
+                <ScrollViewer
+                    VerticalScrollBarVisibility="Disabled"
+                    HorizontalScrollBarVisibility="Hidden"
+                    CanContentScroll="False"
+                    Focusable="False">
+
+                    <StackPanel
+                        x:Name="TabsHost"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center"/>
+
+                </ScrollViewer>
 
                 <!-- NEW TAB -->
 
                 <Button
                     x:Name="NewTabButton"
-                    Width="22"
-                    Height="22"
-                    Margin="5,0,0,0"
-                    Click="OnNewTab">
+                    Width="20"
+                    Height="20"
+                    Margin="6,0,0,0"
+                    Click="OnNewTab"
+                    DockPanel.Dock="Right">
 
-                    <TextBlock
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="12"
-                        Foreground="#CFCFCF"
-                        Text="+"/>
+                    <Border
+                        Width="16"
+                        Height="16"
+                        CornerRadius="4"
+                        Background="#16171A">
+
+                        <TextBlock
+                            Text="+"
+                            FontSize="10"
+                            Foreground="#CFCFCF"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"/>
+
+                    </Border>
 
                 </Button>
 
-            </StackPanel>
+            </DockPanel>
 
             <!-- WINDOW CONTROLS -->
 
@@ -82,50 +100,53 @@
                 Grid.Column="1"
                 Orientation="Horizontal"
                 VerticalAlignment="Center"
-                Margin="0,0,4,0">
+                Margin="0,0,3,0">
+
+                <!-- MINIMIZE -->
 
                 <Button
-                    x:Name="MinimizeButton"
-                    Width="34"
-                    Height="24"
+                    Width="30"
+                    Height="22"
                     Click="OnMinimize">
 
                     <TextBlock
+                        Text="—"
+                        FontSize="9"
+                        Foreground="#A6ABB3"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="10"
-                        Foreground="#BFC3CA"
-                        Text="—"/>
+                        VerticalAlignment="Center"/>
 
                 </Button>
 
+                <!-- MAXIMIZE -->
+
                 <Button
-                    x:Name="MaximizeButton"
-                    Width="34"
-                    Height="24"
+                    Width="30"
+                    Height="22"
                     Click="OnMaximize">
 
                     <TextBlock
+                        Text="▢"
+                        FontSize="8"
+                        Foreground="#A6ABB3"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="9"
-                        Foreground="#BFC3CA"
-                        Text="▢"/>
+                        VerticalAlignment="Center"/>
 
                 </Button>
 
+                <!-- CLOSE -->
+
                 <Button
-                    x:Name="CloseButton"
-                    Width="34"
-                    Height="24"
+                    Width="30"
+                    Height="22"
                     Click="OnClose">
 
                     <TextBlock
+                        Text="✕"
+                        FontSize="9"
+                        Foreground="#A6ABB3"
                         HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        FontSize="10"
-                        Foreground="#BFC3CA"
-                        Text="✕"/>
+                        VerticalAlignment="Center"/>
 
                 </Button>
 
