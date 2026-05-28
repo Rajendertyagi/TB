@@ -2,31 +2,31 @@
 
   <PropertyGroup>
 
-    <TargetFramework>
-       net10.0-windows
-    </TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
 
-    <Nullable>
-      enable
-    </Nullable>
+    <Nullable>enable</Nullable>
 
-    <ImplicitUsings>
-      enable
-    </ImplicitUsings>
+    <ImplicitUsings>enable</ImplicitUsings>
 
-    <AssemblyName>
-      RTBrowser.Services
-    </AssemblyName>
+    <LangVersion>preview</LangVersion>
 
-    <RootNamespace>
-      RTBrowser.Services
-    </RootNamespace>
+    <SatelliteResourceLanguages>
+      en-US
+    </SatelliteResourceLanguages>
+
+    <AssemblyName>RTBrowser.Services</AssemblyName>
+
+    <RootNamespace>RTBrowser.Services</RootNamespace>
+
+    <Platforms>x64</Platforms>
+
+    <PlatformTarget>x64</PlatformTarget>
+
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+
+    <Prefer32Bit>false</Prefer32Bit>
 
   </PropertyGroup>
-
-  <!-- ========================================= -->
-  <!-- PROJECT REFERENCES -->
-  <!-- ========================================= -->
 
   <ItemGroup>
 
