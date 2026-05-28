@@ -15,44 +15,39 @@
     Background="#0D0D0E">
 
     <shell:WindowChrome.WindowChrome>
-
         <shell:WindowChrome
             CaptionHeight="0"
             CornerRadius="0"
             GlassFrameThickness="0"
             ResizeBorderThickness="6"
             UseAeroCaptionButtons="False" />
-
     </shell:WindowChrome.WindowChrome>
 
     <Border
+        Background="#0D0D0E"
         BorderBrush="#202126"
         BorderThickness="1"
-        CornerRadius="10"
-        Background="#0D0D0E">
+        CornerRadius="12">
 
         <Grid>
 
             <Grid.RowDefinitions>
-
-                <RowDefinition Height="34"/>
-
-                <RowDefinition Height="40"/>
-
+                <RowDefinition Height="38"/>
+                <RowDefinition Height="44"/>
                 <RowDefinition Height="*"/>
-
                 <RowDefinition Height="24"/>
-
             </Grid.RowDefinitions>
 
             <!-- TITLEBAR -->
 
             <ui:BrowserTitleBar
+                x:Name="BrowserTitleBar"
                 Grid.Row="0"/>
 
             <!-- NAVIGATION -->
 
             <ui:NavigationBar
+                x:Name="NavigationBar"
                 Grid.Row="1"/>
 
             <!-- WEBVIEW -->
