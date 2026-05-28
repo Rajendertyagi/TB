@@ -22,12 +22,12 @@ namespace RTBrowser.Runtime
             WebView2 webView,
             string url)
         {
-            foreach (BrowserTab existingTab in _tabs)
+            foreach (BrowserTab tab in _tabs)
             {
-                existingTab.IsActive = false;
+                tab.IsActive = false;
             }
 
-            BrowserTab tab =
+            BrowserTab newTab =
                 new()
                 {
                     Title = "New Tab",
@@ -36,11 +36,11 @@ namespace RTBrowser.Runtime
                     WebView = webView
                 };
 
-            _tabs.Add(tab);
+            _tabs.Add(newTab);
 
-            ActiveTab = tab;
+            ActiveTab = newTab;
 
-            return tab;
+            return newTab;
         }
 
         public void SetActiveTab(
@@ -77,6 +77,9 @@ namespace RTBrowser.Runtime
                 return;
             }
 
+            bool wasActive =
+                ActiveTab?.Id == tab.Id;
+
             tab.WebView.Dispose();
 
             _tabs.Remove(tab);
@@ -88,12 +91,24 @@ namespace RTBrowser.Runtime
                 return;
             }
 
+            if (!wasActive)
+            {
+                return;
+            }
+
             BrowserTab nextTab =
                 _tabs.Last();
 
             nextTab.IsActive = true;
 
             ActiveTab = nextTab;
+        }
+
+        public BrowserTab? GetTab(
+            Guid tabId)
+        {
+            return _tabs.FirstOrDefault(
+                x => x.Id == tabId);
         }
     }
 }
