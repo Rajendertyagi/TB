@@ -12,6 +12,8 @@ namespace RTBrowser.App
         {
             base.OnStartup(e);
 
+            DirectoryBootstrapper.Initialize();
+
             AppDomain.CurrentDomain.UnhandledException +=
                 OnUnhandledException;
 
