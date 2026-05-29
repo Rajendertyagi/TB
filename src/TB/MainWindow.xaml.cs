@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using TB.Services;
 using TB.ViewModels;
 
 namespace TB;
@@ -7,12 +8,17 @@ namespace TB;
 public partial class MainWindow : Window
 {
     private readonly BrowserViewModel _viewModel;
+    private readonly IBrowserService _browserService;
 
-    public MainWindow(BrowserViewModel viewModel)
+    public MainWindow(
+        BrowserViewModel viewModel,
+        IBrowserService browserService)
     {
         InitializeComponent();
 
         _viewModel = viewModel;
+        _browserService = browserService;
+
         DataContext = _viewModel;
 
         Loaded += MainWindow_Loaded;
@@ -22,14 +28,13 @@ public partial class MainWindow : Window
     {
         await Browser.EnsureCoreWebView2Async();
 
-        Browser.Source = new Uri(_viewModel.Address);
+        _browserService.Attach(Browser);
+
+        _browserService.Navigate(_viewModel.Address);
     }
 
     private void GoButton_Click(object sender, RoutedEventArgs e)
     {
-        if (Uri.TryCreate(_viewModel.Address, UriKind.Absolute, out var uri))
-        {
-            Browser.Source = uri;
-        }
+        _viewModel.NavigateCommand.Execute(null);
     }
 }
