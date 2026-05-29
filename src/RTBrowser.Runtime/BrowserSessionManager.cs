@@ -1,3 +1,5 @@
+using Microsoft.Web.WebView2.Wpf;
+
 using RTBrowser.Core;
 
 using System;
@@ -26,7 +28,8 @@ namespace RTBrowser.Runtime
             ActiveSessionChanged;
 
         public TabSession CreateSession(
-            BrowserTab tab)
+            BrowserTab tab,
+            WebView2 webView)
         {
             foreach (TabSession session in _sessions)
             {
@@ -34,7 +37,7 @@ namespace RTBrowser.Runtime
             }
 
             TabSession newSession =
-                new(tab);
+                new(tab, webView);
 
             newSession.Activate();
 
