@@ -1,0 +1,5 @@
+/workspaces/RTBrowser/src/TB/bin/Release/net10.0-windows/win-x64/publish/TB.exe
+/workspaces/RTBrowser/src/TB/bin/Release/net10.0-windows/win-x64/publish/TB.dll
+/workspaces/RTBrowser/src/TB/bin/Release/net10.0-windows/win-x64/publish/TB.deps.json
+/workspaces/RTBrowser/src/TB/bin/Release/net10.0-windows/win-x64/publish/TB.runtimeconfig.json
+/workspaces/RTBrowser/src/TB/bin/Release/net10.0-windows/win-x64/publish/TB.pdb
