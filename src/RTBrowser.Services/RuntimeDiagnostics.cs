@@ -3,14 +3,24 @@ using System.Diagnostics;
 
 namespace RTBrowser.Services
 {
+    public static class RuntimeDiagnostics
+    {
+        public static RuntimeTrace Trace(
+            string category,
+            string operation)
+        {
+            return new RuntimeTrace(
+                category,
+                operation);
+        }
+    }
+
     public sealed class RuntimeTrace
         : IDisposable
     {
         private readonly string _category;
-
         private readonly string _operation;
-
-        private readonly Stopwatch _stopwatch;
+        private readonly Stopwatch _timer;
 
         private bool _completed;
 
@@ -24,24 +34,23 @@ namespace RTBrowser.Services
             _operation =
                 operation;
 
-            _stopwatch =
+            _timer =
                 Stopwatch.StartNew();
 
             LoggerService.Info(
                 _category,
-                $"{_operation} ENTER");
+                $"ENTER | {_operation}");
         }
 
         public void Step(
-            string message)
+            string step)
         {
             LoggerService.Info(
                 _category,
-                $"{_operation} | {message}");
+                $"STEP | {_operation} | {step}");
         }
 
-        public void Success(
-            string? message = null)
+        public void Success()
         {
             if (_completed)
             {
@@ -50,18 +59,15 @@ namespace RTBrowser.Services
 
             _completed = true;
 
-            _stopwatch.Stop();
+            _timer.Stop();
 
             LoggerService.Info(
                 _category,
-                $"{_operation} SUCCESS ({_stopwatch.ElapsedMilliseconds}ms)"
-                + (string.IsNullOrWhiteSpace(message)
-                    ? string.Empty
-                    : $" | {message}"));
+                $"SUCCESS | {_operation} | {_timer.ElapsedMilliseconds}ms");
         }
 
         public void Fail(
-            Exception exception)
+            Exception ex)
         {
             if (_completed)
             {
@@ -70,60 +76,23 @@ namespace RTBrowser.Services
 
             _completed = true;
 
-            _stopwatch.Stop();
+            _timer.Stop();
 
             LoggerService.Error(
                 _category,
-                $"{_operation} FAIL ({_stopwatch.ElapsedMilliseconds}ms) | {exception}");
+                $"FAIL | {_operation} | {_timer.ElapsedMilliseconds}ms | {ex}");
+
+            LoggerService.Error(
+                _category,
+                ex.ToString());
         }
 
         public void Dispose()
         {
-            if (_completed)
+            if (!_completed)
             {
-                return;
+                Success();
             }
-
-            Success();
-        }
-    }
-
-    public static class RuntimeDiagnostics
-    {
-        public static RuntimeTrace Trace(
-            string category,
-            string operation)
-        {
-            return new RuntimeTrace(
-                category,
-                operation);
-        }
-
-        public static void Step(
-            string category,
-            string message)
-        {
-            LoggerService.Info(
-                category,
-                message);
-        }
-
-        public static void Success(
-            string category,
-            string message)
-        {
-            LoggerService.Info(
-                category,
-                $"SUCCESS | {message}");
-        }
-
-        public static void Fail(
-            string category,
-            Exception exception)
-        {
-            LoggerService.Error(
-                category,
-                exception.ToString());
         }
     }
 }
