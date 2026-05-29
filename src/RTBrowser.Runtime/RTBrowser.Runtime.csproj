@@ -34,13 +34,14 @@
 
     <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
 
+    <ProjectReference Include="..\RTBrowser.Services\RTBrowser.Services.csproj" />
+
   </ItemGroup>
 
   <ItemGroup>
 
-    <PackageReference
-      Include="Microsoft.Web.WebView2"
-      Version="1.0.3240.44" />
+    <PackageReference Include="Microsoft.Web.WebView2"
+                      Version="1.0.3967.48" />
 
   </ItemGroup>
 
