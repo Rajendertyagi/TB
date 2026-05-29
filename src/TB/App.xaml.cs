@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using Microsoft.Extensions.Hosting;
+using TB.Infrastructure.Bootstrap;
 using TB.Infrastructure.Hosting;
 
 namespace TB;
@@ -10,6 +11,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        DirectoryBootstrapper.Initialize();
+
         _host = HostBuilderFactory.Build();
 
         base.OnStartup(e);
