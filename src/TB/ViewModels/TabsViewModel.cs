@@ -10,25 +10,28 @@ public sealed partial class TabsViewModel : ObservableObject
 {
     private readonly ITabManager _tabManager;
 
+    [ObservableProperty]
+    private BrowserTab? activeTab;
+
     public TabsViewModel(ITabManager tabManager)
     {
         _tabManager = tabManager;
 
         if (_tabManager.Tabs.Count == 0)
         {
-            _tabManager.AddTab();
+            ActiveTab = _tabManager.AddTab();
+        }
+        else
+        {
+            ActiveTab = _tabManager.ActiveTab;
         }
     }
 
     public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
 
-    public BrowserTab? ActiveTab => _tabManager.ActiveTab;
-
     [RelayCommand]
     private void AddTab()
     {
-        _tabManager.AddTab();
-
-        OnPropertyChanged(nameof(ActiveTab));
+        ActiveTab = _tabManager.AddTab();
     }
 }
