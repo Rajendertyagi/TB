@@ -6,8 +6,8 @@ using TB.Infrastructure.Bootstrap;
 using TB.Infrastructure.Hosting;
 using TB.Modules.Logging.Services;
 using TB.Modules.Settings.Contracts;
-using TB.Startup;
 using TB.Services;
+using TB.Startup;
 
 namespace TB;
 
@@ -27,6 +27,34 @@ public partial class App : Application
                 services.AddTbServices();
             })
             .Build();
+
+        var settingsService =
+            _host.Services.GetRequiredService<ISettingsService>();
+
+        var tabManager =
+            _host.Services.GetRequiredService<ITabManager>();
+
+        var settings = settingsService.Load();
+
+        if (settings.OpenTabs.Count > 0)
+        {
+            foreach (var address in settings.OpenTabs)
+            {
+                tabManager.AddTab(address);
+            }
+
+            if (!string.IsNullOrWhiteSpace(settings.ActiveTab))
+            {
+                var activeTab =
+                    tabManager.Tabs
+                        .FirstOrDefault(x => x.Address == settings.ActiveTab);
+
+                if (activeTab is not null)
+                {
+                    tabManager.SetActiveTab(activeTab.Id);
+                }
+            }
+        }
 
         base.OnStartup(e);
 
