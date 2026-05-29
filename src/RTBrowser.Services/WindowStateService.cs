@@ -1,15 +1,74 @@
+using System;
+using System.IO;
+using System.Text.Json;
+
 namespace RTBrowser.Services
 {
-    public sealed class WindowStateModel
+    public static class WindowStateService
     {
-        public double Width { get; set; }
+        private static readonly string _filePath =
+            Path.Combine(
+                AppContext.BaseDirectory,
+                "state",
+                "window.json");
 
-        public double Height { get; set; }
+        public static RTBrowser.Core.WindowStateModel Load()
+        {
+            try
+            {
+                if (!File.Exists(_filePath))
+                {
+                    return new RTBrowser.Core.WindowStateModel();
+                }
 
-        public double Left { get; set; }
+                string json =
+                    File.ReadAllText(
+                        _filePath);
 
-        public double Top { get; set; }
+                RTBrowser.Core.WindowStateModel? state =
+                    JsonSerializer.Deserialize<RTBrowser.Core.WindowStateModel>(
+                        json);
 
-        public bool IsMaximized { get; set; }
+                return state ??
+                       new RTBrowser.Core.WindowStateModel();
+            }
+            catch
+            {
+                return new RTBrowser.Core.WindowStateModel();
+            }
+        }
+
+        public static void Save(
+            RTBrowser.Core.WindowStateModel state)
+        {
+            try
+            {
+                string? directory =
+                    Path.GetDirectoryName(
+                        _filePath);
+
+                if (!string.IsNullOrWhiteSpace(
+                    directory))
+                {
+                    Directory.CreateDirectory(
+                        directory);
+                }
+
+                string json =
+                    JsonSerializer.Serialize(
+                        state,
+                        new JsonSerializerOptions
+                        {
+                            WriteIndented = true
+                        });
+
+                File.WriteAllText(
+                    _filePath,
+                    json);
+            }
+            catch
+            {
+            }
+        }
     }
 }
