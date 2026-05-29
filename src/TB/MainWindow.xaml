@@ -14,6 +14,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
+        <!-- Tabs -->
         <DockPanel Grid.Row="0" Margin="8">
 
             <Button Width="40"
@@ -62,11 +63,30 @@
 
         </DockPanel>
 
+        <!-- Navigation Toolbar -->
         <DockPanel Grid.Row="1" Margin="8">
 
+            <Button Width="40"
+                    Height="32"
+                    Content="←"
+                    Command="{Binding BackCommand}" />
+
+            <Button Width="40"
+                    Height="32"
+                    Margin="4,0,0,0"
+                    Content="→"
+                    Command="{Binding ForwardCommand}" />
+
+            <Button Width="40"
+                    Height="32"
+                    Margin="4,0,0,0"
+                    Content="⟳"
+                    Command="{Binding RefreshCommand}" />
+
             <TextBox x:Name="AddressBar"
-                     Width="1100"
+                     Width="968"
                      Height="32"
+                     Margin="8,0,0,0"
                      VerticalContentAlignment="Center"
                      Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
 
@@ -79,6 +99,7 @@
 
         </DockPanel>
 
+        <!-- Browser -->
         <wv2:WebView2 x:Name="Browser"
                       Grid.Row="2" />
 
