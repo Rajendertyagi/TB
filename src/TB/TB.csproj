@@ -6,5 +6,7 @@
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>TB</AssemblyName>
+    <RootNamespace>TB</RootNamespace>
   </PropertyGroup>
 </Project>

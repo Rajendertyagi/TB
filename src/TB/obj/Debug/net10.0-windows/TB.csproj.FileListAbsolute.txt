@@ -6,7 +6,6 @@
 /workspaces/RTBrowser/src/TB/obj/Debug/net10.0-windows/MainWindow.g.cs
 /workspaces/RTBrowser/src/TB/obj/Debug/net10.0-windows/App.g.cs
 /workspaces/RTBrowser/src/TB/obj/Debug/net10.0-windows/TB_MarkupCompile.cache
-/workspaces/RTBrowser/src/TB/obj/Debug/net10.0-windows/TB_MarkupCompile.lref
 /workspaces/RTBrowser/src/TB/obj/Debug/net10.0-windows/MainWindow.baml
 /workspaces/RTBrowser/src/TB/obj/Debug/net10.0-windows/TB.g.resources
 /workspaces/RTBrowser/src/TB/obj/Debug/net10.0-windows/TB.GeneratedMSBuildEditorConfig.editorconfig

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TB.Modules.Settings")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88b735e0670a535c41e1bbacd380c6ea2bdd794e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d6fe915c4976a25c2176b179b5d3bc10f37f6c0d")]
 [assembly: System.Reflection.AssemblyProductAttribute("TB.Modules.Settings")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TB.Modules.Settings")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
