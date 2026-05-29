@@ -34,8 +34,6 @@
 
     <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
 
-    <ProjectReference Include="..\RTBrowser.Services\RTBrowser.Services.csproj" />
-
   </ItemGroup>
 
   <ItemGroup>
