@@ -1,5 +1,4 @@
 using RTBrowser.Core;
-using RTBrowser.Services;
 
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +11,8 @@ namespace RTBrowser.Runtime
     {
         private static readonly string _sessionFile =
             Path.Combine(
-                BrowserPaths.Sessions,
+                AppContext.BaseDirectory,
+                "sessions",
                 "tabs.json");
 
         public static void Save(
@@ -20,6 +20,9 @@ namespace RTBrowser.Runtime
         {
             try
             {
+                Directory.CreateDirectory(
+                    Path.GetDirectoryName(_sessionFile)!);
+
                 List<PersistedTab> tabs =
                     sessions
                         .Select(
@@ -66,10 +69,8 @@ namespace RTBrowser.Runtime
                     JsonSerializer.Deserialize<List<PersistedTab>>(
                         json);
 
-                return
-                    tabs
-                    ??
-                    new List<PersistedTab>();
+                return tabs ??
+                       new List<PersistedTab>();
             }
             catch
             {
