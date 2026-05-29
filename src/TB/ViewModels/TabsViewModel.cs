@@ -27,6 +27,14 @@ public sealed partial class TabsViewModel : ObservableObject
         }
     }
 
+    partial void OnActiveTabChanged(BrowserTab? value)
+    {
+        if (value is not null)
+        {
+            _tabManager.SetActiveTab(value.Id);
+        }
+    }
+
     public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
 
     [RelayCommand]

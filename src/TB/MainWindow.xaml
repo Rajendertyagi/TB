@@ -9,11 +9,34 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="8">
+
+            <Button Width="40"
+                    Height="28"
+                    Content="+"
+                    Command="{Binding AddTabCommand}" />
+
+            <ListBox Margin="8,0,0,0"
+                     Height="28"
+                     BorderThickness="0"
+                     ItemsSource="{Binding Tabs}"
+                     DisplayMemberPath="Title">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+            </ListBox>
+
+        </DockPanel>
+
+        <DockPanel Grid.Row="1" Margin="8">
+
             <TextBox x:Name="AddressBar"
                      Width="1100"
                      Height="32"
@@ -26,9 +49,11 @@
                     Margin="8,0,0,0"
                     Content="Go"
                     Click="GoButton_Click" />
+
         </DockPanel>
 
         <wv2:WebView2 x:Name="Browser"
-                      Grid.Row="1" />
+                      Grid.Row="2" />
+
     </Grid>
 </Window>
