@@ -1,151 +1,106 @@
+using Microsoft.Web.WebView2.Wpf;
+
 using RTBrowser.Core;
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace RTBrowser.Runtime
 {
-    public sealed class BrowserSessionManager
+    public sealed class TabSession
+        : IDisposable
     {
-        private readonly List<TabSession> _sessions =
-            new();
+        public BrowserTab Tab { get; }
 
-        public IReadOnlyList<TabSession> Sessions =>
-            _sessions;
+        public Guid Id =>
+            Tab.Id;
 
-        public TabSession? ActiveSession { get; private set; }
+        public WebView2 WebView { get; }
 
-        public event EventHandler<BrowserTabEventArgs>?
-            SessionCreated;
-
-        public event EventHandler<BrowserTabEventArgs>?
-            SessionClosed;
-
-        public event EventHandler<BrowserTabEventArgs>?
-            ActiveSessionChanged;
-
-        public TabSession CreateSession(
-            BrowserTab tab)
+        public TabSession(
+            BrowserTab tab,
+            WebView2 webView)
         {
-            foreach (TabSession session in _sessions)
-            {
-                session.Deactivate();
-            }
+            Tab =
+                tab;
 
-            TabSession newSession =
-                new(tab);
-
-            newSession.Activate();
-
-            _sessions.Add(newSession);
-
-            ActiveSession =
-                newSession;
-
-            SessionCreated?.Invoke(
-                this,
-                new BrowserTabEventArgs(
-                    tab));
-
-            ActiveSessionChanged?.Invoke(
-                this,
-                new BrowserTabEventArgs(
-                    tab));
-
-            return newSession;
+            WebView =
+                webView;
         }
 
-        public void SetActiveSession(
-            Guid tabId)
+        public void Activate()
         {
-            TabSession? target =
-                _sessions.FirstOrDefault(
-                    x => x.Id == tabId);
+            Tab.IsActive = true;
+        }
 
-            if (target == null)
+        public void Deactivate()
+        {
+            Tab.IsActive = false;
+        }
+
+        public void SetLoading(
+            bool loading)
+        {
+            Tab.IsLoading =
+                loading;
+        }
+
+        public void UpdateTitle(
+            string title)
+        {
+            if (string.IsNullOrWhiteSpace(title))
             {
                 return;
             }
 
-            foreach (TabSession session in _sessions)
-            {
-                session.Deactivate();
-            }
-
-            target.Activate();
-
-            ActiveSession =
-                target;
-
-            ActiveSessionChanged?.Invoke(
-                this,
-                new BrowserTabEventArgs(
-                    target.Tab));
+            Tab.Title =
+                title;
         }
 
-        public void CloseSession(
-            Guid tabId)
+        public void Navigate(
+            string url)
         {
-            TabSession? target =
-                _sessions.FirstOrDefault(
-                    x => x.Id == tabId);
-
-            if (target == null)
+            if (WebView.CoreWebView2 == null)
             {
                 return;
             }
 
-            bool wasActive =
-                ActiveSession?.Id == tabId;
+            Tab.Url =
+                url;
 
-            target.Dispose();
-
-            _sessions.Remove(target);
-
-            SessionClosed?.Invoke(
-                this,
-                new BrowserTabEventArgs(
-                    target.Tab));
-
-            if (_sessions.Count == 0)
-            {
-                ActiveSession = null;
-
-                return;
-            }
-
-            if (!wasActive)
-            {
-                return;
-            }
-
-            TabSession next =
-                _sessions.Last();
-
-            next.Activate();
-
-            ActiveSession =
-                next;
-
-            ActiveSessionChanged?.Invoke(
-                this,
-                new BrowserTabEventArgs(
-                    next.Tab));
+            WebView.CoreWebView2.Navigate(
+                url);
         }
 
-        public TabSession? GetSession(
-            Guid tabId)
+        public void Reload()
         {
-            return
-                _sessions.FirstOrDefault(
-                    x => x.Id == tabId);
+            WebView.Reload();
         }
 
-        public bool HasSessions =>
-            _sessions.Count > 0;
+        public void GoBack()
+        {
+            if (WebView.CanGoBack)
+            {
+                WebView.GoBack();
+            }
+        }
 
-        public int SessionCount =>
-            _sessions.Count;
+        public void GoForward()
+        {
+            if (WebView.CanGoForward)
+            {
+                WebView.GoForward();
+            }
+        }
+
+        public void Dispose()
+        {
+            try
+            {
+                WebView.Dispose();
+            }
+            catch
+            {
+            }
+        }
     }
 }
