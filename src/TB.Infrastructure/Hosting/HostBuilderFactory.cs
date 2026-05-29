@@ -4,9 +4,8 @@ namespace TB.Infrastructure.Hosting;
 
 public static class HostBuilderFactory
 {
-    public static IHost Build()
+    public static IHostBuilder Create()
     {
-        return Host.CreateDefaultBuilder()
-            .Build();
+        return Host.CreateDefaultBuilder();
     }
 }
