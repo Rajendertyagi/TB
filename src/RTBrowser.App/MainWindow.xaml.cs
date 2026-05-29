@@ -170,13 +170,13 @@ namespace RTBrowser.App
                 {
                     Title = "New Tab",
                     Url = url,
-                    IsActive = true,
-                    WebView = webView
+                    IsActive = true
                 };
 
             TabSession session =
                 _sessionManager.CreateSession(
-                    tab);
+                    tab,
+                    webView);
 
             session.Navigate(url);
 
@@ -465,7 +465,7 @@ namespace RTBrowser.App
 
         private void RestoreWindowState()
         {
-            WindowStateModel state =
+            RTBrowser.Core.WindowStateModel state =
                 WindowStateService.Load();
 
             Width =
@@ -492,7 +492,7 @@ namespace RTBrowser.App
 
         private void SaveWindowState()
         {
-            WindowStateModel state =
+            RTBrowser.Core.WindowStateModel state =
                 new()
                 {
                     Width = Width,
