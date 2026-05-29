@@ -14,6 +14,9 @@ public sealed partial class BrowserViewModel : ObservableObject
     [ObservableProperty]
     private BrowserTab? activeTab;
 
+    [ObservableProperty]
+    private string address = "https://www.google.com";
+
     public BrowserViewModel(
         IBrowserService browserService,
         ITabManager tabManager)
@@ -45,13 +48,23 @@ public sealed partial class BrowserViewModel : ObservableObject
 
     public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
 
-    [ObservableProperty]
-    private string address = "https://www.google.com";
-
     [RelayCommand]
     private void AddTab()
     {
         ActiveTab = _tabManager.AddTab();
+    }
+
+    [RelayCommand]
+    private void CloseTab(BrowserTab? tab)
+    {
+        if (tab is null)
+        {
+            return;
+        }
+
+        _tabManager.CloseTab(tab.Id);
+
+        ActiveTab = _tabManager.ActiveTab;
     }
 
     [RelayCommand]
