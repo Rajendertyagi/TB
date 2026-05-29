@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/TB.Core/TB.Core.csproj" />
+    <Project Path="src/TB.Infrastructure/TB.Infrastructure.csproj" />
+    <Project Path="src/TB.Modules.Logging/TB.Modules.Logging.csproj" />
+    <Project Path="src/TB.Modules.Settings/TB.Modules.Settings.csproj" />
+    <Project Path="src/TB.Modules.Themes/TB.Modules.Themes.csproj" />
+    <Project Path="src/TB/TB.csproj" />
+  </Folder>
+</Solution>

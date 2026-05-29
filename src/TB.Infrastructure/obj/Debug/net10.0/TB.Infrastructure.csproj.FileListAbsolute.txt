@@ -1,0 +1,12 @@
+/workspaces/RTBrowser/src/TB.Infrastructure/bin/Debug/net10.0/TB.Infrastructure.deps.json
+/workspaces/RTBrowser/src/TB.Infrastructure/bin/Debug/net10.0/TB.Infrastructure.dll
+/workspaces/RTBrowser/src/TB.Infrastructure/bin/Debug/net10.0/TB.Infrastructure.pdb
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/TB.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/TB.Infrastructure.AssemblyInfoInputs.cache
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/TB.Infrastructure.AssemblyInfo.cs
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/TB.Infrastructure.csproj.CoreCompileInputs.cache
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/TB.Infrastructure.sourcelink.json
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/TB.Infrastructure.dll
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/refint/TB.Infrastructure.dll
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/TB.Infrastructure.pdb
+/workspaces/RTBrowser/src/TB.Infrastructure/obj/Debug/net10.0/ref/TB.Infrastructure.dll

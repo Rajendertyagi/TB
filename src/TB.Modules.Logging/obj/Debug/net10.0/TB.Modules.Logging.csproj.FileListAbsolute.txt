@@ -1,0 +1,12 @@
+/workspaces/RTBrowser/src/TB.Modules.Logging/bin/Debug/net10.0/TB.Modules.Logging.deps.json
+/workspaces/RTBrowser/src/TB.Modules.Logging/bin/Debug/net10.0/TB.Modules.Logging.dll
+/workspaces/RTBrowser/src/TB.Modules.Logging/bin/Debug/net10.0/TB.Modules.Logging.pdb
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/TB.Modules.Logging.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/TB.Modules.Logging.AssemblyInfoInputs.cache
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/TB.Modules.Logging.AssemblyInfo.cs
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/TB.Modules.Logging.csproj.CoreCompileInputs.cache
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/TB.Modules.Logging.sourcelink.json
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/TB.Modules.Logging.dll
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/refint/TB.Modules.Logging.dll
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/TB.Modules.Logging.pdb
+/workspaces/RTBrowser/src/TB.Modules.Logging/obj/Debug/net10.0/ref/TB.Modules.Logging.dll
