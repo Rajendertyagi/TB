@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TB.Modules.Logging")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8ceb7ae6a917b21bc373584b84773f00da8722c7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88b735e0670a535c41e1bbacd380c6ea2bdd794e")]
 [assembly: System.Reflection.AssemblyProductAttribute("TB.Modules.Logging")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TB.Modules.Logging")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
