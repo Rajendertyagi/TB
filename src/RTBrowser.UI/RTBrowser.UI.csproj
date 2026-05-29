@@ -37,4 +37,10 @@
 
   </ItemGroup>
 
+  <ItemGroup>
+
+    <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
+
+  </ItemGroup>
+
 </Project>
