@@ -30,7 +30,16 @@
 
   <ItemGroup>
 
+    <PackageReference Include="Microsoft.Web.WebView2"
+                      Version="1.0.3967.48" />
+
+  </ItemGroup>
+
+  <ItemGroup>
+
     <ProjectReference Include="..\RTBrowser.Core\RTBrowser.Core.csproj" />
+
+    <ProjectReference Include="..\RTBrowser.Runtime\RTBrowser.Runtime.csproj" />
 
   </ItemGroup>
 
