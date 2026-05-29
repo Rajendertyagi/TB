@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TB.Models;
@@ -10,19 +11,22 @@ public sealed partial class BrowserViewModel : ObservableObject
 {
     private readonly IBrowserService _browserService;
     private readonly ITabManager _tabManager;
+    private readonly IBookmarkService _bookmarkService;
 
     [ObservableProperty]
     private BrowserTab? activeTab;
 
-    [ObservableProperty]
-    private string address = "https://www.google.com";
-
     public BrowserViewModel(
         IBrowserService browserService,
-        ITabManager tabManager)
+        ITabManager tabManager,
+        IBookmarkService bookmarkService)
     {
         _browserService = browserService;
         _tabManager = tabManager;
+        _bookmarkService = bookmarkService;
+
+        Bookmarks = new ObservableCollection<Bookmark>(
+            _bookmarkService.Load());
 
         if (_tabManager.Tabs.Count == 0)
         {
@@ -48,6 +52,11 @@ public sealed partial class BrowserViewModel : ObservableObject
 
     public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
 
+    public ObservableCollection<Bookmark> Bookmarks { get; }
+
+    [ObservableProperty]
+    private string address = "https://www.google.com";
+
     [RelayCommand]
     private void AddTab()
     {
@@ -68,12 +77,43 @@ public sealed partial class BrowserViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void AddBookmark()
+    {
+        if (ActiveTab is null)
+        {
+            return;
+        }
+
+        var bookmark = new Bookmark
+        {
+            Title = ActiveTab.Title,
+            Url = ActiveTab.Address
+        };
+
+        Bookmarks.Add(bookmark);
+
+        _bookmarkService.Save(Bookmarks.ToList());
+    }
+
+    [RelayCommand]
+    private void RemoveBookmark(Bookmark? bookmark)
+    {
+        if (bookmark is null)
+        {
+            return;
+        }
+
+        Bookmarks.Remove(bookmark);
+
+        _bookmarkService.Save(Bookmarks.ToList());
+    }
+
+    [RelayCommand]
     private void Navigate()
     {
         if (ActiveTab is not null)
         {
             ActiveTab.Address = Address;
-            ActiveTab.LastVisitedUtc = DateTime.UtcNow;
 
             if (ActiveTab.Title == "New Tab")
             {
