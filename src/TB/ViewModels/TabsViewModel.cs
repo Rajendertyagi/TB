@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TB.Models;
@@ -19,7 +20,7 @@ public sealed partial class TabsViewModel : ObservableObject
         }
     }
 
-    public IReadOnlyList<BrowserTab> Tabs => _tabManager.Tabs;
+    public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
 
     public BrowserTab? ActiveTab => _tabManager.ActiveTab;
 
@@ -28,7 +29,6 @@ public sealed partial class TabsViewModel : ObservableObject
     {
         _tabManager.AddTab();
 
-        OnPropertyChanged(nameof(Tabs));
         OnPropertyChanged(nameof(ActiveTab));
     }
 }
