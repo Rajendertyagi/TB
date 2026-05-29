@@ -1,12 +1,11 @@
+using System.Collections.ObjectModel;
 using TB.Models;
 
 namespace TB.Services;
 
 public sealed class TabManager : ITabManager
 {
-    private readonly List<BrowserTab> _tabs = [];
-
-    public IReadOnlyList<BrowserTab> Tabs => _tabs;
+    public ObservableCollection<BrowserTab> Tabs { get; } = [];
 
     public BrowserTab? ActiveTab { get; private set; }
 
@@ -14,7 +13,7 @@ public sealed class TabManager : ITabManager
     {
         var tab = new BrowserTab();
 
-        _tabs.Add(tab);
+        Tabs.Add(tab);
 
         ActiveTab = tab;
 
@@ -23,20 +22,20 @@ public sealed class TabManager : ITabManager
 
     public void CloseTab(Guid id)
     {
-        var tab = _tabs.FirstOrDefault(x => x.Id == id);
+        var tab = Tabs.FirstOrDefault(x => x.Id == id);
 
         if (tab is null)
         {
             return;
         }
 
-        _tabs.Remove(tab);
+        Tabs.Remove(tab);
 
-        ActiveTab = _tabs.LastOrDefault();
+        ActiveTab = Tabs.LastOrDefault();
     }
 
     public void SetActiveTab(Guid id)
     {
-        ActiveTab = _tabs.FirstOrDefault(x => x.Id == id);
+        ActiveTab = Tabs.FirstOrDefault(x => x.Id == id);
     }
 }

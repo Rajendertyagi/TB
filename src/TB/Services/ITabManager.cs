@@ -1,10 +1,11 @@
+using System.Collections.ObjectModel;
 using TB.Models;
 
 namespace TB.Services;
 
 public interface ITabManager
 {
-    IReadOnlyList<BrowserTab> Tabs { get; }
+    ObservableCollection<BrowserTab> Tabs { get; }
 
     BrowserTab? ActiveTab { get; }
 
