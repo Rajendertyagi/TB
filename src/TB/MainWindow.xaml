@@ -25,6 +25,7 @@
                      Height="28"
                      BorderThickness="0"
                      ItemsSource="{Binding Tabs}"
+                     SelectedItem="{Binding ActiveTab, Mode=TwoWay}"
                      DisplayMemberPath="Title">
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>

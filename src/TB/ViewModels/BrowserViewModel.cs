@@ -11,6 +11,9 @@ public sealed partial class BrowserViewModel : ObservableObject
     private readonly IBrowserService _browserService;
     private readonly ITabManager _tabManager;
 
+    [ObservableProperty]
+    private BrowserTab? activeTab;
+
     public BrowserViewModel(
         IBrowserService browserService,
         ITabManager tabManager)
@@ -20,8 +23,24 @@ public sealed partial class BrowserViewModel : ObservableObject
 
         if (_tabManager.Tabs.Count == 0)
         {
-            _tabManager.AddTab();
+            ActiveTab = _tabManager.AddTab();
         }
+        else
+        {
+            ActiveTab = _tabManager.ActiveTab;
+        }
+    }
+
+    partial void OnActiveTabChanged(BrowserTab? value)
+    {
+        if (value is null)
+        {
+            return;
+        }
+
+        _tabManager.SetActiveTab(value.Id);
+
+        Address = value.Address;
     }
 
     public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
@@ -32,14 +51,17 @@ public sealed partial class BrowserViewModel : ObservableObject
     [RelayCommand]
     private void AddTab()
     {
-        _tabManager.AddTab();
-
-        OnPropertyChanged(nameof(Tabs));
+        ActiveTab = _tabManager.AddTab();
     }
 
     [RelayCommand]
     private void Navigate()
     {
+        if (ActiveTab is not null)
+        {
+            ActiveTab.Address = Address;
+        }
+
         _browserService.Navigate(Address);
     }
 
