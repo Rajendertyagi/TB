@@ -11,6 +11,8 @@ public interface ITabManager
 
     BrowserTab AddTab();
 
+    BrowserTab AddTab(string address);
+
     void CloseTab(Guid id);
 
     void SetActiveTab(Guid id);

@@ -20,6 +20,21 @@ public sealed class TabManager : ITabManager
         return tab;
     }
 
+    public BrowserTab AddTab(string address)
+    {
+        var tab = new BrowserTab
+        {
+            Address = address,
+            Title = address
+        };
+
+        Tabs.Add(tab);
+
+        ActiveTab = tab;
+
+        return tab;
+    }
+
     public void CloseTab(Guid id)
     {
         var tab = Tabs.FirstOrDefault(x => x.Id == id);
