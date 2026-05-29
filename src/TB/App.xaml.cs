@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TB.Infrastructure.Bootstrap;
 using TB.Infrastructure.Hosting;
+using TB.Modules.Logging.Services;
 using TB.Startup;
 
 namespace TB;
@@ -14,6 +15,8 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         DirectoryBootstrapper.Initialize();
+
+        LoggingConfigurator.Configure();
 
         _host = HostBuilderFactory.Create()
             .ConfigureServices(services =>

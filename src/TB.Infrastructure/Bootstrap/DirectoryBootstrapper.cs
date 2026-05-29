@@ -9,5 +9,7 @@ public static class DirectoryBootstrapper
         Directory.CreateDirectory("Logs");
         Directory.CreateDirectory("Settings");
         Directory.CreateDirectory("UserData");
+
+        File.AppendAllText("Logs/app.log", string.Empty);
     }
 }
