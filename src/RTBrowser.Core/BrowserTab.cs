@@ -1,5 +1,3 @@
-using Microsoft.Web.WebView2.Wpf;
-
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -27,9 +25,6 @@ namespace RTBrowser.Core
 
         public DateTime CreatedAt { get; init; } =
             DateTime.UtcNow;
-
-        public WebView2 WebView { get; set; } =
-            null!;
 
         public string Title
         {
