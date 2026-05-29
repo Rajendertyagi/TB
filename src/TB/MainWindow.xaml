@@ -25,13 +25,39 @@
                      Height="28"
                      BorderThickness="0"
                      ItemsSource="{Binding Tabs}"
-                     SelectedItem="{Binding ActiveTab, Mode=TwoWay}"
-                     DisplayMemberPath="Title">
+                     SelectedItem="{Binding ActiveTab, Mode=TwoWay}">
+
                 <ListBox.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ListBox.ItemsPanel>
+
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="2"
+                                Padding="6,2"
+                                BorderThickness="1">
+
+                            <StackPanel Orientation="Horizontal">
+
+                                <TextBlock VerticalAlignment="Center"
+                                           Text="{Binding Title}" />
+
+                                <Button Width="20"
+                                        Height="20"
+                                        Margin="6,0,0,0"
+                                        Content="×"
+                                        Command="{Binding DataContext.CloseTabCommand,
+                                                          RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}" />
+
+                            </StackPanel>
+
+                        </Border>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+
             </ListBox>
 
         </DockPanel>
