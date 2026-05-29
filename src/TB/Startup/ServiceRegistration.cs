@@ -12,6 +12,8 @@ public static class ServiceRegistration
     {
         services.AddSingleton<ISettingsService, SettingsService>();
 
+        services.AddSingleton<IBookmarkService, BookmarkService>();
+
         services.AddSingleton<IBrowserService, WebView2BrowserService>();
 
         services.AddSingleton<ITabManager, TabManager>();
