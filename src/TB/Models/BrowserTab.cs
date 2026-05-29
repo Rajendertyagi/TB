@@ -7,4 +7,12 @@ public sealed class BrowserTab
     public string Title { get; set; } = "New Tab";
 
     public string Address { get; set; } = "https://www.google.com";
+
+    public bool CanGoBack { get; set; }
+
+    public bool CanGoForward { get; set; }
+
+    public DateTime CreatedUtc { get; init; } = DateTime.UtcNow;
+
+    public DateTime LastVisitedUtc { get; set; } = DateTime.UtcNow;
 }

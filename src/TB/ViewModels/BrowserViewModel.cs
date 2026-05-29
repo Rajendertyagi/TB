@@ -60,6 +60,12 @@ public sealed partial class BrowserViewModel : ObservableObject
         if (ActiveTab is not null)
         {
             ActiveTab.Address = Address;
+            ActiveTab.LastVisitedUtc = DateTime.UtcNow;
+
+            if (ActiveTab.Title == "New Tab")
+            {
+                ActiveTab.Title = Address;
+            }
         }
 
         _browserService.Navigate(Address);
