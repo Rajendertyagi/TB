@@ -12,7 +12,10 @@ public sealed class TabManager : ITabManager
 
     public BrowserTab AddTab()
     {
-        var tab = new BrowserTab();
+        var tab = new BrowserTab
+        {
+            LastActivatedUtc = DateTime.UtcNow
+        };
 
         Tabs.Add(tab);
 
@@ -30,7 +33,8 @@ public sealed class TabManager : ITabManager
         var tab = new BrowserTab
         {
             Address = address,
-            Title = address
+            Title = address,
+            LastActivatedUtc = DateTime.UtcNow
         };
 
         Tabs.Add(tab);
@@ -70,6 +74,8 @@ public sealed class TabManager : ITabManager
         {
             return;
         }
+
+        ActiveTab.LastActivatedUtc = DateTime.UtcNow;
 
         TbLogger.TabActivated(
             ActiveTab.Id,
