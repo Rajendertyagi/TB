@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TB Flags</title>
+
+    <style>
+        body
+        {
+            background: #111;
+            color: #fff;
+            font-family: Segoe UI, sans-serif;
+            margin: 20px;
+        }
+
+        h1
+        {
+            margin-bottom: 20px;
+        }
+
+        table
+        {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        th,
+        td
+        {
+            border: 1px solid #444;
+            padding: 10px;
+            text-align: left;
+        }
+
+        th
+        {
+            background: #222;
+        }
+
+        input[type="checkbox"]
+        {
+            width: 18px;
+            height: 18px;
+        }
+    </style>
+
+    <script>
+        function onFlagChanged(
+            checkbox,
+            flagName)
+        {
+            if (!window.chrome ||
+                !window.chrome.webview)
+            {
+                return;
+            }
+
+            window.chrome.webview.postMessage(
+                JSON.stringify(
+                {
+                    type: "flag-toggle",
+                    name: flagName,
+                    enabled: checkbox.checked
+                }));
+        }
+    </script>
+</head>
+
+<body>
+
+    <h1>TB Flags</h1>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Enabled</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{FLAGS_TABLE}}
+        </tbody>
+
+    </table>
+
+</body>
+</html>

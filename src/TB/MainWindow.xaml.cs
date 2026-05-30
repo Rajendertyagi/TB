@@ -1,8 +1,10 @@
 using System;
+using System.Text.Json;
 using System.Windows;
 using Microsoft.Web.WebView2.Wpf;
 using TB.Modules.Logging.Services;
 using TB.Services;
+using TB.Services.FeatureFlags;
 using TB.ViewModels;
 
 namespace TB;
@@ -13,12 +15,14 @@ public partial class MainWindow : Window
     private readonly IBrowserService _browserService;
     private readonly ITabManager _tabManager;
     private readonly IWebViewManager _webViewManager;
+    private readonly IFeatureFlagService _featureFlagService;
 
     public MainWindow(
         BrowserViewModel viewModel,
         IBrowserService browserService,
         ITabManager tabManager,
-        IWebViewManager webViewManager)
+        IWebViewManager webViewManager,
+        IFeatureFlagService featureFlagService)
     {
         InitializeComponent();
 
@@ -26,6 +30,7 @@ public partial class MainWindow : Window
         _browserService = browserService;
         _tabManager = tabManager;
         _webViewManager = webViewManager;
+        _featureFlagService = featureFlagService;
 
         DataContext = _viewModel;
 
@@ -49,6 +54,13 @@ public partial class MainWindow : Window
                     BrowserHost.Content = webView;
 
                     await webView.EnsureCoreWebView2Async();
+
+                    webView.CoreWebView2.WebMessageReceived +=
+                        (_, args) =>
+                        {
+                            HandleWebMessage(
+                                args.WebMessageAsJson);
+                        };
 
                     TbLogger.WebViewInitialized();
 
@@ -118,6 +130,13 @@ public partial class MainWindow : Window
 
         await browser.EnsureCoreWebView2Async();
 
+        browser.CoreWebView2.WebMessageReceived +=
+            (_, args) =>
+            {
+                HandleWebMessage(
+                    args.WebMessageAsJson);
+            };
+
         TbLogger.WebViewInitialized();
 
         browser.CoreWebView2.NavigationStarting +=
@@ -160,6 +179,39 @@ public partial class MainWindow : Window
 
         _browserService.Navigate(
             _viewModel.Address);
+    }
+
+    private void HandleWebMessage(
+        string json)
+    {
+        try
+        {
+            var message =
+                JsonSerializer.Deserialize<FeatureFlagMessage>(
+                    json);
+
+            if (message is null)
+            {
+                return;
+            }
+
+            if (!string.Equals(
+                    message.Type,
+                    "flag-toggle",
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            _featureFlagService.SetEnabled(
+                message.Name,
+                message.Enabled);
+        }
+        catch (Exception ex)
+        {
+            TbLogger.Exception(
+                ex);
+        }
     }
 
     private void GoButton_Click(

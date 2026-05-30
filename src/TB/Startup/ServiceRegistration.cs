@@ -2,6 +2,8 @@ using Microsoft.Extensions.DependencyInjection;
 using TB.Modules.Settings.Contracts;
 using TB.Modules.Settings.Services;
 using TB.Services;
+using TB.Services.FeatureFlags;
+using TB.Services.InternalPages;
 using TB.ViewModels;
 
 namespace TB.Startup;
@@ -14,6 +16,14 @@ public static class ServiceRegistration
 
         services.AddSingleton<IBookmarkService, BookmarkService>();
 
+        services.AddSingleton<
+            IFeatureFlagService,
+            FeatureFlagService>();
+
+        services.AddSingleton<
+            IInternalPageService,
+            InternalPageService>();
+
         services.AddSingleton<IBrowserService, WebView2BrowserService>();
 
         services.AddSingleton<IWebViewManager, WebViewManager>();
@@ -21,6 +31,7 @@ public static class ServiceRegistration
         services.AddSingleton<ITabManager, TabManager>();
 
         services.AddSingleton<BrowserViewModel>();
+
         services.AddSingleton<TabsViewModel>();
 
         services.AddSingleton<MainWindow>();
