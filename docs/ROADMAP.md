@@ -12,6 +12,35 @@
 
 33 Offline Recovery
 
+# Milestone 33A - Browser Diagnostics Foundation
+
+Priority: Critical
+
+## Goal
+
+Establish complete browser diagnostics before additional browser feature development.
+
+## Deliverables
+
+* Navigation logging
+* Tab logging
+* WebView logging
+* Network logging
+* Exception logging
+* Performance logging
+* State transition logging
+* UI interaction logging
+* 30-day retention support
+
+## Exit Criteria
+
+* User-reported issues can be diagnosed from logs.
+* Browser actions are traceable end-to-end.
+* Unhandled exceptions are captured automatically.
+* Build passes.
+* Manual testing passes.
+
+
 34 Keyboard Shortcuts
 
 35 Startup Optimization
@@ -29,3 +58,4 @@
 41 Dashboard Foundation
 
 42 Ad Blocking Foundation
+
