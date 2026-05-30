@@ -44,3 +44,21 @@ Next Milestone
 Build Status
 ------------
 Green
+
+2026-05-30
+
+Decision:
+---------
+Diagnostics are infrastructure.
+
+Rule:
+-----
+No user-testable feature may proceed
+without sufficient logging.
+
+Architecture:
+-------------
+LoggingConfigurator.cs
+TbLogger.cs
+TbLogEvents.cs
+
