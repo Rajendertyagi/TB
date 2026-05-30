@@ -1,9 +1,8 @@
-﻿using System.IO;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Serilog;
 using TB.Infrastructure.Bootstrap;
 using TB.Infrastructure.Hosting;
 using TB.Modules.Logging.Services;
@@ -25,10 +24,11 @@ public partial class App : Application
 
         LoggingConfigurator.Configure();
 
+        RegisterGlobalExceptionHandlers();
+
         if (File.Exists(RunningFlagFile))
         {
-            Log.Warning(
-                "Previous RTBrowser session ended unexpectedly. Crash recovery activated.");
+            TbLogger.CrashDetected();
         }
 
         File.WriteAllText(
@@ -69,9 +69,7 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Log.Error(
-                ex,
-                "Failed to restore session. Starting with default tab.");
+            TbLogger.Exception(ex);
         }
 
         if (tabManager.Tabs.Count == 0)
@@ -85,7 +83,7 @@ public partial class App : Application
 
         window.Show();
 
-        Log.Information("RTBrowser started successfully.");
+        TbLogger.ApplicationStartup();
     }
 
     protected override async void OnExit(ExitEventArgs e)
@@ -124,15 +122,34 @@ public partial class App : Application
                 File.Delete(RunningFlagFile);
             }
 
-            Log.Information("RTBrowser exited cleanly.");
+            TbLogger.ApplicationShutdown();
         }
         catch (Exception ex)
         {
-            Log.Error(
-                ex,
-                "Error during shutdown.");
+            TbLogger.Exception(ex);
         }
 
         base.OnExit(e);
+    }
+
+    private void RegisterGlobalExceptionHandlers()
+    {
+        DispatcherUnhandledException += (_, e) =>
+        {
+            TbLogger.Exception(e.Exception);
+        };
+
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            if (e.ExceptionObject is Exception ex)
+            {
+                TbLogger.Exception(ex);
+            }
+        };
+
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            TbLogger.Exception(e.Exception);
+        };
     }
 }
