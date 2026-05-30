@@ -22,6 +22,11 @@ public sealed class WebView2BrowserService : IBrowserService
         TbLogger.WebViewAttached();
     }
 
+    public void SetActiveBrowser(WebView2 browser)
+    {
+        _browser = browser;
+    }
+
     public void Navigate(string url)
     {
         TbLogger.NavigationRequested(url);

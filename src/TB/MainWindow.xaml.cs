@@ -32,15 +32,69 @@ public partial class MainWindow : Window
         Loaded += MainWindow_Loaded;
 
         _tabManager.ActiveTabChanged +=
-            tab =>
+            async tab =>
             {
                 var webView =
                     _webViewManager.Get(tab.Id);
 
-                if (webView is not null)
+                if (webView is null)
                 {
+                    webView =
+                        _webViewManager.Create(
+                            tab.Id);
+
+                    _browserService.SetActiveBrowser(
+                        webView);
+
                     BrowserHost.Content = webView;
+
+                    await webView.EnsureCoreWebView2Async();
+
+                    TbLogger.WebViewInitialized();
+
+                    webView.CoreWebView2.NavigationStarting +=
+                        (_, args) =>
+                        {
+                            TbLogger.NavigationStarted(
+                                args.Uri);
+                        };
+
+                    webView.CoreWebView2.NavigationCompleted +=
+                        (_, args) =>
+                        {
+                            var url =
+                                webView.Source?.ToString()
+                                ?? "Unknown";
+
+                            if (args.IsSuccess)
+                            {
+                                TbLogger.NavigationCompleted(
+                                    url);
+                            }
+                            else
+                            {
+                                TbLogger.WebViewProcessFailed(
+                                    args.WebErrorStatus.ToString());
+                            }
+                        };
+
+                    webView.CoreWebView2.ProcessFailed +=
+                        (_, args) =>
+                        {
+                            TbLogger.WebViewProcessFailed(
+                                args.ProcessFailedKind.ToString());
+                        };
+
+                    _browserService.Navigate(
+                        tab.Address);
+
+                    return;
                 }
+
+                _browserService.SetActiveBrowser(
+                    webView);
+
+                BrowserHost.Content = webView;
             };
     }
 
@@ -100,6 +154,9 @@ public partial class MainWindow : Window
             };
 
         _browserService.Attach(browser);
+
+        _browserService.SetActiveBrowser(
+            browser);
 
         _browserService.Navigate(
             _viewModel.Address);

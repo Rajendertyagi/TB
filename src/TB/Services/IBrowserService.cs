@@ -5,8 +5,14 @@ namespace TB.Services;
 public interface IBrowserService
 {
     void Attach(WebView2 browser);
+
+    void SetActiveBrowser(WebView2 browser);
+
     void Navigate(string url);
+
     void GoBack();
+
     void GoForward();
+
     void Refresh();
 }
