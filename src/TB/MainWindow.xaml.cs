@@ -11,26 +11,54 @@ public partial class MainWindow : Window
 {
     private readonly BrowserViewModel _viewModel;
     private readonly IBrowserService _browserService;
+    private readonly ITabManager _tabManager;
+    private readonly IWebViewManager _webViewManager;
 
     public MainWindow(
         BrowserViewModel viewModel,
-        IBrowserService browserService)
+        IBrowserService browserService,
+        ITabManager tabManager,
+        IWebViewManager webViewManager)
     {
         InitializeComponent();
 
         _viewModel = viewModel;
         _browserService = browserService;
+        _tabManager = tabManager;
+        _webViewManager = webViewManager;
 
         DataContext = _viewModel;
 
         Loaded += MainWindow_Loaded;
+
+        _tabManager.ActiveTabChanged +=
+            tab =>
+            {
+                var webView =
+                    _webViewManager.Get(tab.Id);
+
+                if (webView is not null)
+                {
+                    BrowserHost.Content = webView;
+                }
+            };
     }
 
     private async void MainWindow_Loaded(
         object sender,
         RoutedEventArgs e)
     {
-        var browser = new WebView2();
+        var activeTab =
+            _tabManager.ActiveTab;
+
+        if (activeTab is null)
+        {
+            return;
+        }
+
+        var browser =
+            _webViewManager.Create(
+                activeTab.Id);
 
         BrowserHost.Content = browser;
 

@@ -27,6 +27,8 @@ public sealed class TabManager : ITabManager
             tab.Id,
             Tabs.Count);
 
+        SetActiveTab(tab.Id);
+
         return tab;
     }
 
@@ -46,6 +48,8 @@ public sealed class TabManager : ITabManager
         TbLogger.TabAdded(
             tab.Id,
             Tabs.Count);
+
+        SetActiveTab(tab.Id);
 
         return tab;
     }

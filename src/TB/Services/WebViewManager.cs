@@ -16,7 +16,11 @@ public sealed class WebViewManager : IWebViewManager
             return existing;
         }
 
-        var webView = new WebView2();
+        var webView = new WebView2
+        {
+            HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
+            VerticalAlignment = System.Windows.VerticalAlignment.Stretch
+        };
 
         _webViews[tabId] = webView;
 
@@ -32,6 +36,11 @@ public sealed class WebViewManager : IWebViewManager
 
     public bool Remove(Guid tabId)
     {
+        if (_webViews.TryGetValue(tabId, out var webView))
+        {
+            webView.Dispose();
+        }
+
         return _webViews.Remove(tabId);
     }
 }
