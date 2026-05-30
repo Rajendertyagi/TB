@@ -16,6 +16,8 @@ public static class ServiceRegistration
 
         services.AddSingleton<IBrowserService, WebView2BrowserService>();
 
+        services.AddSingleton<IWebViewManager, WebViewManager>();
+
         services.AddSingleton<ITabManager, TabManager>();
 
         services.AddSingleton<BrowserViewModel>();

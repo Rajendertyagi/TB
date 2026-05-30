@@ -5,7 +5,15 @@ namespace TB.Services;
 
 public sealed class WebView2BrowserService : IBrowserService
 {
+    private readonly IWebViewManager _webViewManager;
+
     private WebView2? _browser;
+
+    public WebView2BrowserService(
+        IWebViewManager webViewManager)
+    {
+        _webViewManager = webViewManager;
+    }
 
     public void Attach(WebView2 browser)
     {
