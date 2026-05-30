@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using TB.Models;
@@ -12,6 +13,7 @@ public sealed partial class BrowserViewModel : ObservableObject
     private readonly IBrowserService _browserService;
     private readonly ITabManager _tabManager;
     private readonly IBookmarkService _bookmarkService;
+    private readonly IWebViewManager _webViewManager;
 
     [ObservableProperty]
     private BrowserTab? activeTab;
@@ -19,11 +21,13 @@ public sealed partial class BrowserViewModel : ObservableObject
     public BrowserViewModel(
         IBrowserService browserService,
         ITabManager tabManager,
-        IBookmarkService bookmarkService)
+        IBookmarkService bookmarkService,
+        IWebViewManager webViewManager)
     {
         _browserService = browserService;
         _tabManager = tabManager;
         _bookmarkService = bookmarkService;
+        _webViewManager = webViewManager;
 
         Bookmarks = new ObservableCollection<Bookmark>(
             _bookmarkService.Load());
@@ -71,9 +75,20 @@ public sealed partial class BrowserViewModel : ObservableObject
             return;
         }
 
-        _tabManager.CloseTab(tab.Id);
+        if (_tabManager.Tabs.Count == 1)
+        {
+            Application.Current.Shutdown();
+            return;
+        }
 
-        ActiveTab = _tabManager.ActiveTab;
+        _webViewManager.Remove(
+            tab.Id);
+
+        _tabManager.CloseTab(
+            tab.Id);
+
+        ActiveTab =
+            _tabManager.ActiveTab;
     }
 
     [RelayCommand]

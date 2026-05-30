@@ -56,34 +56,73 @@ public sealed class TabManager : ITabManager
 
     public void CloseTab(Guid id)
     {
-        var tab = Tabs.FirstOrDefault(x => x.Id == id);
+        var tab = Tabs.FirstOrDefault(
+            x => x.Id == id);
 
         if (tab is null)
         {
             return;
         }
 
-        Tabs.Remove(tab);
+        if (Tabs.Count == 1)
+        {
+            Tabs.Clear();
 
-        ActiveTab = Tabs.LastOrDefault();
+            var newTab = new BrowserTab
+            {
+                LastActivatedUtc =
+                    DateTime.UtcNow
+            };
+
+            Tabs.Add(newTab);
+
+            ActiveTab = newTab;
+
+            TbLogger.TabClosed(
+                id,
+                Tabs.Count);
+
+            SetActiveTab(
+                newTab.Id);
+
+            return;
+        }
+
+        var closingActiveTab =
+            ActiveTab?.Id == id;
+
+        Tabs.Remove(tab);
 
         TbLogger.TabClosed(
             id,
             Tabs.Count);
+
+        if (closingActiveTab)
+        {
+            var replacementTab =
+                Tabs.Last();
+
+            SetActiveTab(
+                replacementTab.Id);
+        }
     }
 
     public void SetActiveTab(Guid id)
     {
-        ActiveTab = Tabs.FirstOrDefault(x => x.Id == id);
+        ActiveTab =
+            Tabs.FirstOrDefault(
+                x => x.Id == id);
 
         if (ActiveTab is null)
         {
             return;
         }
 
-        ActiveTab.LastActivatedUtc = DateTime.UtcNow;
+        ActiveTab.LastActivatedUtc =
+            DateTime.UtcNow;
 
-        ActiveTabChanged?.Invoke(ActiveTab);
+        ActiveTabChanged?.Invoke(
+            ActiveTab);
 
         TbLogger.TabActivated(
             ActiveTab.Id,
