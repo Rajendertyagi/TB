@@ -34,26 +34,33 @@ public partial class App : Application
         var tabManager =
             _host.Services.GetRequiredService<ITabManager>();
 
-        var settings = settingsService.Load();
-
-        if (settings.OpenTabs.Count > 0)
+        try
         {
-            foreach (var address in settings.OpenTabs)
-            {
-                tabManager.AddTab(address);
-            }
+            var settings = settingsService.Load();
 
-            if (!string.IsNullOrWhiteSpace(settings.ActiveTab))
+            if (settings.OpenTabs.Count > 0)
             {
-                var activeTab =
-                    tabManager.Tabs
-                        .FirstOrDefault(x => x.Address == settings.ActiveTab);
-
-                if (activeTab is not null)
+                foreach (var address in settings.OpenTabs)
                 {
-                    tabManager.SetActiveTab(activeTab.Id);
+                    tabManager.AddTab(address);
+                }
+
+                if (settings.ActiveTabIndex >= 0 &&
+                    settings.ActiveTabIndex < tabManager.Tabs.Count)
+                {
+                    tabManager.SetActiveTab(
+                        tabManager.Tabs[settings.ActiveTabIndex].Id);
                 }
             }
+        }
+        catch
+        {
+            // Ignore corrupted settings and continue startup.
+        }
+
+        if (tabManager.Tabs.Count == 0)
+        {
+            tabManager.AddTab();
         }
 
         base.OnStartup(e);
@@ -80,8 +87,10 @@ public partial class App : Application
                     .Select(x => x.Address)
                     .ToList();
 
-            settings.ActiveTab =
-                tabManager.ActiveTab?.Address;
+            settings.ActiveTabIndex =
+                tabManager.ActiveTab is null
+                    ? 0
+                    : tabManager.Tabs.IndexOf(tabManager.ActiveTab);
 
             settingsService.Save(settings);
 

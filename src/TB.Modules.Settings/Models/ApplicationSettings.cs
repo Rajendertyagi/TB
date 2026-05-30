@@ -8,5 +8,5 @@ public sealed class ApplicationSettings
 
     public List<string> OpenTabs { get; set; } = [];
 
-    public string? ActiveTab { get; set; }
+    public int ActiveTabIndex { get; set; }
 }
