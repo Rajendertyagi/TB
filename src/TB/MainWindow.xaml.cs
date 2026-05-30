@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+using Microsoft.Web.WebView2.Wpf;
 using TB.Modules.Logging.Services;
 using TB.Services;
 using TB.ViewModels;
@@ -29,22 +30,26 @@ public partial class MainWindow : Window
         object sender,
         RoutedEventArgs e)
     {
-        await Browser.EnsureCoreWebView2Async();
+        var browser = new WebView2();
+
+        BrowserHost.Content = browser;
+
+        await browser.EnsureCoreWebView2Async();
 
         TbLogger.WebViewInitialized();
 
-        Browser.CoreWebView2.NavigationStarting +=
+        browser.CoreWebView2.NavigationStarting +=
             (_, args) =>
             {
                 TbLogger.NavigationStarted(
                     args.Uri);
             };
 
-        Browser.CoreWebView2.NavigationCompleted +=
+        browser.CoreWebView2.NavigationCompleted +=
             (_, args) =>
             {
                 var url =
-                    Browser.Source?.ToString()
+                    browser.Source?.ToString()
                     ?? "Unknown";
 
                 if (args.IsSuccess)
@@ -59,14 +64,14 @@ public partial class MainWindow : Window
                 }
             };
 
-        Browser.CoreWebView2.ProcessFailed +=
+        browser.CoreWebView2.ProcessFailed +=
             (_, args) =>
             {
                 TbLogger.WebViewProcessFailed(
                     args.ProcessFailedKind.ToString());
             };
 
-        _browserService.Attach(Browser);
+        _browserService.Attach(browser);
 
         _browserService.Navigate(
             _viewModel.Address);
