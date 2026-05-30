@@ -9,6 +9,8 @@ public interface ITabManager
 
     BrowserTab? ActiveTab { get; }
 
+    event Action<BrowserTab>? ActiveTabChanged;
+
     BrowserTab AddTab();
 
     BrowserTab AddTab(string address);

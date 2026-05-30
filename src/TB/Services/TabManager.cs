@@ -6,6 +6,8 @@ namespace TB.Services;
 
 public sealed class TabManager : ITabManager
 {
+    public event Action<BrowserTab>? ActiveTabChanged;
+
     public ObservableCollection<BrowserTab> Tabs { get; } = [];
 
     public BrowserTab? ActiveTab { get; private set; }
@@ -76,6 +78,8 @@ public sealed class TabManager : ITabManager
         }
 
         ActiveTab.LastActivatedUtc = DateTime.UtcNow;
+
+        ActiveTabChanged?.Invoke(ActiveTab);
 
         TbLogger.TabActivated(
             ActiveTab.Id,
