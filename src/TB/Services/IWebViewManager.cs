@@ -11,4 +11,6 @@ public interface IWebViewManager
     bool Remove(Guid tabId);
 
     IReadOnlyCollection<Guid> LoadedTabs { get; }
+
+    int LoadedTabCount { get; }
 }

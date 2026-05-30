@@ -102,6 +102,37 @@ public static class TbLogger
             TbLogEvents.WebView.Initialized);
     }
 
+    public static void WebViewCreated(
+        Guid tabId,
+        int loadedTabCount)
+    {
+        Log.Information(
+            "{Event} TabId={TabId} LoadedTabs={LoadedTabs}",
+            TbLogEvents.WebView.Created,
+            tabId,
+            loadedTabCount);
+    }
+
+    public static void WebViewReused(
+        Guid tabId)
+    {
+        Log.Information(
+            "{Event} TabId={TabId}",
+            TbLogEvents.WebView.Reused,
+            tabId);
+    }
+
+    public static void WebViewDisposed(
+        Guid tabId,
+        int loadedTabCount)
+    {
+        Log.Information(
+            "{Event} TabId={TabId} LoadedTabs={LoadedTabs}",
+            TbLogEvents.WebView.Disposed,
+            tabId,
+            loadedTabCount);
+    }
+
     public static void WebViewProcessFailed(string reason)
     {
         Log.Error(
