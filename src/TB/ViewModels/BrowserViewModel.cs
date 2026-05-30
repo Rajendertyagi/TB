@@ -48,6 +48,8 @@ public sealed partial class BrowserViewModel : ObservableObject
         _tabManager.SetActiveTab(value.Id);
 
         Address = value.Address;
+
+        _browserService.Navigate(value.Address);
     }
 
     public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;

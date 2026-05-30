@@ -61,6 +61,14 @@ public static class TbLogger
             url);
     }
 
+    public static void NavigationStarted(string url)
+    {
+        Log.Information(
+            "{Event} Url={Url}",
+            TbLogEvents.Navigation.Started,
+            url);
+    }
+
     public static void NavigationCompleted(string url)
     {
         Log.Information(
@@ -85,6 +93,21 @@ public static class TbLogger
         Log.Information(
             "{Event}",
             TbLogEvents.WebView.Attached);
+    }
+
+    public static void WebViewInitialized()
+    {
+        Log.Information(
+            "{Event}",
+            TbLogEvents.WebView.Initialized);
+    }
+
+    public static void WebViewProcessFailed(string reason)
+    {
+        Log.Error(
+            "{Event} Reason={Reason}",
+            TbLogEvents.WebView.ProcessFailed,
+            reason);
     }
 
     public static void Exception(Exception exception)

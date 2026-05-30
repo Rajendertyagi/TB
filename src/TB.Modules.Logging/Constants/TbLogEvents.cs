@@ -19,6 +19,7 @@ public static class TbLogEvents
     public static class Navigation
     {
         public const string Requested = "Navigation.Requested";
+        public const string Started = "Navigation.Started";
         public const string Completed = "Navigation.Completed";
         public const string Failed = "Navigation.Failed";
     }
