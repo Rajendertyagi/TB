@@ -12,7 +12,13 @@ public sealed class BrowserTab
 
     public bool CanGoForward { get; set; }
 
+    public bool IsLoaded { get; set; }
+
+    public bool IsCrashed { get; set; }
+
     public DateTime CreatedUtc { get; init; } = DateTime.UtcNow;
 
     public DateTime LastVisitedUtc { get; set; } = DateTime.UtcNow;
+
+    public DateTime LastActivatedUtc { get; set; } = DateTime.UtcNow;
 }
