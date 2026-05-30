@@ -1,7 +1,9 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using TB.Infrastructure.Bootstrap;
 using TB.Infrastructure.Hosting;
 using TB.Modules.Logging.Services;
@@ -13,6 +15,8 @@ namespace TB;
 
 public partial class App : Application
 {
+    private const string RunningFlagFile = "Settings/running.flag";
+
     private IHost? _host;
 
     protected override void OnStartup(StartupEventArgs e)
@@ -20,6 +24,16 @@ public partial class App : Application
         DirectoryBootstrapper.Initialize();
 
         LoggingConfigurator.Configure();
+
+        if (File.Exists(RunningFlagFile))
+        {
+            Log.Warning(
+                "Previous RTBrowser session ended unexpectedly. Crash recovery activated.");
+        }
+
+        File.WriteAllText(
+            RunningFlagFile,
+            DateTime.UtcNow.ToString("O"));
 
         _host = HostBuilderFactory.Create()
             .ConfigureServices(services =>
@@ -53,9 +67,11 @@ public partial class App : Application
                 }
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Ignore corrupted settings and continue startup.
+            Log.Error(
+                ex,
+                "Failed to restore session. Starting with default tab.");
         }
 
         if (tabManager.Tabs.Count == 0)
@@ -68,35 +84,53 @@ public partial class App : Application
         var window = _host.Services.GetRequiredService<MainWindow>();
 
         window.Show();
+
+        Log.Information("RTBrowser started successfully.");
     }
 
     protected override async void OnExit(ExitEventArgs e)
     {
-        if (_host is not null)
+        try
         {
-            var settingsService =
-                _host.Services.GetRequiredService<ISettingsService>();
+            if (_host is not null)
+            {
+                var settingsService =
+                    _host.Services.GetRequiredService<ISettingsService>();
 
-            var tabManager =
-                _host.Services.GetRequiredService<ITabManager>();
+                var tabManager =
+                    _host.Services.GetRequiredService<ITabManager>();
 
-            var settings = settingsService.Load();
+                var settings = settingsService.Load();
 
-            settings.OpenTabs =
-                tabManager.Tabs
-                    .Select(x => x.Address)
-                    .ToList();
+                settings.OpenTabs =
+                    tabManager.Tabs
+                        .Select(x => x.Address)
+                        .ToList();
 
-            settings.ActiveTabIndex =
-                tabManager.ActiveTab is null
-                    ? 0
-                    : tabManager.Tabs.IndexOf(tabManager.ActiveTab);
+                settings.ActiveTabIndex =
+                    tabManager.ActiveTab is null
+                        ? 0
+                        : tabManager.Tabs.IndexOf(tabManager.ActiveTab);
 
-            settingsService.Save(settings);
+                settingsService.Save(settings);
 
-            await _host.StopAsync();
+                await _host.StopAsync();
 
-            _host.Dispose();
+                _host.Dispose();
+            }
+
+            if (File.Exists(RunningFlagFile))
+            {
+                File.Delete(RunningFlagFile);
+            }
+
+            Log.Information("RTBrowser exited cleanly.");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(
+                ex,
+                "Error during shutdown.");
         }
 
         base.OnExit(e);
