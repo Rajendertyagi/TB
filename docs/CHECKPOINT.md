@@ -29,7 +29,18 @@ Green
 * Recovery
 * Performance
 
-## Notes
+Completed Milestone
+-------------------
+31 - Session Hardening
 
-GitHub connected to ChatGPT.
-Repository is source of truth.
+Current Stable Tag
+------------------
+milestone-31-stable
+
+Next Milestone
+--------------
+32 - Crash Recovery
+
+Build Status
+------------
+Green
