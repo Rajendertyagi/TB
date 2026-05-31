@@ -14,6 +14,15 @@ public sealed class TabManager : ITabManager
 
     public BrowserTab? ActiveTab { get; private set; }
 
+    public TabManager()
+    {
+        LifecycleLogger.Created(
+            nameof(TabManager));
+
+        LifecycleLogger.Initialized(
+            nameof(TabManager));
+    }
+
     public BrowserTab AddTab()
     {
         var tab = new BrowserTab
@@ -25,6 +34,9 @@ public sealed class TabManager : ITabManager
 
         TabCreated?.Invoke(
             tab);
+
+        CommandLogger.Completed(
+            "TabCreatedEvent");
 
         ActiveTab = tab;
 
@@ -52,6 +64,9 @@ public sealed class TabManager : ITabManager
         TabCreated?.Invoke(
             tab);
 
+        CommandLogger.Completed(
+            "TabCreatedEvent");
+
         ActiveTab = tab;
 
         TbLogger.TabAdded(
@@ -66,11 +81,18 @@ public sealed class TabManager : ITabManager
 
     public void CloseTab(Guid id)
     {
+        CommandLogger.Requested(
+            "CloseTab");
+
         var tab = Tabs.FirstOrDefault(
             x => x.Id == id);
 
         if (tab is null)
         {
+            CommandLogger.Warning(
+                "CloseTab",
+                $"Tab not found: {id}");
+
             return;
         }
 
@@ -89,6 +111,9 @@ public sealed class TabManager : ITabManager
             TabCreated?.Invoke(
                 newTab);
 
+            CommandLogger.Completed(
+                "TabCreatedEvent");
+
             ActiveTab = newTab;
 
             TbLogger.TabClosed(
@@ -97,6 +122,9 @@ public sealed class TabManager : ITabManager
 
             SetActiveTab(
                 newTab.Id);
+
+            CommandLogger.Completed(
+                "CloseTab");
 
             return;
         }
@@ -118,16 +146,26 @@ public sealed class TabManager : ITabManager
             SetActiveTab(
                 replacementTab.Id);
         }
+
+        CommandLogger.Completed(
+            "CloseTab");
     }
 
     public void SetActiveTab(Guid id)
     {
+        CommandLogger.Requested(
+            "SetActiveTab");
+
         ActiveTab =
             Tabs.FirstOrDefault(
                 x => x.Id == id);
 
         if (ActiveTab is null)
         {
+            CommandLogger.Warning(
+                "SetActiveTab",
+                $"Tab not found: {id}");
+
             return;
         }
 
@@ -137,9 +175,16 @@ public sealed class TabManager : ITabManager
         ActiveTabChanged?.Invoke(
             ActiveTab);
 
+        CommandLogger.Completed(
+            "ActiveTabChangedEvent");
+
         TbLogger.TabActivated(
             ActiveTab.Id,
             ActiveTab.Address);
+
+        CommandLogger.Completed(
+            "SetActiveTab");
     }
 }
+
 
