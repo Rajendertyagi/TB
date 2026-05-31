@@ -7,6 +7,7 @@ using TB.Modules.Themes.Services;
 using TB.Services;
 using TB.Services.FeatureFlags;
 using TB.Services.InternalPages;
+using TB.Services.KeyboardShortcuts;
 using TB.ViewModels;
 
 namespace TB.Startup;
@@ -74,6 +75,13 @@ public static class ServiceRegistration
 
         CommandLogger.Completed(
             "ITabManagerRegistered");
+
+        services.AddSingleton<
+            IKeyboardShortcutService,
+            KeyboardShortcutService>();
+
+        CommandLogger.Completed(
+            "IKeyboardShortcutServiceRegistered");
 
         services.AddSingleton<
             BrowserViewModel>();
