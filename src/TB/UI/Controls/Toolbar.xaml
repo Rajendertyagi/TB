@@ -20,21 +20,21 @@
 
         <Button Grid.Column="0"
                 Width="40"
-                Height="32"
+                Style="{StaticResource TBButtonStyle}"
                 Content="←"
                 Command="{Binding BackCommand}" />
 
         <Button Grid.Column="1"
                 Width="40"
-                Height="32"
                 Margin="4,0,0,0"
+                Style="{StaticResource TBButtonStyle}"
                 Content="→"
                 Command="{Binding ForwardCommand}" />
 
         <Button Grid.Column="2"
                 Width="40"
-                Height="32"
                 Margin="4,0,0,0"
+                Style="{StaticResource TBButtonStyle}"
                 Content="⟳"
                 Command="{Binding RefreshCommand}" />
 
@@ -49,7 +49,7 @@
         <Button x:Name="GoButton"
                 Grid.Column="4"
                 Width="80"
-                Height="32"
+                Style="{StaticResource TBButtonStyle}"
                 Content="Go"
                 Command="{Binding NavigateCommand}" />
 

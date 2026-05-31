@@ -5,7 +5,7 @@
     <DockPanel Margin="8">
 
         <Button Width="40"
-                Height="28"
+                Style="{StaticResource TBButtonStyle}"
                 Content="+"
                 Command="{Binding AddTabCommand}" />
 
@@ -34,8 +34,8 @@
                                        Text="{Binding Title}" />
 
                             <Button Width="20"
-                                    Height="20"
                                     Margin="6,0,0,0"
+                                    Style="{StaticResource TBButtonStyle}"
                                     Content="×"
                                     Command="{Binding DataContext.CloseTabCommand,
                                                       RelativeSource={RelativeSource AncestorType=Window}}"
