@@ -49,8 +49,6 @@ public sealed partial class BrowserViewModel : ObservableObject
             return;
         }
 
-        _tabManager.SetActiveTab(value.Id);
-
         Address = value.Address;
     }
 
