@@ -8,6 +8,8 @@ public sealed class TabManager : ITabManager
 {
     public event Action<BrowserTab>? ActiveTabChanged;
 
+    public event Action<BrowserTab>? TabCreated;
+
     public ObservableCollection<BrowserTab> Tabs { get; } = [];
 
     public BrowserTab? ActiveTab { get; private set; }
@@ -21,13 +23,17 @@ public sealed class TabManager : ITabManager
 
         Tabs.Add(tab);
 
+        TabCreated?.Invoke(
+            tab);
+
         ActiveTab = tab;
 
         TbLogger.TabAdded(
             tab.Id,
             Tabs.Count);
 
-        SetActiveTab(tab.Id);
+        SetActiveTab(
+            tab.Id);
 
         return tab;
     }
@@ -43,13 +49,17 @@ public sealed class TabManager : ITabManager
 
         Tabs.Add(tab);
 
+        TabCreated?.Invoke(
+            tab);
+
         ActiveTab = tab;
 
         TbLogger.TabAdded(
             tab.Id,
             Tabs.Count);
 
-        SetActiveTab(tab.Id);
+        SetActiveTab(
+            tab.Id);
 
         return tab;
     }
@@ -75,6 +85,9 @@ public sealed class TabManager : ITabManager
             };
 
             Tabs.Add(newTab);
+
+            TabCreated?.Invoke(
+                newTab);
 
             ActiveTab = newTab;
 
@@ -129,3 +142,4 @@ public sealed class TabManager : ITabManager
             ActiveTab.Address);
     }
 }
+
