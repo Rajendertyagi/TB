@@ -1,4 +1,5 @@
 using System.Windows;
+using TB.Modules.Logging.Services;
 using TB.Services;
 using TB.Services.FeatureFlags;
 using TB.ViewModels;
@@ -20,6 +21,9 @@ public partial class MainWindow : Window
         IWebViewManager webViewManager,
         IFeatureFlagService featureFlagService)
     {
+        LifecycleLogger.Created(
+            nameof(MainWindow));
+
         InitializeComponent();
 
         _viewModel = viewModel;
@@ -32,14 +36,29 @@ public partial class MainWindow : Window
 
         Loaded += MainWindow_Loaded;
 
+        CommandLogger.Completed(
+            "MainWindowLoadedHandlerRegistered");
+
         RegisterActiveTabChangedHandler();
+
+        CommandLogger.Completed(
+            "ActiveTabChangedHandlerRegistered");
+
+        LifecycleLogger.Initialized(
+            nameof(MainWindow));
     }
 
     private void GoButton_Click(
         object sender,
         RoutedEventArgs e)
     {
+        CommandLogger.Requested(
+            "GoButtonClick");
+
         _viewModel.NavigateCommand.Execute(
             null);
+
+        CommandLogger.Completed(
+            "GoButtonClick");
     }
 }
