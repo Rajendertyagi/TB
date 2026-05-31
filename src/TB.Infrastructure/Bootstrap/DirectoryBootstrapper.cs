@@ -1,4 +1,5 @@
 using System.IO;
+using TB.Modules.Logging.Services;
 
 namespace TB.Infrastructure.Bootstrap;
 
@@ -6,10 +7,35 @@ public static class DirectoryBootstrapper
 {
     public static void Initialize()
     {
-        Directory.CreateDirectory("Logs");
-        Directory.CreateDirectory("Settings");
-        Directory.CreateDirectory("UserData");
+        LifecycleLogger.Created(
+            nameof(DirectoryBootstrapper));
 
-        File.AppendAllText("Logs/app.log", string.Empty);
+        Directory.CreateDirectory(
+            "Logs");
+
+        CommandLogger.Completed(
+            "LogsDirectoryCreated");
+
+        Directory.CreateDirectory(
+            "Settings");
+
+        CommandLogger.Completed(
+            "SettingsDirectoryCreated");
+
+        Directory.CreateDirectory(
+            "UserData");
+
+        CommandLogger.Completed(
+            "UserDataDirectoryCreated");
+
+        File.AppendAllText(
+            "Logs/app.log",
+            string.Empty);
+
+        CommandLogger.Completed(
+            "LogFileVerified");
+
+        LifecycleLogger.Initialized(
+            nameof(DirectoryBootstrapper));
     }
 }
