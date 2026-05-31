@@ -7,6 +7,7 @@
         WindowStartupLocation="CenterScreen">
 
     <Grid>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -14,7 +15,9 @@
         </Grid.RowDefinitions>
 
         <!-- Tabs -->
-        <DockPanel Grid.Row="0" Margin="8">
+
+        <DockPanel Grid.Row="0"
+                   Margin="8">
 
             <Button Width="40"
                     Height="28"
@@ -35,6 +38,7 @@
 
                 <ListBox.ItemTemplate>
                     <DataTemplate>
+
                         <Border Margin="2"
                                 Padding="6,2"
                                 BorderThickness="1">
@@ -55,6 +59,7 @@
                             </StackPanel>
 
                         </Border>
+
                     </DataTemplate>
                 </ListBox.ItemTemplate>
 
@@ -63,44 +68,66 @@
         </DockPanel>
 
         <!-- Navigation Toolbar -->
-        <DockPanel Grid.Row="1" Margin="8">
 
-            <Button Width="40"
+        <Grid Grid.Row="1"
+              Margin="8">
+
+            <Grid.ColumnDefinitions>
+
+                <ColumnDefinition Width="Auto"/>
+
+                <ColumnDefinition Width="Auto"/>
+
+                <ColumnDefinition Width="Auto"/>
+
+                <ColumnDefinition Width="*"/>
+
+                <ColumnDefinition Width="Auto"/>
+
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0"
+                    Width="40"
                     Height="32"
                     Content="←"
                     Command="{Binding BackCommand}" />
 
-            <Button Width="40"
+            <Button Grid.Column="1"
+                    Width="40"
                     Height="32"
                     Margin="4,0,0,0"
                     Content="→"
                     Command="{Binding ForwardCommand}" />
 
-            <Button Width="40"
+            <Button Grid.Column="2"
+                    Width="40"
                     Height="32"
                     Margin="4,0,0,0"
                     Content="⟳"
                     Command="{Binding RefreshCommand}" />
 
             <TextBox x:Name="AddressBar"
-                     Width="968"
+                     Grid.Column="3"
                      Height="32"
-                     Margin="8,0,0,0"
+                     Margin="8,0,8,0"
                      VerticalContentAlignment="Center"
-                     Text="{Binding Address, UpdateSourceTrigger=PropertyChanged}" />
+                     Text="{Binding Address,
+                                    UpdateSourceTrigger=PropertyChanged}" />
 
             <Button x:Name="GoButton"
+                    Grid.Column="4"
                     Width="80"
                     Height="32"
-                    Margin="8,0,0,0"
                     Content="Go"
                     Click="GoButton_Click" />
 
-        </DockPanel>
+        </Grid>
 
         <!-- Browser Host -->
+
         <ContentControl x:Name="BrowserHost"
                         Grid.Row="2" />
 
     </Grid>
+
 </Window>
