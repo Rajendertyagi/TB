@@ -5,22 +5,28 @@
         Title="Trading Browser"
         Width="1280"
         Height="800"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        Background="{StaticResource TBBackgroundBrush}">
 
     <Grid>
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <ui:TabStrip Grid.Row="0" />
+        <ui:TitleBar Grid.Row="0" />
 
-        <ui:Toolbar Grid.Row="1" />
+        <ui:TabStrip Grid.Row="1" />
+
+        <ui:Toolbar Grid.Row="2" />
 
         <ContentControl x:Name="BrowserHost"
-                        Grid.Row="2" />
+                        Grid.Row="3" />
 
     </Grid>
 

@@ -14,6 +14,24 @@
                 <ResourceDictionary
                     Source="UI/Resources/TBColors.xaml" />
 
+                <ResourceDictionary
+                    Source="UI/Resources/TBWindow.xaml" />
+
+                <ResourceDictionary
+                    Source="UI/Resources/TBButtons.xaml" />
+
+                <ResourceDictionary
+                    Source="UI/Resources/TBWindowButtons.xaml" />
+
+                <ResourceDictionary
+                    Source="UI/Resources/TBTextBox.xaml" />
+
+                <ResourceDictionary
+                    Source="UI/Resources/TBToolbar.xaml" />
+
+                <ResourceDictionary
+                    Source="UI/Resources/TBTabs.xaml" />
+
             </ResourceDictionary.MergedDictionaries>
 
         </ResourceDictionary>
