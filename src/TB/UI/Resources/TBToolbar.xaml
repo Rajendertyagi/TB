@@ -1,0 +1,17 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Thickness x:Key="TBToolbarMargin">
+        8
+    </Thickness>
+
+    <Thickness x:Key="TBToolbarControlSpacing">
+        4,0,0,0
+    </Thickness>
+
+    <Thickness x:Key="TBAddressBarMargin">
+        8,0,8,0
+    </Thickness>
+
+</ResourceDictionary>

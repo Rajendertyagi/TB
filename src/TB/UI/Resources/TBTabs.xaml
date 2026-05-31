@@ -1,0 +1,17 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Thickness x:Key="TBTabMargin">
+        2
+    </Thickness>
+
+    <Thickness x:Key="TBTabPadding">
+        6,2
+    </Thickness>
+
+    <Thickness x:Key="TBTabCloseButtonMargin">
+        6,0,0,0
+    </Thickness>
+
+</ResourceDictionary>
