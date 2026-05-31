@@ -1,0 +1,47 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Color x:Key="TBBackgroundColor">
+        #151515
+    </Color>
+
+    <Color x:Key="TBSurfaceColor">
+        #1C1C1C
+    </Color>
+
+    <Color x:Key="TBSurfaceHoverColor">
+        #242424
+    </Color>
+
+    <Color x:Key="TBBorderColor">
+        #2B2B2B
+    </Color>
+
+    <Color x:Key="TBAccentColor">
+        #7C5CFF
+    </Color>
+
+    <Color x:Key="TBTextColor">
+        #FFFFFF
+    </Color>
+
+    <SolidColorBrush x:Key="TBBackgroundBrush"
+                     Color="{StaticResource TBBackgroundColor}" />
+
+    <SolidColorBrush x:Key="TBSurfaceBrush"
+                     Color="{StaticResource TBSurfaceColor}" />
+
+    <SolidColorBrush x:Key="TBSurfaceHoverBrush"
+                     Color="{StaticResource TBSurfaceHoverColor}" />
+
+    <SolidColorBrush x:Key="TBBorderBrush"
+                     Color="{StaticResource TBBorderColor}" />
+
+    <SolidColorBrush x:Key="TBAccentBrush"
+                     Color="{StaticResource TBAccentColor}" />
+
+    <SolidColorBrush x:Key="TBTextBrush"
+                     Color="{StaticResource TBTextColor}" />
+
+</ResourceDictionary>
