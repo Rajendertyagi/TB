@@ -4,53 +4,109 @@ namespace TB.Modules.Logging.Services;
 
 public static class BookmarkLogger
 {
-    public static void Added(
+    public static void AddRequested(
         string title,
         string url)
     {
         Log.Information(
-            "Bookmark.Added Title={Title} Url={Url}",
+            "Bookmark.Add.Requested Title={Title} Url={Url}",
             title,
             url);
     }
 
-    public static void Updated(
+    public static void AddCompleted(
         string title,
         string url)
     {
         Log.Information(
-            "Bookmark.Updated Title={Title} Url={Url}",
+            "Bookmark.Add.Completed Title={Title} Url={Url}",
             title,
             url);
     }
 
-    public static void Removed(
+    public static void RemoveRequested(
         string title,
         string url)
     {
         Log.Information(
-            "Bookmark.Removed Title={Title} Url={Url}",
+            "Bookmark.Remove.Requested Title={Title} Url={Url}",
             title,
             url);
     }
 
-    public static void Opened(
+    public static void RemoveCompleted(
         string title,
         string url)
     {
         Log.Information(
-            "Bookmark.Opened Title={Title} Url={Url}",
+            "Bookmark.Remove.Completed Title={Title} Url={Url}",
             title,
             url);
+    }
+
+    public static void UpdateRequested(
+        string title,
+        string url)
+    {
+        Log.Information(
+            "Bookmark.Update.Requested Title={Title} Url={Url}",
+            title,
+            url);
+    }
+
+    public static void UpdateCompleted(
+        string title,
+        string url)
+    {
+        Log.Information(
+            "Bookmark.Update.Completed Title={Title} Url={Url}",
+            title,
+            url);
+    }
+
+    public static void OpenRequested(
+        string title,
+        string url)
+    {
+        Log.Information(
+            "Bookmark.Open.Requested Title={Title} Url={Url}",
+            title,
+            url);
+    }
+
+    public static void OpenCompleted(
+        string title,
+        string url)
+    {
+        Log.Information(
+            "Bookmark.Open.Completed Title={Title} Url={Url}",
+            title,
+            url);
+    }
+
+    public static void Loaded(
+        int bookmarkCount)
+    {
+        Log.Information(
+            "Bookmark.Loaded Count={Count}",
+            bookmarkCount);
+    }
+
+    public static void Saved(
+        int bookmarkCount)
+    {
+        Log.Information(
+            "Bookmark.Saved Count={Count}",
+            bookmarkCount);
     }
 
     public static void Failed(
-        string title,
+        string operation,
         Exception exception)
     {
         Log.Error(
             exception,
-            "Bookmark.Failed Title={Title}",
-            title);
+            "Bookmark.Failed Operation={Operation}",
+            operation);
     }
 }

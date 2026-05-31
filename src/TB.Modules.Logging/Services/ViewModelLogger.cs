@@ -20,6 +20,22 @@ public static class ViewModelLogger
             viewModelName);
     }
 
+    public static void Activated(
+        string viewModelName)
+    {
+        Log.Information(
+            "ViewModel.Activated Name={ViewModel}",
+            viewModelName);
+    }
+
+    public static void Deactivated(
+        string viewModelName)
+    {
+        Log.Information(
+            "ViewModel.Deactivated Name={ViewModel}",
+            viewModelName);
+    }
+
     public static void PropertyChanged(
         string viewModelName,
         string propertyName)
@@ -38,6 +54,16 @@ public static class ViewModelLogger
             "ViewModel.CommandExecuted ViewModel={ViewModel} Command={Command}",
             viewModelName,
             commandName);
+    }
+
+    public static void Warning(
+        string viewModelName,
+        string message)
+    {
+        Log.Warning(
+            "ViewModel.Warning Name={ViewModel} Message={Message}",
+            viewModelName,
+            message);
     }
 
     public static void Disposed(

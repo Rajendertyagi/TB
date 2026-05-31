@@ -28,6 +28,24 @@ public static class CommandLogger
             commandName);
     }
 
+    public static void Success(
+        string commandName)
+    {
+        Log.Information(
+            "Command.Success Name={Command}",
+            commandName);
+    }
+
+    public static void Warning(
+        string commandName,
+        string message)
+    {
+        Log.Warning(
+            "Command.Warning Name={Command} Message={Message}",
+            commandName,
+            message);
+    }
+
     public static void Cancelled(
         string commandName)
     {
