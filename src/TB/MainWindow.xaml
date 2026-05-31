@@ -17,61 +17,7 @@
 
         <ui:TabStrip Grid.Row="0" />
 
-        <!-- Navigation Toolbar -->
-
-        <Grid Grid.Row="1"
-              Margin="8">
-
-            <Grid.ColumnDefinitions>
-
-                <ColumnDefinition Width="Auto"/>
-
-                <ColumnDefinition Width="Auto"/>
-
-                <ColumnDefinition Width="Auto"/>
-
-                <ColumnDefinition Width="*"/>
-
-                <ColumnDefinition Width="Auto"/>
-
-            </Grid.ColumnDefinitions>
-
-            <Button Grid.Column="0"
-                    Width="40"
-                    Height="32"
-                    Content="←"
-                    Command="{Binding BackCommand}" />
-
-            <Button Grid.Column="1"
-                    Width="40"
-                    Height="32"
-                    Margin="4,0,0,0"
-                    Content="→"
-                    Command="{Binding ForwardCommand}" />
-
-            <Button Grid.Column="2"
-                    Width="40"
-                    Height="32"
-                    Margin="4,0,0,0"
-                    Content="⟳"
-                    Command="{Binding RefreshCommand}" />
-
-            <TextBox x:Name="AddressBar"
-                     Grid.Column="3"
-                     Height="32"
-                     Margin="8,0,8,0"
-                     VerticalContentAlignment="Center"
-                     Text="{Binding Address,
-                                    UpdateSourceTrigger=PropertyChanged}" />
-
-            <Button x:Name="GoButton"
-                    Grid.Column="4"
-                    Width="80"
-                    Height="32"
-                    Content="Go"
-                    Click="GoButton_Click" />
-
-        </Grid>
+        <ui:Toolbar Grid.Row="1" />
 
         <ContentControl x:Name="BrowserHost"
                         Grid.Row="2" />

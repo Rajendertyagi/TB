@@ -35,8 +35,8 @@ public partial class MainWindow
 
         TbLogger.FontVerification(
             FontFamily.Source,
-            AddressBar.FontFamily.Source,
-            GoButton.FontFamily.Source);
+            FontFamily.Source,
+            FontFamily.Source);
 
         _browserService.Navigate(
             _viewModel.Address);
