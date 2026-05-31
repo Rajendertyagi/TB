@@ -1,8 +1,5 @@
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using TB.Models;
 using TB.Services;
 
@@ -17,6 +14,13 @@ public sealed partial class BrowserViewModel : ObservableObject
 
     [ObservableProperty]
     private BrowserTab? activeTab;
+
+    [ObservableProperty]
+    private string address = "https://www.google.com";
+
+    public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
+
+    public ObservableCollection<Bookmark> Bookmarks { get; }
 
     public BrowserViewModel(
         IBrowserService browserService,
@@ -42,7 +46,8 @@ public sealed partial class BrowserViewModel : ObservableObject
         }
     }
 
-    partial void OnActiveTabChanged(BrowserTab? value)
+    partial void OnActiveTabChanged(
+        BrowserTab? value)
     {
         if (value is null)
         {
@@ -50,108 +55,5 @@ public sealed partial class BrowserViewModel : ObservableObject
         }
 
         Address = value.Address;
-    }
-
-    public ObservableCollection<BrowserTab> Tabs => _tabManager.Tabs;
-
-    public ObservableCollection<Bookmark> Bookmarks { get; }
-
-    [ObservableProperty]
-    private string address = "https://www.google.com";
-
-    [RelayCommand]
-    private void AddTab()
-    {
-        ActiveTab = _tabManager.AddTab();
-    }
-
-    [RelayCommand]
-    private void CloseTab(BrowserTab? tab)
-    {
-        if (tab is null)
-        {
-            return;
-        }
-
-        if (_tabManager.Tabs.Count == 1)
-        {
-            Application.Current.Shutdown();
-            return;
-        }
-
-        _webViewManager.Remove(
-            tab.Id);
-
-        _tabManager.CloseTab(
-            tab.Id);
-
-        ActiveTab =
-            _tabManager.ActiveTab;
-    }
-
-    [RelayCommand]
-    private void AddBookmark()
-    {
-        if (ActiveTab is null)
-        {
-            return;
-        }
-
-        var bookmark = new Bookmark
-        {
-            Title = ActiveTab.Title,
-            Url = ActiveTab.Address
-        };
-
-        Bookmarks.Add(bookmark);
-
-        _bookmarkService.Save(Bookmarks.ToList());
-    }
-
-    [RelayCommand]
-    private void RemoveBookmark(Bookmark? bookmark)
-    {
-        if (bookmark is null)
-        {
-            return;
-        }
-
-        Bookmarks.Remove(bookmark);
-
-        _bookmarkService.Save(Bookmarks.ToList());
-    }
-
-    [RelayCommand]
-    private void Navigate()
-    {
-        if (ActiveTab is not null)
-        {
-            ActiveTab.Address = Address;
-
-            if (ActiveTab.Title == "New Tab")
-            {
-                ActiveTab.Title = Address;
-            }
-        }
-
-        _browserService.Navigate(Address);
-    }
-
-    [RelayCommand]
-    private void Back()
-    {
-        _browserService.GoBack();
-    }
-
-    [RelayCommand]
-    private void Forward()
-    {
-        _browserService.GoForward();
-    }
-
-    [RelayCommand]
-    private void Refresh()
-    {
-        _browserService.Refresh();
     }
 }
