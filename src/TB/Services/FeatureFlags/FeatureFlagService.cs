@@ -1,6 +1,7 @@
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using TB.Modules.Logging.Services;
 
 namespace TB.Services.FeatureFlags;
 
@@ -14,8 +15,14 @@ public sealed class FeatureFlagService
 
     public FeatureFlagService()
     {
+        LifecycleLogger.Created(
+            nameof(FeatureFlagService));
+
         _flags =
             Load().ToList();
+
+        LifecycleLogger.Initialized(
+            nameof(FeatureFlagService));
     }
 
     public IReadOnlyList<FeatureFlag> Load()
@@ -28,6 +35,10 @@ public sealed class FeatureFlagService
 
             Save(defaults);
 
+            FeatureFlagLogger.Loaded(
+                "Defaults",
+                true);
+
             return defaults;
         }
 
@@ -35,9 +46,19 @@ public sealed class FeatureFlagService
             File.ReadAllText(
                 FlagsFile);
 
-        return JsonSerializer.Deserialize<List<FeatureFlag>>(
-                   json)
-               ?? [];
+        var flags =
+            JsonSerializer.Deserialize<List<FeatureFlag>>(
+                json)
+            ?? [];
+
+        foreach (var flag in flags)
+        {
+            FeatureFlagLogger.Loaded(
+                flag.Name,
+                flag.Enabled);
+        }
+
+        return flags;
     }
 
     public void Save(
@@ -78,11 +99,32 @@ public sealed class FeatureFlagService
 
         if (flag is null)
         {
+            FeatureFlagLogger.Failed(
+                name,
+                new InvalidOperationException(
+                    "Feature flag not found"));
+
             return;
         }
 
         flag.Enabled = enabled;
 
-        Save(_flags);
+        if (enabled)
+        {
+            FeatureFlagLogger.Enabled(
+                name);
+        }
+        else
+        {
+            FeatureFlagLogger.Disabled(
+                name);
+        }
+
+        FeatureFlagLogger.Changed(
+            name,
+            enabled);
+
+        Save(
+            _flags);
     }
 }
