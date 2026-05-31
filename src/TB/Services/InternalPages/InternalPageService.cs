@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using TB.Modules.Logging.Services;
 using TB.Services.FeatureFlags;
 
 namespace TB.Services.InternalPages;
@@ -15,20 +16,33 @@ public sealed class InternalPageService
     public InternalPageService(
         IFeatureFlagService featureFlagService)
     {
+        LifecycleLogger.Created(
+            nameof(InternalPageService));
+
         _featureFlagService =
             featureFlagService;
+
+        LifecycleLogger.Initialized(
+            nameof(InternalPageService));
     }
 
     public bool TryGetPage(
         string url,
         out string html)
     {
+        CommandLogger.Requested(
+            "InternalPageRequest");
+
         html = string.Empty;
 
         if (!url.Equals(
                 "tb://flags",
                 StringComparison.OrdinalIgnoreCase))
         {
+            CommandLogger.Warning(
+                "InternalPageRequest",
+                $"No page registered for {url}");
+
             return false;
         }
 
@@ -36,8 +50,14 @@ public sealed class InternalPageService
             File.ReadAllText(
                 FlagsTemplate);
 
+        CommandLogger.Completed(
+            "FlagsTemplateLoaded");
+
         var flags =
             _featureFlagService.Load();
+
+        CommandLogger.Completed(
+            $"FlagsLoaded Count={flags.Count}");
 
         var rows =
             new StringBuilder();
@@ -63,6 +83,9 @@ public sealed class InternalPageService
             template.Replace(
                 "{{FLAGS_TABLE}}",
                 rows.ToString());
+
+        CommandLogger.Completed(
+            "FlagsPageGenerated");
 
         return true;
     }
