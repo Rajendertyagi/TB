@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using TB.Modules.Settings.Contracts;
 using TB.Modules.Settings.Services;
+using TB.Modules.Themes.Contracts;
+using TB.Modules.Themes.Services;
 using TB.Services;
 using TB.Services.FeatureFlags;
 using TB.Services.InternalPages;
@@ -10,11 +12,20 @@ namespace TB.Startup;
 
 public static class ServiceRegistration
 {
-    public static IServiceCollection AddTbServices(this IServiceCollection services)
+    public static IServiceCollection AddTbServices(
+        this IServiceCollection services)
     {
-        services.AddSingleton<ISettingsService, SettingsService>();
+        services.AddSingleton<
+            ISettingsService,
+            SettingsService>();
 
-        services.AddSingleton<IBookmarkService, BookmarkService>();
+        services.AddSingleton<
+            IThemeService,
+            ThemeService>();
+
+        services.AddSingleton<
+            IBookmarkService,
+            BookmarkService>();
 
         services.AddSingleton<
             IFeatureFlagService,
@@ -24,17 +35,26 @@ public static class ServiceRegistration
             IInternalPageService,
             InternalPageService>();
 
-        services.AddSingleton<IBrowserService, WebView2BrowserService>();
+        services.AddSingleton<
+            IBrowserService,
+            WebView2BrowserService>();
 
-        services.AddSingleton<IWebViewManager, WebViewManager>();
+        services.AddSingleton<
+            IWebViewManager,
+            WebViewManager>();
 
-        services.AddSingleton<ITabManager, TabManager>();
+        services.AddSingleton<
+            ITabManager,
+            TabManager>();
 
-        services.AddSingleton<BrowserViewModel>();
+        services.AddSingleton<
+            BrowserViewModel>();
 
-        services.AddSingleton<TabsViewModel>();
+        services.AddSingleton<
+            TabsViewModel>();
 
-        services.AddSingleton<MainWindow>();
+        services.AddSingleton<
+            MainWindow>();
 
         return services;
     }
