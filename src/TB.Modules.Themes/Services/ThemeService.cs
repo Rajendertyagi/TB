@@ -1,3 +1,4 @@
+using TB.Modules.Logging.Services;
 using TB.Modules.Themes.Contracts;
 using TB.Modules.Themes.Models;
 
@@ -10,11 +11,17 @@ public sealed class ThemeService : IThemeService
 
     public ThemeSettings Load()
     {
+        ThemeLogger.Loaded(
+            _settings.CurrentTheme);
+
         return _settings;
     }
 
     public ThemeDefinition GetCurrentTheme()
     {
+        ThemeLogger.Applied(
+            _settings.CurrentTheme);
+
         return new ThemeDefinition
         {
             Name = "HeliumDark",
@@ -44,7 +51,16 @@ public sealed class ThemeService : IThemeService
     public void Apply(
         string themeName)
     {
+        ThemeLogger.Changed(
+            _settings.CurrentTheme,
+            themeName);
+
         _settings.CurrentTheme =
             themeName;
+
+        ThemeLogger.Applied(
+            themeName);
     }
 }
+
+
