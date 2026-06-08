@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradingShell</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="shell-header">
+        <div class="tab-bar">
+            <div class="tabs-container"></div>
+            <button class="new-tab-btn" title="New Tab (Ctrl+T)" data-icon="add-tab"></button>
+        </div>
+
+        <div class="nav-bar">
+            <div class="nav-buttons">
+                <button class="icon-btn" id="btn-back" title="Back (Alt+Left)" data-icon="back"></button>
+                <button class="icon-btn" id="btn-forward" title="Forward (Alt+Right)" data-icon="forward"></button>
+                <button class="icon-btn" id="btn-reload" title="Reload (F5)" data-icon="refresh"></button>
+            </div>
+
+            <div class="url-bar">
+                <span class="security-icon" id="security-icon" data-icon="lock"></span>
+                <input type="text" id="url-input" value="" spellcheck="false" placeholder="Search or enter address">
+            </div>
+
+            <button class="icon-btn" id="btn-menu" title="Menu" data-icon="menu"></button>
+        </div>
+    </div>
+
+    <!-- Right-Click Context Menu -->
+    <div id="context-menu" class="context-menu">
+        <div class="ctx-item" data-action="pin">Pin Tab</div>
+        <div class="ctx-item" data-action="mute">Mute Tab</div>
+        <div class="ctx-item" data-action="split">Split Screen</div>
+        <hr class="ctx-divider">
+        <div class="ctx-item" data-action="close">Close Tab</div>
+    </div>
+
+    <script src="js/icons.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "native": {
+    "titleBarText": "#F5D5E0",
+    "titleBarIconHover": "#FF4E8A"
+  },
+  "css": {
+    "--bg-app": "#1A111B",
+    "--bg-titlebar": "#241626",
+    "--bg-tab": "#36203B",
+    "--bg-tab-hover": "#4A2545",
+    "--bg-tab-active": "#1A111B",
+    "--text-main": "#F5D5E0",
+    "--text-muted": "#A885A8",
+    "--accent": "#FF4E8A",
+    "--font-main": "'Segoe UI', system-ui, -apple-system, sans-serif",
+
+    "--header-shadow": "0 8px 24px rgba(0, 0, 0, 0.6)",
+    "--ctx-shadow": "0 12px 32px rgba(0, 0, 0, 0.8)",
+    "--border-crisp": "1px solid rgba(255, 255, 255, 0.06)",
+    "--border-active": "1px solid rgba(255, 255, 255, 0.08)",
+
+    "--tabbar-height": "32px",
+    "--nav-height": "36px",
+    "--tab-height": "24px",
+    "--urlbar-height": "28px",
+    "--radius-sm": "4px",
+    "--radius-md": "6px"
+  }
+}
