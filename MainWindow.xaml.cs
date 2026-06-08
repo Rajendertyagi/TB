@@ -5,7 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.IO;
-using System.Runtime.InteropServices; // Required for OS Hooks
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using TB.Features.Tabs;
 using TB.Infrastructure;
@@ -40,7 +40,7 @@ namespace TB
         {
             this.InitializeComponent();
             this.RootGrid.Loaded += RootGrid_Loaded;
-            this.Closed += MainWindow_Closed; // Clean up hook when app closes
+            this.Closed += MainWindow_Closed;
             _themeService = new ThemeService(AppDomain.CurrentDomain.BaseDirectory);
 
             IntPtr hwnd = WindowNative.GetWindowHandle(this);
@@ -76,21 +76,17 @@ namespace TB
                 _tabManager = new TabManager(ContentGrid, ShellWebView.CoreWebView2);
                 ShellWebView.Source = new Uri(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot", "index.html"));
 
-                // INSTALL THE OS-LEVEL KEYBOARD HOOK
                 _hookProc = KeyboardHookCallback;
-                _hookId = SetWindowsHookEx(2, _hookProc, IntPtr.Zero, GetCurrentThreadId()); // 2 = WH_KEYBOARD
+                _hookId = SetWindowsHookEx(2, _hookProc, IntPtr.Zero, GetCurrentThreadId());
             }
             catch (Exception ex) { Logger.Error($"Startup Error: {ex.Message}"); }
         }
 
-        // THE OS-LEVEL INTERCEPTOR
         private IntPtr KeyboardHookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
             if (nCode >= 0)
             {
-                // Bit 31 of lParam: 0 = Key Down, 1 = Key Up
                 bool isKeyDown = ((long)lParam & 0x80000000) == 0;
-
                 if (isKeyDown)
                 {
                     VirtualKey key = (VirtualKey)wParam.ToInt32();
@@ -98,10 +94,7 @@ namespace TB
                     bool shift = (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift) & CoreVirtualKeyStates.Down) == CoreVirtualKeyStates.Down;
                     bool alt = (InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Menu) & CoreVirtualKeyStates.Down) == CoreVirtualKeyStates.Down;
 
-                    if (ProcessShortcut(key, ctrl, shift, alt))
-                    {
-                        return (IntPtr)1; // BLOCK the key from reaching the website
-                    }
+                    if (ProcessShortcut(key, ctrl, shift, alt)) return (IntPtr)1;
                 }
             }
             return CallNextHookEx(_hookId, nCode, wParam, lParam);
@@ -118,13 +111,19 @@ namespace TB
             else if (ctrl && shift && k == VirtualKey.Tab) { _tabManager?.PrevTab(); handled = true; }
             else if (ctrl && k >= VirtualKey.Number1 && k <= VirtualKey.Number9) { _tabManager?.SwitchToIndex((int)k - (int)VirtualKey.Number0); handled = true; }
 
-            // Address Bar
-            else if ((ctrl && k == VirtualKey.L) || k == VirtualKey.F6 || (alt && k == VirtualKey.D))
+            // Address Bar (Steals native OS focus back from the Tab WebView)
+            else if ((ctrl && k == VirtualKey.L) || k == VirtualKey.F6 || (alt && k == VirtualKey.D) || (ctrl && k == VirtualKey.K) || (ctrl && k == VirtualKey.E))
             {
+                ShellWebView.Focus(FocusState.Programmatic);
                 ShellWebView.CoreWebView2.PostWebMessageAsJson("{ \"action\": \"FOCUS_URL\" }");
                 handled = true;
             }
-            else if (k == VirtualKey.Escape) { _tabManager?.Stop(); handled = true; }
+            // Escape (Routes to JS for 2-step Chrome-style logic)
+            else if (k == VirtualKey.Escape)
+            {
+                ShellWebView.CoreWebView2.PostWebMessageAsJson("{ \"action\": \"ESCAPE_PRESSED\" }");
+                handled = true;
+            }
             else if (ctrl && k == VirtualKey.N) { new MainWindow().Activate(); handled = true; }
 
             // Navigation
@@ -166,6 +165,11 @@ namespace TB
                     case "CLOSE_TAB": _tabManager?.CloseTab(doc.RootElement.GetProperty("id").GetInt32()); break;
                     case "NAVIGATE": _tabManager?.NavigateActiveTab(doc.RootElement.GetProperty("url").GetString() ?? ""); break;
                     case "CONTEXT_ACTION": _tabManager?.HandleContextAction(doc.RootElement.GetProperty("type").GetString() ?? "", doc.RootElement.GetProperty("id").GetInt32()); break;
+
+                    // JS Requests C# to stop page load
+                    case "STOP": _tabManager?.Stop(); break;
+                    // JS Requests C# to return native OS focus to the active web page
+                    case "FOCUS_TAB": _tabManager?.FocusActiveTab(); break;
                 }
             }
             catch (Exception ex) { Logger.Error($"IPC Error: {ex.Message}"); }

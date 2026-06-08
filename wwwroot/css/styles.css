@@ -268,3 +268,8 @@ body {
     border-top: var(--border-crisp);
     margin: 4px 0;
 }
+
+.url-bar input:not(:focus)::selection {
+    background: transparent;
+    color: var(--text-main);
+}

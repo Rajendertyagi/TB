@@ -83,6 +83,15 @@ namespace TB.Features.Tabs
         public async void Print() { if (_activeId != -1 && _tabs.ContainsKey(_activeId)) await _tabs[_activeId].CoreWebView2.ExecuteScriptAsync("window.print();"); }
         public void ViewSource() { if (_activeId != -1 && _tabs.ContainsKey(_activeId)) _tabs[_activeId].CoreWebView2.OpenDevToolsWindow(); }
 
+        // NEW: Rips focus away from the Shell and gives it back to the web page
+        public void FocusActiveTab()
+        {
+            if (_activeId != -1 && _tabs.ContainsKey(_activeId))
+            {
+                _tabs[_activeId].Focus(FocusState.Programmatic);
+            }
+        }
+
         public void HandleContextAction(string type, int id)
         {
             if (type == "close") CloseTab(id);
