@@ -4,3 +4,17 @@ obj/
 *.user
 *.suo
 *.cache
+
+# Build / logs
+*.binlog
+*.log
+
+# Runtime data
+session.json
+
+# Local AI/dev files
+conversations/
+
+# OS
+Thumbs.db
+Desktop.ini

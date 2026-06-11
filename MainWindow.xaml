@@ -1,17 +1,166 @@
 ﻿<Window
     x:Class="TB.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls">
 
-	<Grid x:Name="RootGrid" Background="#09090b">
-		<Grid.RowDefinitions>
-			<RowDefinition Height="68"/>
-			<RowDefinition Height="*"/>
-		</Grid.RowDefinitions>
+    <Grid x:Name="RootGrid" Background="{ThemeResource bgAppBrush}" RowSpacing="0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-		<Grid x:Name="AppTitleBar" Grid.Row="0" Height="1" Width="1" Background="Transparent" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <!-- Chrome Container (tab strip + toolbar) for pointer tracking -->
+        <Grid x:Name="ChromeContainer" Grid.Row="0"
+              PointerEntered="ChromeContainer_PointerEntered"
+              PointerExited="ChromeContainer_PointerExited">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="{ThemeResource navHeightLength}"/>
+            </Grid.RowDefinitions>
 
-		<WebView2 x:Name="ShellWebView" Grid.Row="0" />
-		<Grid x:Name="ContentGrid" Grid.Row="1" Background="#09090b"/>
-	</Grid>
+            <!-- Tab Strip with subtle separator from toolbar below -->
+            <Grid Grid.Row="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="1"/>
+                </Grid.RowDefinitions>
+                <Grid x:Name="TabStripGrid" Grid.Row="0" Background="{ThemeResource bgAppBrush}" Height="{ThemeResource tabbarHeightLength}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <ItemsRepeater x:Name="TabRepeater" Grid.Column="0" ItemsSource="{Binding Tabs}" Background="Transparent"
+                                   Margin="0,0,4,0">
+                    <ItemsRepeater.Layout>
+                        <StackLayout Orientation="Horizontal" Spacing="{ThemeResource tabInterTabGapLength}"/>
+                    </ItemsRepeater.Layout>
+                    <ItemsRepeater.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding SwitchCommand}"
+                                    Style="{StaticResource TabItemButtonStyle}"
+                                    Opacity="{Binding TabOpacity}"
+                                    Background="{Binding IsActive, Converter={StaticResource BoolToActiveBgConverter}}">
+                                <Grid>
+                                    <Border BorderBrush="{ThemeResource textMutedBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="{ThemeResource radiusMdLength}"
+                                            Opacity="{Binding HoverBorderOpacity}"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Image Grid.Column="0" Source="{Binding Favicon}"
+                                               Width="16" Height="16" VerticalAlignment="Center"
+                                               Margin="0,0,4,0"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Title}" FontSize="11"
+                                                   Foreground="{ThemeResource textMainBrush}"
+                                                   VerticalAlignment="Center"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Margin="0,0,4,0"/>
+                                        <Button Grid.Column="2" Command="{Binding CloseCommand}"
+                                                Style="{StaticResource TabCloseButtonStyle}"
+                                                Visibility="{Binding EffectiveShowCloseButton, Converter={StaticResource BoolToVisibilityConverter}}">
+                                            <Path Data="{StaticResource IconTabCloseData}"
+                                                  Style="{StaticResource SmallIconPathStyle}"/>
+                                        </Button>
+                                    </Grid>
+                                </Grid>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsRepeater.ItemTemplate>
+                </ItemsRepeater>
+                    <Button Grid.Column="1" Style="{StaticResource NewTabButtonStyle}"
+                            Command="{Binding NewTabCommand}">
+                        <Path Data="{StaticResource IconAddTabData}" Style="{StaticResource NavIconPathStyle}"/>
+                    </Button>
+                </Grid>
+                <Rectangle Grid.Row="1" Fill="{ThemeResource borderCrispBrush}" Height="1" VerticalAlignment="Bottom"/>
+            </Grid>
+
+            <!-- Toolbar with three-column Grid for proper URL bar width -->
+            <Grid Grid.Row="1" Background="{ThemeResource bgAppBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Navigation icons -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="3"
+                            Margin="6,0" VerticalAlignment="Center">
+                    <Button Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoHomeCommand}">
+                        <Path Data="{StaticResource IconHomeData}" Style="{StaticResource NavIconPathStyle}"/>
+                    </Button>
+                    <Button Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoBackCommand}">
+                        <Path Data="{StaticResource IconBackData}" Style="{StaticResource NavIconPathStyle}"/>
+                    </Button>
+                    <Button Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding GoForwardCommand}">
+                        <Path Data="{StaticResource IconForwardData}" Style="{StaticResource NavIconPathStyle}"/>
+                    </Button>
+                    <Button Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding ReloadCommand}">
+                        <Path Data="{Binding ReloadIconData}" Style="{StaticResource NavIconPathStyle}"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- Center: URL bar (fills remaining width) -->
+                <Border Grid.Column="1"
+                        CornerRadius="{ThemeResource radiusLgLength}" Height="{ThemeResource urlbarHeightLength}"
+                        Background="{ThemeResource bgInputBrush}"
+                        BorderThickness="0"
+                        VerticalAlignment="Center" Margin="6,0">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Path Grid.Column="0" Data="{StaticResource IconLockData}"
+                              Style="{StaticResource NavIconPathStyle}"
+                              Margin="8,0,4,0"/>
+                        <TextBox x:Name="UrlInput" Grid.Column="1"
+                                 Text="{Binding UrlText, Mode=TwoWay}"
+                                 Background="Transparent" BorderThickness="0"
+                                 Foreground="{ThemeResource textMainBrush}"
+                                 FontSize="12" VerticalAlignment="Center"
+                                 PlaceholderText="Search or enter address"
+                                 KeyDown="OnUrlInputKeyDown"
+                                 GotFocus="OnUrlInputGotFocus"
+                                 LostFocus="OnUrlInputLostFocus"/>
+                    </Grid>
+                </Border>
+
+                <!-- Right: Action icons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3"
+                            Margin="0,0,6,0" VerticalAlignment="Center">
+                    <Button Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding OpenSettingsCommand}">
+                        <Path Data="{StaticResource IconSettingsData}" Style="{StaticResource TrailingIconPathStyle}"/>
+                    </Button>
+                    <Button Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding OpenDownloadsCommand}">
+                        <Path Data="{StaticResource IconDownloadData}" Style="{StaticResource TrailingIconPathStyle}"/>
+                    </Button>
+                    <Button Style="{StaticResource NavButtonStyle}"
+                            Command="{Binding OpenFlagsCommand}">
+                        <Path Data="{StaticResource IconFlagData}" Style="{StaticResource TrailingIconPathStyle}"/>
+                    </Button>
+                    <Button x:Name="MenuButton" Style="{StaticResource NavButtonStyle}">
+                        <Path Data="{StaticResource IconMenuData}" Style="{StaticResource TrailingIconPathStyle}"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Grid>
+
+        <!-- Content Area -->
+        <Border Grid.Row="1" CornerRadius="8,8,0,0" Background="{ThemeResource bgAppBrush}"
+                BorderThickness="0">
+            <Grid x:Name="ContentGrid" Background="{ThemeResource bgAppBrush}"/>
+        </Border>
+    </Grid>
 </Window>

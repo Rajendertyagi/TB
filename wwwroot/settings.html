@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - TB</title>
+    <link rel="stylesheet" href="css/tb.css">
+    <script src="js/theme-sync.js"></script>
+</head>
+<body>
+    <main class="demo-shell glass-children">
+        <div class="section-heading intro">
+            <h1>Settings</h1>
+            <p>Customize your browser experience</p>
+        </div>
+
+        <div class="row" style="gap:var(--gap-2)">
+            <button class="button primary" data-section="general">General</button>
+            <button class="button" data-section="appearance">Appearance</button>
+            <button class="button" data-section="privacy">Privacy</button>
+            <button class="button" data-section="downloads">Downloads</button>
+            <button class="button" data-section="shortcuts">Shortcuts</button>
+            <button class="button" data-section="about">About</button>
+        </div>
+
+        <!-- General -->
+        <section class="showcase-section" data-section="general">
+            <div class="section-heading">
+                <h3>General</h3>
+                <p>Basic browser settings</p>
+            </div>
+            <div class="wide-stack">
+                <button class="toggle-button card" data-setting="search-engine">
+                    <div class="toggle-text">
+                        <h4>Default search engine</h4>
+                        <p>Search queries in the address bar use this engine</p>
+                    </div>
+                    <label class="dropdown" style="width:180px" onclick="event.stopPropagation()">
+                        <select id="search-engine">
+                            <option value="google">Google</option>
+                            <option value="duckduckgo">DuckDuckGo</option>
+                            <option value="bing">Bing</option>
+                            <option value="brave">Brave Search</option>
+                        </select>
+                        <span class="dropdown-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                </button>
+                <button class="toggle-button card" data-setting="home-page">
+                    <div class="toggle-text">
+                        <h4>Home page</h4>
+                        <p>Page shown when you click the home button</p>
+                    </div>
+                    <label class="input-field" style="width:240px" onclick="event.stopPropagation()">
+                        <input type="text" id="home-page" value="https://www.google.com">
+                    </label>
+                </button>
+                <button class="toggle-button card" data-setting="new-tab-page">
+                    <div class="toggle-text">
+                        <h4>New tab page</h4>
+                        <p>Page shown when opening a new tab</p>
+                    </div>
+                    <label class="dropdown" style="width:180px" onclick="event.stopPropagation()">
+                        <select id="new-tab-page">
+                            <option value="google">Google Search</option>
+                            <option value="blank">Blank page</option>
+                            <option value="custom">Custom URL</option>
+                        </select>
+                        <span class="dropdown-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                </button>
+            </div>
+        </section>
+
+        <!-- Appearance -->
+        <section class="showcase-section" data-section="appearance" style="display:none">
+            <div class="section-heading">
+                <h3>Appearance</h3>
+                <p>Customize the look and feel</p>
+            </div>
+            <div class="wide-stack">
+                <button class="toggle-button card" data-setting="theme-select">
+                    <div class="toggle-text">
+                        <h4>Theme</h4>
+                        <p>Choose your preferred color scheme</p>
+                    </div>
+                    <label class="dropdown" style="width:160px" onclick="event.stopPropagation()">
+                        <select id="theme-select">
+                            <option value="dark">Dark</option>
+                            <option value="light">Light</option>
+                            <option value="system">System default</option>
+                        </select>
+                        <span class="dropdown-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                </button>
+                <button class="toggle-button card" data-setting="accent-color">
+                    <div class="toggle-text">
+                        <h4>Accent color</h4>
+                        <p>Highlight color used throughout the browser</p>
+                    </div>
+                    <label class="input-field" style="width:48px;height:48px;padding:8px;border-radius:12px" onclick="event.stopPropagation()">
+                        <input type="color" id="accent-color" value="#ee82ee" style="width:32px;height:32px;padding:0;border:none;background:none;cursor:pointer">
+                    </label>
+                </button>
+                <button class="toggle-button card" data-setting="font-size">
+                    <div class="toggle-text">
+                        <h4>Font size</h4>
+                        <p>Default text size for browser UI</p>
+                    </div>
+                    <label class="dropdown" style="width:160px" onclick="event.stopPropagation()">
+                        <select id="font-size">
+                            <option value="12">Small</option>
+                            <option value="13" selected>Medium</option>
+                            <option value="14">Large</option>
+                            <option value="15">Extra large</option>
+                        </select>
+                        <span class="dropdown-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+                        </span>
+                    </label>
+                </button>
+                <button class="toggle-button card" data-setting="compact-mode" data-toggle="compact-mode">
+                    <div class="toggle-text">
+                        <h4>Compact mode</h4>
+                        <p>Reduce spacing for a denser layout</p>
+                    </div>
+                    <div class="toggle" id="compact-mode"><div class="runner"></div></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Privacy -->
+        <section class="showcase-section" data-section="privacy" style="display:none">
+            <div class="section-heading">
+                <h3>Privacy &amp; security</h3>
+                <p>Control your privacy settings</p>
+            </div>
+            <div class="wide-stack">
+                <button class="toggle-button card" data-toggle="block-trackers">
+                    <div class="toggle-text">
+                        <h4>Block ads and trackers</h4>
+                        <p>Prevent websites from tracking your activity</p>
+                    </div>
+                    <div class="toggle enabled" id="block-trackers"><div class="runner"></div></div>
+                </button>
+                <button class="toggle-button card" data-toggle="block-cookies">
+                    <div class="toggle-text">
+                        <h4>Block third-party cookies</h4>
+                        <p>Prevent cross-site tracking cookies</p>
+                    </div>
+                    <div class="toggle enabled" id="block-cookies"><div class="runner"></div></div>
+                </button>
+                <button class="toggle-button card" data-toggle="https-only">
+                    <div class="toggle-text">
+                        <h4>HTTPS only mode</h4>
+                        <p>Always use secure connections when available</p>
+                    </div>
+                    <div class="toggle enabled" id="https-only"><div class="runner"></div></div>
+                </button>
+                <button class="toggle-button card" data-toggle="do-not-track">
+                    <div class="toggle-text">
+                        <h4>Do not track</h4>
+                        <p>Send a "Do Not Track" request to websites</p>
+                    </div>
+                    <div class="toggle" id="do-not-track"><div class="runner"></div></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Downloads -->
+        <section class="showcase-section" data-section="downloads" style="display:none">
+            <div class="section-heading">
+                <h3>Downloads</h3>
+                <p>Download preferences</p>
+            </div>
+            <div class="wide-stack">
+                <button class="toggle-button card" data-setting="download-path">
+                    <div class="toggle-text">
+                        <h4>Download location</h4>
+                        <p>Where to save downloaded files</p>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center" onclick="event.stopPropagation()">
+                        <label class="input-field" style="width:200px">
+                            <input type="text" id="download-path" value="C:\Users\RTPC\Downloads" style="font-size:13px">
+                        </label>
+                        <button class="button" id="browse-path" style="--size:34px;min-height:34px;padding:6px 12px;font-size:13px">Browse</button>
+                    </div>
+                </button>
+                <button class="toggle-button card" data-toggle="ask-save">
+                    <div class="toggle-text">
+                        <h4>Ask where to save</h4>
+                        <p>Prompt for location before each download</p>
+                    </div>
+                    <div class="toggle" id="ask-save"><div class="runner"></div></div>
+                </button>
+                <button class="toggle-button card" data-toggle="auto-open-pdf">
+                    <div class="toggle-text">
+                        <h4>Auto-open PDFs</h4>
+                        <p>Open PDF files automatically after download</p>
+                    </div>
+                    <div class="toggle" id="auto-open-pdf"><div class="runner"></div></div>
+                </button>
+            </div>
+        </section>
+
+        <!-- Shortcuts -->
+        <section class="showcase-section" data-section="shortcuts" style="display:none">
+            <div class="section-heading">
+                <h3>Keyboard shortcuts</h3>
+                <p>All available keyboard shortcuts</p>
+            </div>
+            <div class="control-group">
+                <div class="shortcut-grid">
+                    <span class="shortcut-label">New tab</span><span><span class="shortcut-key">Ctrl + T</span></span>
+                    <span class="shortcut-label">Close tab</span><span><span class="shortcut-key">Ctrl + W</span></span>
+                    <span class="shortcut-label">Next tab</span><span><span class="shortcut-key">Ctrl + Tab</span></span>
+                    <span class="shortcut-label">Previous tab</span><span><span class="shortcut-key">Ctrl + Shift + Tab</span></span>
+                    <span class="shortcut-label">Switch to tab 1-9</span><span><span class="shortcut-key">Ctrl + 1-9</span></span>
+                    <span class="shortcut-label">Focus address bar</span><span><span class="shortcut-key">Ctrl + L / F6</span></span>
+                    <span class="shortcut-label">Reload</span><span><span class="shortcut-key">F5 / Ctrl + R</span></span>
+                    <span class="shortcut-label">Hard reload</span><span><span class="shortcut-key">Shift + F5</span></span>
+                    <span class="shortcut-label">Go back</span><span><span class="shortcut-key">Alt + Left</span></span>
+                    <span class="shortcut-label">Go forward</span><span><span class="shortcut-key">Alt + Right</span></span>
+                    <span class="shortcut-label">Zoom in</span><span><span class="shortcut-key">Ctrl + +</span></span>
+                    <span class="shortcut-label">Zoom out</span><span><span class="shortcut-key">Ctrl + -</span></span>
+                    <span class="shortcut-label">Reset zoom</span><span><span class="shortcut-key">Ctrl + 0</span></span>
+                    <span class="shortcut-label">Print</span><span><span class="shortcut-key">Ctrl + P</span></span>
+                    <span class="shortcut-label">View source</span><span><span class="shortcut-key">Ctrl + U</span></span>
+                    <span class="shortcut-label">New window</span><span><span class="shortcut-key">Ctrl + N</span></span>
+                    <span class="shortcut-label">Escape / Stop</span><span><span class="shortcut-key">Esc</span></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- About -->
+        <section class="showcase-section" data-section="about" style="display:none">
+            <div class="section-heading">
+                <h3>About</h3>
+                <p>Browser information</p>
+            </div>
+            <div class="wide-stack">
+                <div class="settings-card" style="padding:24px">
+                    <div class="about-logo">TB</div>
+                    <div class="about-version">Version 1.0.0</div>
+                    <div class="about-info">
+                        <strong>TB Browser</strong> — A lightweight tabbed browser built with WinUI 3 and WebView2.<br><br>
+                        Built with: .NET 10, Windows App SDK, WebView2<br>
+                        Shell UI: HTML, CSS, JavaScript<br>
+                        Engine: Chromium (via WebView2)<br><br>
+                        <a href="https://github.com/Rajendertyagi/TB" target="_blank">View on GitHub</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <button class="button" id="back-to-browser" style="gap:6px">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                        Back to browsing
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const sections = document.querySelectorAll('.showcase-section');
+        const navBtns = document.querySelectorAll('.row > .button[data-section]');
+        const toast = document.getElementById('toast');
+        let toastTimeout;
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        navBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                navBtns.forEach(b => b.classList.remove('primary'));
+                btn.classList.add('primary');
+                const section = btn.dataset.section;
+                sections.forEach(s => s.style.display = s.dataset.section === section ? '' : 'none');
+            });
+        });
+
+        document.querySelectorAll('.toggle-button.card[data-toggle]').forEach(card => {
+            const toggle = card.querySelector('.toggle');
+            if (!toggle) return;
+            card.addEventListener('click', () => {
+                toggle.classList.toggle('enabled');
+            });
+        });
+
+        document.getElementById('back-to-browser').addEventListener('click', (e) => {
+            e.preventDefault();
+            window.chrome.webview.postMessage({ action: 'CLOSE_SETTINGS' });
+        });
+
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('change', () => {
+                const key = el.id || el.name;
+                if (!key) return;
+                showToast('Settings saved');
+                window.chrome.webview.postMessage({ action: 'SAVE_SETTING', key, value: el.value });
+            });
+        });
+
+        document.getElementById('browse-path')?.addEventListener('click', () => {
+            window.chrome.webview.postMessage({ action: 'BROWSE_FOLDER' });
+        });
+
+        window.chrome.webview.postMessage({ action: 'SETTINGS_READY' });
+
+        window.chrome.webview.addEventListener('message', event => {
+            const msg = event.data;
+            if (msg.action === 'SETTINGS_DATA' && msg.settings) {
+                for (const [key, value] of Object.entries(msg.settings)) {
+                    const el = document.getElementById(key);
+                    if (!el) continue;
+                    if (el.classList.contains('toggle')) {
+                        el.classList.toggle('enabled', value);
+                    } else {
+                        el.value = value;
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

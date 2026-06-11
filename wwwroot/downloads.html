@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloads - TB</title>
+    <link rel="stylesheet" href="css/tb.css">
+    <script src="js/theme-sync.js"></script>
+</head>
+<body>
+    <main class="demo-shell glass-children">
+        <div class="showcase-section">
+            <div class="section-heading">
+                <h1>Downloads</h1>
+                <p>Manage your downloaded files</p>
+            </div>
+            <div class="row" style="justify-content:space-between;align-items:center;width:100%">
+                <label class="input-field small" style="flex:1;max-width:360px">
+                    <input type="text" id="search-downloads" placeholder="Search downloads...">
+                </label>
+                <button class="button" id="clear-all" style="--size:34px;min-height:34px;padding:6px 14px;font-size:13px">Clear all</button>
+            </div>
+        </div>
+
+        <div class="showcase-section" id="downloads-list">
+            <div class="section-heading" id="empty-state" style="text-align:center;max-width:100%;width:100%;padding:48px 0;display:none">
+                <p style="font-size:18px;color:var(--secondary);margin:0">No downloads yet</p>
+                <p style="color:var(--tertiary);margin:0">Downloaded files will appear here</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const container = document.getElementById('downloads-list');
+        const emptyState = document.getElementById('empty-state');
+        const searchInput = document.getElementById('search-downloads');
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+        }
+
+        function formatDate(ts) {
+            return new Date(ts * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        function renderDownloads(items) {
+            const existing = container.querySelectorAll('.download-item');
+            existing.forEach(el => el.remove());
+
+            if (!items || items.length === 0) {
+                emptyState.style.display = 'block';
+                return;
+            }
+            emptyState.style.display = 'none';
+
+            items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'download-item';
+                el.dataset.url = item.url || '';
+                el.dataset.id = item.id || '';
+
+                const icon = document.createElement('div');
+                icon.className = 'download-icon';
+                icon.textContent = item.state === 'completed' ? '✓' : '↻';
+
+                const info = document.createElement('div');
+                info.className = 'download-info';
+
+                const name = document.createElement('div');
+                name.className = 'download-name';
+                name.textContent = item.filename || 'Unknown file';
+
+                const meta = document.createElement('div');
+                meta.className = 'download-meta';
+                const parts = [];
+                if (item.totalBytes > 0) parts.push(formatSize(item.totalBytes));
+                if (item.state === 'completed' && item.endTime) parts.push(formatDate(item.endTime));
+                if (item.state === 'in_progress') parts.push(Math.round(item.receivedBytes / item.totalBytes * 100) + '%');
+                meta.textContent = parts.join(' · ');
+
+                const progress = document.createElement('div');
+                progress.className = 'download-progress';
+                if (item.state === 'in_progress' && item.totalBytes > 0) {
+                    const pct = Math.round(item.receivedBytes / item.totalBytes * 100);
+                    progress.innerHTML = '<div class="download-progress-bar" style="width:' + pct + '%"></div>';
+                }
+
+                const actions = document.createElement('div');
+                actions.className = 'button-grid';
+                actions.style.cssText = 'flex-direction:row;max-width:none;width:auto;gap:6px';
+                if (item.state === 'completed') {
+                    const openBtn = document.createElement('button');
+                    openBtn.className = 'button';
+                    openBtn.style.cssText = '--size:32px;min-height:28px;padding:2px 12px;font-size:12px';
+                    openBtn.textContent = 'Open';
+                    openBtn.addEventListener('click', () => {
+                        window.chrome.webview.postMessage({ action: 'OPEN_DOWNLOAD', id: item.id, url: item.url });
+                    });
+                    actions.appendChild(openBtn);
+                }
+                const showBtn = document.createElement('button');
+                showBtn.className = 'button';
+                showBtn.style.cssText = '--size:32px;min-height:28px;padding:2px 12px;font-size:12px';
+                showBtn.textContent = item.state === 'completed' ? 'Show in folder' : 'Cancel';
+                showBtn.addEventListener('click', () => {
+                    if (item.state === 'completed') {
+                        window.chrome.webview.postMessage({ action: 'SHOW_IN_FOLDER', id: item.id });
+                    } else {
+                        window.chrome.webview.postMessage({ action: 'CANCEL_DOWNLOAD', id: item.id });
+                    }
+                });
+                actions.appendChild(showBtn);
+
+                info.appendChild(name);
+                info.appendChild(meta);
+                el.appendChild(icon);
+                el.appendChild(info);
+                if (item.state === 'in_progress') el.appendChild(progress);
+                el.appendChild(actions);
+                container.appendChild(el);
+            });
+        }
+
+        searchInput.addEventListener('input', () => {
+            const q = searchInput.value.toLowerCase();
+            document.querySelectorAll('.download-item').forEach(el => {
+                const name = el.querySelector('.download-name')?.textContent?.toLowerCase() || '';
+                const url = el.dataset.url?.toLowerCase() || '';
+                el.style.display = name.includes(q) || url.includes(q) ? '' : 'none';
+            });
+        });
+
+        document.getElementById('clear-all').addEventListener('click', () => {
+            window.chrome.webview.postMessage({ action: 'CLEAR_ALL_DOWNLOADS' });
+            renderDownloads([]);
+        });
+
+        window.chrome.webview.postMessage({ action: 'DOWNLOADS_READY' });
+
+        window.chrome.webview.addEventListener('message', event => {
+            const msg = event.data;
+            if (msg.action === 'DOWNLOADS_DATA' && msg.downloads) {
+                renderDownloads(msg.downloads);
+            }
+        });
+    </script>
+</body>
+</html>

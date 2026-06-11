@@ -1,29 +1,37 @@
 {
+  "active": "violet-dark",
   "native": {
-    "titleBarText": "#F5D5E0",
-    "titleBarIconHover": "#FF4E8A"
+    "titleBarText": "#f0e0f0",
+    "titleBarIconHover": "#ee82ee"
   },
-  "css": {
-    "--bg-app": "#1A111B",
-    "--bg-titlebar": "#241626",
-    "--bg-tab": "#36203B",
-    "--bg-tab-hover": "#4A2545",
-    "--bg-tab-active": "#1A111B",
-    "--text-main": "#F5D5E0",
-    "--text-muted": "#A885A8",
-    "--accent": "#FF4E8A",
-    "--font-main": "'Segoe UI', system-ui, -apple-system, sans-serif",
-
-    "--header-shadow": "0 8px 24px rgba(0, 0, 0, 0.6)",
-    "--ctx-shadow": "0 12px 32px rgba(0, 0, 0, 0.8)",
-    "--border-crisp": "1px solid rgba(255, 255, 255, 0.06)",
-    "--border-active": "1px solid rgba(255, 255, 255, 0.08)",
-
-    "--tabbar-height": "32px",
-    "--nav-height": "36px",
-    "--tab-height": "24px",
-    "--urlbar-height": "28px",
-    "--radius-sm": "4px",
-    "--radius-md": "6px"
+  "colors": {
+    "bgApp":       "#1a0f1a",
+    "bgTitlebar":  "#1a0f1a",
+    "bgTab":       "transparent",
+    "bgTabHover":  "#2a152a",
+    "bgTabActive": "#3a1f3a",
+    "bgInput":     "#120912",
+    "textMain":    "#f0e0f0",
+    "textMuted":   "#b89cb8",
+    "textSubtle":  "#6a4a6a",
+    "accent":      "#ee82ee",
+    "accentSecondary": "#d66fd6",
+    "accentPress":     "#b855b8",
+    "success":        "#22c55e",
+    "danger":         "#ef4444",
+    "borderCrisp": "#3a223a",
+    "borderActive":"#ee82ee"
+  },
+  "sizes": {
+    "tabbarHeight": 34,
+    "navHeight": 34,
+    "tabHeight": 28,
+    "urlbarHeight": 28,
+    "radiusSm": 6,
+    "radiusMd": 8,
+    "radiusLg": 20,
+    "tabInterTabGap": 2,
+    "tabMinWidth": 32,
+    "tabMaxWidth": 180
   }
 }
