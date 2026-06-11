@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
@@ -111,5 +113,4 @@ public class TabMovedEventArgs : EventArgs
     public int FromIndex { get; init; }
     public int ToIndex { get; init; }
 }
-
 

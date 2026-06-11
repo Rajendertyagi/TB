@@ -1,0 +1,5 @@
+﻿{
+  "active": "dracula",
+  "native": { "titleBarText": "#f8f8f2", "titleBarIconHover": "#bd93f9" },
+  "colors": { "bgApp": "#282a36", "bgTitlebar": "#282a36", "bgTab": "transparent", "bgTabHover": "#44475a", "bgTabActive": "#6272a4", "bgInput": "#21222c", "textMain": "#f8f8f2", "textMuted": "#6272a4", "textSubtle": "#44475a", "accent": "#bd93f9", "accentSecondary": "#ff79c6", "accentPress": "#ff5555", "success": "#50fa7b", "danger": "#ff5555", "borderCrisp": "#44475a", "borderActive": "#bd93f9" }
+}

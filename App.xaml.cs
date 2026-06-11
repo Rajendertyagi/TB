@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using TB.Features.Downloads;
 using TB.Helpers;
 using TB.Infrastructure;
@@ -7,6 +8,7 @@ using TB.Input;
 using TB.Services;
 using TB.Services.Interfaces;
 using TB.ViewModels;
+using System.Threading.Tasks;
 
 namespace TB;
 
@@ -24,42 +26,50 @@ public partial class App : Application
     {
         InitializeComponent();
 
+        // 1. UI Thread Exceptions
         UnhandledException += (_, e) =>
         {
             try
             {
-                Logger.Error(
-                    $"WinUI UnhandledException: {e.Exception?.GetType().FullName}: {e.Exception?.Message}\n{e.Exception?.StackTrace}");
+                Logger.Error($"[UI THREAD CRASH] {e.Exception?.GetType().FullName}: {e.Exception?.Message}\n{e.Exception?.StackTrace}");
+
+                // Prevent the app from silently crashing
+                e.Handled = true;
+
+                ShowCrashDialog("UI Error", e.Exception?.Message ?? "An unexpected UI error occurred.");
             }
             catch
             {
             }
         };
 
+        // 2. Background Thread Exceptions (Fatal, but we log it before the OS kills the app)
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
             try
             {
-                Logger.Error(
-                    $"AppDomain UnhandledException: {e.ExceptionObject}");
+                Logger.Error($"[FATAL BACKGROUND CRASH] {e.ExceptionObject}");
             }
             catch
             {
             }
         };
 
+        // 3. Unobserved Async Task Exceptions (e.g., _ = SomeAsyncMethod())
         TaskScheduler.UnobservedTaskException += (_, e) =>
         {
             try
             {
-                Logger.Error(
-                    $"TaskScheduler UnobservedTaskException: {e.Exception}");
+                Logger.Error($"[ASYNC TASK CRASH] {e.Exception?.InnerException?.Message ?? e.Exception?.Message}\n{e.Exception?.StackTrace}");
+
+                // Prevent the app from crashing
+                e.SetObserved();
+
+                ShowCrashDialog("Background Task Error", "A background process failed. Your data is safe, but some features may not have updated.");
             }
             catch
             {
             }
-
-            e.SetObserved();
         };
     }
 
@@ -74,24 +84,19 @@ public partial class App : Application
 
             _services = services.BuildServiceProvider();
 
-            var themeService =
-                _services.GetRequiredService<IThemeService>();
-
+            var themeService = _services.GetRequiredService<IThemeService>();
             await themeService.ReloadThemeAsync();
-
             themeService.ApplyXamlResources();
 
             var appResources = Application.Current.Resources;
+            Logger.Info($"Theme loaded. bgAppBrush exists = {appResources.ContainsKey("bgAppBrush")}, Theme dictionaries = {appResources.ThemeDictionaries.Count}");
 
-            Logger.Info(
-                $"Theme loaded. bgAppBrush exists = {appResources.ContainsKey("bgAppBrush")}, Theme dictionaries = {appResources.ThemeDictionaries.Count}");
+            var window = _services.GetRequiredService<MainWindow>();
 
-            var window =
-                _services.GetRequiredService<MainWindow>();
+            // FIX: Assign MainWindow EARLY so crash handlers can use its XamlRoot if OnLaunched throws
+            MainWindow = window;
 
             window.Activate();
-
-            MainWindow = window;
 
             if (window.Content is FrameworkElement root)
             {
@@ -102,11 +107,37 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            Logger.Error(
-                $"Application startup failed: {ex}");
-
+            Logger.Error($"Application startup failed: {ex}");
             throw;
         }
+    }
+
+    private void ShowCrashDialog(string title, string message)
+    {
+        // We must dispatch to the UI thread to show XAML dialogs
+        MainWindow?.DispatcherQueue?.TryEnqueue(async () =>
+        {
+            try
+            {
+                var dialog = new ContentDialog
+                {
+                    Title = title,
+                    Content = $"TB Browser caught an error to prevent a crash.\n\nDetails: {message}",
+                    CloseButtonText = "OK",
+                    XamlRoot = MainWindow?.Content?.XamlRoot // Required in WinUI 3
+                };
+
+                if (dialog.XamlRoot != null)
+                {
+                    await dialog.ShowAsync();
+                }
+            }
+            catch (Exception dialogEx)
+            {
+                // If the dialog itself fails to render, just log it
+                Logger.Warning($"Failed to show crash dialog: {dialogEx.Message}");
+            }
+        });
     }
 
     private static void ConfigureServices(IServiceCollection services)
@@ -146,4 +177,6 @@ public partial class App : Application
 
         services.AddTransient<MainWindow>();
     }
+
+
 }

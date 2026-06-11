@@ -5,33 +5,21 @@
     "titleBarIconHover": "#ee82ee"
   },
   "colors": {
-    "bgApp":       "#1a0f1a",
-    "bgTitlebar":  "#1a0f1a",
-    "bgTab":       "transparent",
-    "bgTabHover":  "#2a152a",
+    "bgApp": "#1a0f1a",
+    "bgTitlebar": "#1a0f1a",
+    "bgTab": "transparent",
+    "bgTabHover": "#2a152a",
     "bgTabActive": "#3a1f3a",
-    "bgInput":     "#120912",
-    "textMain":    "#f0e0f0",
-    "textMuted":   "#b89cb8",
-    "textSubtle":  "#6a4a6a",
-    "accent":      "#ee82ee",
+    "bgInput": "#120912",
+    "textMain": "#f0e0f0",
+    "textMuted": "#b89cb8",
+    "textSubtle": "#6a4a6a",
+    "accent": "#ee82ee",
     "accentSecondary": "#d66fd6",
-    "accentPress":     "#b855b8",
-    "success":        "#22c55e",
-    "danger":         "#ef4444",
+    "accentPress": "#b855b8",
+    "success": "#22c55e",
+    "danger": "#ef4444",
     "borderCrisp": "#3a223a",
-    "borderActive":"#ee82ee"
-  },
-  "sizes": {
-    "tabbarHeight": 34,
-    "navHeight": 34,
-    "tabHeight": 28,
-    "urlbarHeight": 28,
-    "radiusSm": 6,
-    "radiusMd": 8,
-    "radiusLg": 20,
-    "tabInterTabGap": 2,
-    "tabMinWidth": 32,
-    "tabMaxWidth": 180
+    "borderActive": "#ee82ee"
   }
 }

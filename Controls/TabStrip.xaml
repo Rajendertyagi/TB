@@ -1,0 +1,87 @@
+<UserControl
+ x:Class="TB.Controls.TabStrip"
+ xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+ xmlns:vm="using:TB.ViewModels"
+ xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ mc:Ignorable="d">
+
+    <Grid x:Name="TabStripGrid" Padding="8,2,4,0" HorizontalAlignment="Stretch">
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+
+            <ItemsRepeater x:Name="TabRepeater" ItemsSource="{Binding Tabs}">
+                <ItemsRepeater.Layout>
+                    <StackLayout Orientation="Horizontal" Spacing="2"/>
+                </ItemsRepeater.Layout>
+
+                <ItemsRepeater.ItemTemplate>
+                    <DataTemplate x:DataType="vm:TabItemViewModel">
+
+                        <Button Style="{StaticResource TabItemButtonStyle}"
+                                Background="{Binding IsActive, Converter={StaticResource BoolToActiveBgConverter}}"
+                                Command="{Binding SwitchCommand}"
+                                CornerRadius="6"
+                                BorderThickness="0"
+                                Padding="0">
+
+                            <Grid Height="30" Padding="8,0,8,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Border Grid.Column="0" 
+                                        Width="16" Height="16" 
+                                        VerticalAlignment="Center" 
+                                        Background="{ThemeResource textMutedBrush}"
+                                        Opacity="0.85" 
+                                        CornerRadius="3"/>
+
+                                <TextBlock Grid.Column="1" 
+                                           Margin="6,0,6,0"
+                                           Text="{Binding Title}"
+                                           FontSize="11"
+                                           FontWeight="Normal"
+                                           VerticalAlignment="Center"
+                                           Foreground="{ThemeResource textMainBrush}"
+                                           TextTrimming="CharacterEllipsis"
+                                           MaxLines="1"
+                                           Visibility="{Binding IsSquashed, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}"/>
+
+                                <Button Grid.Column="2" 
+                                        Width="16" Height="16" 
+                                        Padding="0"
+                                        Style="{StaticResource TabCloseButtonStyle}"
+                                        Command="{Binding CloseCommand}"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        Visibility="{Binding IsSquashed, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
+
+                                    <Path Data="{StaticResource IconTabCloseData}" 
+                                          Stretch="Uniform" 
+                                          Width="10" Height="10" 
+                                          Fill="Transparent" 
+                                          Stroke="{ThemeResource textMutedBrush}" 
+                                          StrokeThickness="1.5"/>
+                                </Button>
+                            </Grid>
+                        </Button>
+                    </DataTemplate>
+                </ItemsRepeater.ItemTemplate>
+            </ItemsRepeater>
+
+            <Button Width="24" Height="24" 
+                    Margin="4,0,0,0" 
+                    VerticalAlignment="Center"
+                    Style="{StaticResource NewTabButtonStyle}" 
+                    Command="{Binding NewTabCommand}">
+                <Path Data="{StaticResource IconAddTabData}" Style="{StaticResource NavIconPathStyle}" Width="12" Height="12"/>
+            </Button>
+
+        </StackPanel>
+    </Grid>
+</UserControl>
+    

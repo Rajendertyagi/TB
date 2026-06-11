@@ -19,6 +19,7 @@
 		<MinimumWindowsVersion>10.0.19041.0</MinimumWindowsVersion>
 		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="2.1.3" />
 		<PackageReference Include="Microsoft.WindowsAppSDK.WinUI" Version="2.1.0" />
@@ -26,12 +27,15 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
 		<PackageReference Include="Microsoft.Windows.CsWinRT" Version="2.2.0" />
+
 		<!-- WinRT metadata inputs for CsWinRT projection resolution -->
 		<CsWinRTInputs Include="$(NuGetPackageRoot)microsoft.windowsappsdk.foundation\2.0.21\metadata\*.winmd" />
 	</ItemGroup>
+
 	<ItemGroup>
 		<Content Include="wwwroot\**\*.*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
+
 	<ItemGroup>
 		<Content Include="Assets\Fonts\**\*" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>

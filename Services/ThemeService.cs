@@ -1,3 +1,12 @@
+#pragma warning disable CS8601, CS8602, CS8603, CS8604 // Disable WinRT projection nullable quirks
+
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -12,8 +21,9 @@ namespace TB.Services;
 
 public class ThemeService : IThemeService
 {
-    private readonly string _themeFilePath;
+    private readonly string _themesDirectory;
     private readonly ISettingsService _settings;
+
     private ThemeDefinition _theme = new();
     private FileSystemWatcher? _watcher;
     private DateTime _lastReload = DateTime.MinValue;
@@ -24,14 +34,21 @@ public class ThemeService : IThemeService
 
     public ThemeService(string basePath, ISettingsService settings)
     {
-        _themeFilePath = Path.Combine(basePath, "wwwroot", "theme.json");
+        _themesDirectory = Path.Combine(basePath, "wwwroot", "themes");
         _settings = settings;
+
+        Directory.CreateDirectory(_themesDirectory);
+        SetupFileWatcher();
+    }
+
+    private void SetupFileWatcher()
+    {
         try
         {
-            _watcher = new FileSystemWatcher(Path.GetDirectoryName(_themeFilePath)!)
+            _watcher = new FileSystemWatcher(_themesDirectory)
             {
-                Filter = Path.GetFileName(_themeFilePath),
-                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName
+                Filter = "*.json",
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName
             };
 
             void OnFileChanged()
@@ -47,10 +64,7 @@ public class ThemeService : IThemeService
             _watcher.Renamed += (_, _) => OnFileChanged();
             _watcher.EnableRaisingEvents = true;
         }
-        catch (Exception ex)
-        {
-            Logger.Warning($"Failed to start theme file watcher: {ex.Message}");
-        }
+        catch (Exception ex) { Logger.Warning($"Theme watcher failed: {ex.Message}"); }
     }
 
     private async Task ReloadAndApplyAsync()
@@ -60,41 +74,48 @@ public class ThemeService : IThemeService
             await Task.Delay(100);
             await ReloadThemeAsync();
             ApplyXamlResources();
+
             if (App.MainWindow?.Content is FrameworkElement root)
             {
                 var current = root.RequestedTheme;
                 root.RequestedTheme = current == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
                 root.RequestedTheme = current;
             }
+
             NotifyThemeChanged();
-            Logger.Info("Theme reloaded from file change");
         }
-        catch (Exception ex)
-        {
-            Logger.Error($"Theme reload failed: {ex.Message}");
-        }
+        catch (Exception ex) { Logger.Error($"Theme reload failed: {ex.Message}"); }
     }
 
     public async Task ReloadThemeAsync()
     {
-        Logger.Info($"Loading theme file: {_themeFilePath}");
+        var activeTheme = _settings.Get("theme-name", Defaults.Theme);
+        var themePath = Path.Combine(_themesDirectory, $"{activeTheme}.json");
 
-        if (!File.Exists(_themeFilePath))
+        if (!File.Exists(themePath))
         {
-            Logger.Warn("theme.json not found, using defaults");
+            Logger.Warning($"Theme '{activeTheme}.json' not found. Falling back to default.");
+            themePath = Path.Combine(_themesDirectory, $"{Defaults.Theme}.json");
+        }
+
+        if (!File.Exists(themePath))
+        {
+            Logger.Error("No theme files found. Using hardcoded C# defaults.");
+            _theme = new ThemeDefinition();
             return;
         }
 
         try
         {
-            var json = await File.ReadAllTextAsync(_themeFilePath);
+            var json = await File.ReadAllTextAsync(themePath);
             _theme = ThemeDefinition.Load(json);
-            _settings.Set("theme-name", _theme.Active);
-            Logger.Info($"Theme loaded. Active={_theme.Active}, Colors={_theme.Colors.Count}, Sizes={_theme.Sizes.Count}");
+            _theme.Active = activeTheme;
+            Logger.Info($"Theme loaded: {activeTheme}");
         }
         catch (Exception ex)
         {
-            Logger.Error($"Failed to load theme: {ex.GetType().Name}: {ex.Message}");
+            Logger.Error($"Failed to parse {themePath}: {ex.Message}");
+            _theme = new ThemeDefinition();
         }
     }
 
@@ -102,21 +123,26 @@ public class ThemeService : IThemeService
     {
         try
         {
-            var accentColor = ColorExtensions.ParseHex(_theme.Colors["accent"]);
-            var borderColor = ColorExtensions.ParseHex(_theme.Colors["borderCrisp"]);
+            var textHex = _theme.Native.TitleBarText ?? _theme.Colors.GetValueOrDefault("textMain");
+            var hoverHex = _theme.Native.TitleBarIconHover ?? _theme.Colors.GetValueOrDefault("accent");
+            var accentHex = _theme.Colors.GetValueOrDefault("accent");
+            var borderHex = _theme.Colors.GetValueOrDefault("borderCrisp");
 
-            appWindow.TitleBar.ButtonForegroundColor = _theme.Native.TitleBarTextColor;
+            var textColor = !string.IsNullOrEmpty(textHex) ? ColorExtensions.ParseHex(textHex) : Colors.White;
+            var hoverColor = !string.IsNullOrEmpty(hoverHex) ? ColorExtensions.ParseHex(hoverHex) : Colors.White;
+            var accentColor = !string.IsNullOrEmpty(accentHex) ? ColorExtensions.ParseHex(accentHex) : Colors.Transparent;
+            var borderColor = !string.IsNullOrEmpty(borderHex) ? ColorExtensions.ParseHex(borderHex) : Colors.Transparent;
+
+            appWindow.TitleBar.ButtonForegroundColor = textColor;
             appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
             appWindow.TitleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+            appWindow.TitleBar.ButtonInactiveForegroundColor = textColor;
             appWindow.TitleBar.ButtonHoverBackgroundColor = borderColor;
-            appWindow.TitleBar.ButtonHoverForegroundColor = _theme.Native.TitleBarTextColor;
+            appWindow.TitleBar.ButtonHoverForegroundColor = hoverColor;
             appWindow.TitleBar.ButtonPressedBackgroundColor = accentColor;
             appWindow.TitleBar.ButtonPressedForegroundColor = Colors.White;
         }
-        catch (Exception ex)
-        {
-            Logger.Error($"Failed to apply native theme: {ex.Message}");
-        }
+        catch (Exception ex) { Logger.Error($"Native theme failed: {ex.Message}"); }
     }
 
     public void ApplyXamlResources()
@@ -129,14 +155,12 @@ public class ThemeService : IThemeService
         {
             if (string.IsNullOrEmpty(value)) continue;
 
-            // Skip "transparent" — let XAML fallback handle it to avoid parse errors
-            if (value == "transparent")
+            if (value.Equals("transparent", StringComparison.OrdinalIgnoreCase))
             {
                 SetBrushResource(dark, $"{key}Brush", Colors.Transparent);
                 SetBrushResource(light, $"{key}Brush", Colors.Transparent);
                 dark[$"{key}Color"] = Colors.Transparent;
                 light[$"{key}Color"] = Colors.Transparent;
-                Logger.Debug($"Theme resource: {key}Brush = transparent");
                 continue;
             }
 
@@ -149,30 +173,29 @@ public class ThemeService : IThemeService
                 SetBrushResource(dark, $"{key}Brush", color);
                 light[$"{key}Color"] = color;
                 SetBrushResource(light, $"{key}Brush", color);
-                Logger.Debug($"Theme resource: {key}Brush = {value}");
             }
-            catch (Exception ex)
-            {
-                Logger.Error($"Failed to parse color '{key}': {ex.Message}");
-            }
+            catch (Exception ex) { Logger.Error($"Parse color '{key}' failed: {ex.Message}"); }
         }
 
-        foreach (var (key, value) in _theme.Sizes)
+        var layoutMap = new Dictionary<string, double>
+        {
+            { "tabbarHeight", Layout.TabbarHeight }, { "navHeight", Layout.NavHeight },
+            { "tabHeight", Layout.TabHeight }, { "urlbarHeight", Layout.UrlbarHeight },
+            { "radiusSm", Layout.RadiusSm }, { "radiusMd", Layout.RadiusMd }, { "radiusLg", Layout.RadiusLg },
+            { "tabInterTabGap", Layout.TabInterTabGap }, { "tabMinWidth", Layout.TabMinWidth }, { "tabMaxWidth", Layout.TabMaxWidth }
+        };
+
+        foreach (var (key, value) in layoutMap)
         {
             if (key.StartsWith("radius"))
             {
                 var cr = new CornerRadius(value);
-                dark[$"{key}Length"] = cr;
-                light[$"{key}Length"] = cr;
-                Logger.Debug($"Theme resource: {key}Length = CornerRadius({value})");
+                dark[$"{key}Length"] = cr; light[$"{key}Length"] = cr;
             }
             else
             {
-                dark[$"{key}Length"] = value;
-                dark[$"{key}Thickness"] = new Thickness(value);
-                light[$"{key}Length"] = value;
-                light[$"{key}Thickness"] = new Thickness(value);
-                Logger.Debug($"Theme resource: {key}Length = {value}");
+                dark[$"{key}Length"] = value; dark[$"{key}Thickness"] = new Thickness(value);
+                light[$"{key}Length"] = value; light[$"{key}Thickness"] = new Thickness(value);
             }
         }
     }
@@ -187,56 +210,44 @@ public class ThemeService : IThemeService
 
     private static ResourceDictionary GetOrCreateDict(IDictionary<object, object> themeDict, string key)
     {
-        if (!themeDict.ContainsKey(key))
-            themeDict[key] = new ResourceDictionary();
-        return (ResourceDictionary)themeDict[key];
+        if (themeDict.TryGetValue(key, out var existing) && existing is ResourceDictionary dict)
+            return dict;
+
+        var newDict = new ResourceDictionary();
+        themeDict[key] = newDict;
+        return newDict;
     }
 
     public async Task SetThemeAsync(string themeName)
     {
-        try
-        {
-            var json = await File.ReadAllTextAsync(_themeFilePath);
-            var node = System.Text.Json.Nodes.JsonNode.Parse(json);
-            if (node is System.Text.Json.Nodes.JsonObject obj)
-            {
-                obj["active"] = themeName;
-                var updated = obj.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-                await File.WriteAllTextAsync(_themeFilePath, updated);
-            }
-            await ReloadThemeAsync();
-            ApplyXamlResources();
-            if (App.MainWindow?.Content is FrameworkElement rootEl)
-            {
-                var current = rootEl.RequestedTheme;
-                rootEl.RequestedTheme = current == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
-                rootEl.RequestedTheme = current;
-            }
-            NotifyThemeChanged();
-        }
-        catch (Exception ex)
-        {
-            Logger.Error($"Failed to set theme '{themeName}': {ex.Message}");
-        }
+        _settings.Set("theme-name", themeName);
+        await ReloadAndApplyAsync();
     }
 
     public Dictionary<string, string> GetCssVariables()
     {
         var vars = new Dictionary<string, string>();
+
         foreach (var (key, value) in _theme.Colors)
         {
-            var cssKey = "--" + string.Concat(key.Select((c, i) =>
-                char.IsUpper(c) && i > 0 ? "-" + char.ToLowerInvariant(c).ToString() : char.ToLowerInvariant(c).ToString()));
-            vars[cssKey] = value;
+            vars[$"--{ToKebabCase(key)}"] = value ?? "";
         }
-        foreach (var (key, value) in _theme.Sizes)
-        {
-            var cssKey = "--" + string.Concat(key.Select((c, i) =>
-                char.IsUpper(c) && i > 0 ? "-" + char.ToLowerInvariant(c).ToString() : char.ToLowerInvariant(c).ToString()));
-            vars[cssKey] = key.StartsWith("radius") ? $"{value}px" : $"{value}px";
-        }
+
+        vars["--tabbar-height"] = $"{Layout.TabbarHeight}px";
+        vars["--nav-height"] = $"{Layout.NavHeight}px";
+        vars["--tab-height"] = $"{Layout.TabHeight}px";
+        vars["--urlbar-height"] = $"{Layout.UrlbarHeight}px";
+        vars["--radius-sm"] = $"{Layout.RadiusSm}px";
+        vars["--radius-md"] = $"{Layout.RadiusMd}px";
+        vars["--radius-lg"] = $"{Layout.RadiusLg}px";
+        vars["--tab-gap"] = $"{Layout.TabInterTabGap}px";
+        vars["--tab-min-width"] = $"{Layout.TabMinWidth}px";
+        vars["--tab-max-width"] = $"{Layout.TabMaxWidth}px";
+
         return vars;
     }
+
+    private static string ToKebabCase(string str) => string.Concat(str.Select((c, i) => char.IsUpper(c) && i > 0 ? "-" + char.ToLowerInvariant(c).ToString() : char.ToLowerInvariant(c).ToString()));
 
     public void NotifyThemeChanged() => ThemeChanged?.Invoke();
 
@@ -249,3 +260,4 @@ public class ThemeService : IThemeService
         NotifyThemeChanged();
     }
 }
+

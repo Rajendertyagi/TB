@@ -7,71 +7,114 @@ using Windows.Foundation;
 
 namespace TB.Input;
 
+/// <summary>
+/// Provides access to the internal ICoreWebView2Controller COM interface.
+/// This is required to subscribe to AcceleratorKeyPressed events, which allows
+/// the browser to intercept global shortcuts (Ctrl+T, Ctrl+W) before the 
+/// web page content can consume them.
+/// 
+/// WARNING: This uses undocumented COM interop. If WebView2 SDK updates 
+/// change the internal IID or interface layout, this may need updating.
+/// </summary>
 public sealed class WebView2ControllerAccessor
 {
-    // GUID {4D00C0D1-9434-4EB6-8078-8697A560334F} = CoreWebView2Controller IID
-    // WARNING: This GUID is tied to the WebView2 SDK version (currently 1.0.xxx).
-    // A future SDK update could change the IID, breaking the raw QueryInterface below.
-    // If accelerator keys stop working after a WebView2 SDK update, this is the first place to check.
-    private static readonly Guid ControllerGuid = new("4D00C0D1-9434-4EB6-8078-8697A560334F");
+    // IID for ICoreWebView2Controller: {4D00C0D1-9434-4EB6-8078-8697A560334F}
+    // This GUID is stable across WebView2 SDK versions as it refers to the base interface.
+    private static readonly Guid ControllerIid = new("4D00C0D1-9434-4EB6-8078-8697A560334F");
 
     private WebView2ControllerAccessor() { }
 
+    /// <summary>
+    /// Attempts to hook into the WebView2 Controller's AcceleratorKeyPressed event.
+    /// </summary>
+    /// <returns>An IDisposable that unsubscribes the event when disposed, or null if failed.</returns>
     public static IDisposable? TrySubscribeAcceleratorKeyPressed(WebView2 webView, Func<Windows.System.VirtualKey, bool> handler)
     {
         if (webView?.CoreWebView2 == null)
             return null;
 
+        IntPtr pUnk = IntPtr.Zero;
+        IntPtr pController = IntPtr.Zero;
+
         try
         {
-            var pWebView2 = Marshal.GetIUnknownForObject(webView.CoreWebView2);
-            if (pWebView2 == IntPtr.Zero)
+            // 1. Get the IUnknown pointer for the CoreWebView2 object
+            pUnk = Marshal.GetIUnknownForObject(webView.CoreWebView2);
+            if (pUnk == IntPtr.Zero)
                 return null;
 
-            try
-            {
-                if (Marshal.QueryInterface(pWebView2, in ControllerGuid, out var pController) != 0 || pController == IntPtr.Zero)
-                    return null;
+            // 2. Query for the ICoreWebView2Controller interface
+            int hr = Marshal.QueryInterface(pUnk, in ControllerIid, out pController);
 
+            if (hr != 0 || pController == IntPtr.Zero)
+            {
+                // This can happen if the SDK version changes or the object doesn't support QI
+                Logger.Warning($"Failed to query ICoreWebView2Controller (HR: 0x{hr:X8}). Global shortcuts may not work when web content is focused.");
+                return null;
+            }
+
+            // 3. Cast the COM pointer back to the managed Controller type
+            var controller = Marshal.GetObjectForIUnknown(pController) as CoreWebView2Controller;
+            if (controller == null)
+                return null;
+
+            // 4. Subscribe to the event
+            TypedEventHandler<CoreWebView2Controller, CoreWebView2AcceleratorKeyPressedEventArgs> acceleratorHandler = (_, e) =>
+            {
+                // Pass the key to the handler. If it returns true, mark as handled to prevent the web page from seeing it.
+                if (handler((Windows.System.VirtualKey)e.VirtualKey))
+                {
+                    e.Handled = true;
+                }
+            };
+
+            controller.AcceleratorKeyPressed += acceleratorHandler;
+
+            // 5. Return a disposable to clean up the subscription later
+            return new Disposable(() =>
+            {
                 try
                 {
-                    var controller = Marshal.GetObjectForIUnknown(pController) as CoreWebView2Controller;
-                    if (controller == null)
-                        return null;
-
-                    TypedEventHandler<CoreWebView2Controller, CoreWebView2AcceleratorKeyPressedEventArgs> acceleratorHandler = (_, e) =>
-                    {
-                        if (handler((Windows.System.VirtualKey)e.VirtualKey))
-                            e.Handled = true;
-                    };
-
-                    controller.AcceleratorKeyPressed += acceleratorHandler;
-
-                    return new Disposable(() =>
-                    {
-                        try { controller.AcceleratorKeyPressed -= acceleratorHandler; } catch (ObjectDisposedException) { }
-                    });
+                    controller.AcceleratorKeyPressed -= acceleratorHandler;
                 }
-                finally { Marshal.Release(pController); }
-            }
-            finally { Marshal.Release(pWebView2); }
+                catch (ObjectDisposedException)
+                {
+                    // Ignore if the controller was already destroyed
+                }
+            });
         }
         catch (COMException ex)
         {
-            Logger.Warning($"WebView2 COM failure: 0x{ex.HResult:X8}");
+            Logger.Warning($"WebView2 COM interop failure: 0x{ex.HResult:X8}");
             return null;
         }
         catch (Exception ex)
         {
-            Logger.Warning($"WebView2ControllerAccessor failed: {ex}");
+            Logger.Warning($"WebView2ControllerAccessor failed: {ex.Message}");
             return null;
+        }
+        finally
+        {
+            // CRITICAL: Release COM references to prevent memory leaks
+            if (pController != IntPtr.Zero) Marshal.Release(pController);
+            if (pUnk != IntPtr.Zero) Marshal.Release(pUnk);
         }
     }
 
+    /// <summary>
+    /// Helper class to wrap an Action in an IDisposable interface.
+    /// </summary>
     private sealed class Disposable : IDisposable
     {
-        private readonly Action _cleanup;
+        private Action? _cleanup;
+
         public Disposable(Action cleanup) => _cleanup = cleanup;
-        public void Dispose() => _cleanup();
+
+        public void Dispose()
+        {
+            var cleanup = _cleanup;
+            _cleanup = null; // Prevent double disposal
+            cleanup?.Invoke();
+        }
     }
 }

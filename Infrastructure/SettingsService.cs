@@ -2,62 +2,108 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using TB.Helpers;
 using TB.Services.Interfaces;
 
-namespace TB.Infrastructure
+namespace TB.Infrastructure;
+
+public class SettingsService : ISettingsService
 {
-    public class SettingsService : ISettingsService
+    private readonly string _dataFile;
+    private readonly Dictionary<string, object> _settings;
+    private readonly object _lock = new(); // Thread-safety for concurrent IPC/UI access
+
+    public SettingsService(string basePath)
     {
-        private readonly string _dataFile;
-        private Dictionary<string, object> _settings;
+        // PORTABLE MODE: Keep settings in the same folder as the .exe
+        var appDataFolder = Path.Combine(basePath, "AppData");
+        Directory.CreateDirectory(appDataFolder);
 
-        public SettingsService(string basePath)
+        _dataFile = Path.Combine(appDataFolder, "settings.json");
+
+        // INDUSTRY STANDARD DEFAULTS
+        _settings = new Dictionary<string, object>
         {
-            _dataFile = Path.Combine(basePath, "AppData", "settings.json");
-            _settings = new Dictionary<string, object>
-            {
-                ["search-engine"] = "google",
-                ["home-page"] = "https://www.google.com",
-                ["new-tab-page"] = "google",
-                ["theme-select"] = "dark",
-                ["accent-color"] = "#5b9cf6",
-                ["font-size"] = "13",
-                ["compact-mode"] = false,
-                ["block-trackers"] = true,
-                ["block-cookies"] = true,
-                ["https-only"] = true,
-                ["do-not-track"] = false,
-                ["download-path"] = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-                ["ask-save"] = false,
-                ["auto-open-pdf"] = false
-            };
-            Load();
-        }
+            // Navigation
+            ["search-engine"] = "google",
+            ["home-page"] = Defaults.HomeUrl,
+            ["new-tab-page"] = Defaults.HomeUrl,
 
-        public T? Get<T>(string key, T? defaultValue = default)
+            // Appearance
+            ["theme-name"] = Defaults.Theme,
+            ["accent-color"] = "", // Empty = defer to theme.json
+            ["font-size"] = 14,
+            ["compact-mode"] = false,
+
+            // Privacy & Security
+            ["block-trackers"] = true,
+            ["block-cookies"] = false,
+            ["https-only"] = false,
+            ["do-not-track"] = true,
+
+            // Downloads (Standard: OS User Downloads folder, not hidden AppData)
+            ["download-path"] = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            ["ask-save"] = true,
+            ["auto-open-pdf"] = false
+        };
+
+        Load();
+    }
+
+    public T? Get<T>(string key, T? defaultValue = default)
+    {
+        lock (_lock)
         {
             if (_settings.TryGetValue(key, out var val))
             {
-                try { return (T)Convert.ChangeType(val, typeof(T)); }
-                catch (Exception) { /* silent fallback — type conversion expected to fail */ }
+                try
+                {
+                    // System.Text.Json deserializes 'object' as JsonElement. 
+                    // We must explicitly unwrap it to prevent InvalidCastException.
+                    if (val is JsonElement element)
+                    {
+                        return element.Deserialize<T>() ?? defaultValue;
+                    }
+
+                    return (T)Convert.ChangeType(val, typeof(T));
+                }
+                catch
+                {
+                    // Silent fallback for type mismatches
+                }
             }
             return defaultValue;
         }
+    }
 
-        public void Set(string key, object value)
+    public void Set(string key, object value)
+    {
+        lock (_lock)
         {
             _settings[key] = value;
-            Save();
         }
+        Save();
+    }
 
-        public Dictionary<string, object> GetAll() => new(_settings);
+    public Dictionary<string, object> GetAll()
+    {
+        lock (_lock)
+        {
+            return new Dictionary<string, object>(_settings);
+        }
+    }
 
-        public string GetAllJson()
+    public string GetAllJson()
+    {
+        lock (_lock)
         {
             return JsonSerializer.Serialize(_settings);
         }
+    }
 
-        private void Save()
+    private void Save()
+    {
+        lock (_lock)
         {
             try
             {
@@ -69,8 +115,11 @@ namespace TB.Infrastructure
                 Logger.Error($"Failed to save settings: {ex.Message}");
             }
         }
+    }
 
-        private void Load()
+    private void Load()
+    {
+        lock (_lock)
         {
             try
             {

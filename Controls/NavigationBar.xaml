@@ -1,0 +1,82 @@
+<UserControl
+    x:Class="TB.Controls.NavigationBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid x:Name="NavBarGrid" Padding="8,4,8,6">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding BackCommand}">
+                <Path Data="{StaticResource IconBackData}" Style="{StaticResource NavIconPathStyle}"/>
+            </Button>
+            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding ForwardCommand}">
+                <Path Data="{StaticResource IconForwardData}" Style="{StaticResource NavIconPathStyle}"/>
+            </Button>
+            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding ReloadCommand}">
+                <Path Data="{StaticResource IconRefreshData}" Style="{StaticResource NavIconPathStyle}"/>
+            </Button>
+            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding HomeCommand}">
+                <Path Data="{StaticResource IconHomeData}" Style="{StaticResource NavIconPathStyle}"/>
+            </Button>
+        </StackPanel>
+
+        <Border x:Name="UrlBarBorder"
+                Grid.Column="1"
+                Height="{ThemeResource urlbarHeightLength}"
+                Background="{ThemeResource bgInputBrush}"
+                CornerRadius="99"
+                BorderThickness="0"
+                Margin="12,0,12,0"
+                VerticalAlignment="Center">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Path x:Name="SecurityIcon"
+                      Grid.Column="0"
+                      Data="{StaticResource IconLockData}"
+                      Style="{StaticResource SmallIconPathStyle}"
+                      Margin="12,0,8,0"
+                      VerticalAlignment="Center"
+                      Opacity="0.6"/>
+
+                <TextBox x:Name="UrlInput"
+                         Grid.Column="1"
+                         Text="{Binding UrlText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Foreground="{ThemeResource textMainBrush}"
+                         VerticalAlignment="Center"
+                         Padding="0,0,16,0"
+                         GotFocus="OnUrlInputGotFocus"
+                         LostFocus="OnUrlInputLostFocus"
+                         KeyDown="OnUrlInputKeyDown"/>
+            </Grid>
+        </Border>
+
+        <Button Grid.Column="2" Style="{StaticResource NavButtonStyle}" VerticalAlignment="Center">
+            <Path Data="{StaticResource IconMenuData}" Style="{StaticResource NavIconPathStyle}"/>
+
+            <Button.Flyout>
+                <MenuFlyout Placement="BottomEdgeAlignedRight" MenuFlyoutPresenterStyle="{StaticResource HeliumMenuFlyoutPresenterStyle}">
+                    <MenuFlyoutItem Text="Downloads" Command="{Binding DownloadsCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
+                    <MenuFlyoutItem Text="History" Command="{Binding HistoryCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
+                    <MenuFlyoutItem Text="Settings" Command="{Binding SettingsCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
+                    <MenuFlyoutSeparator/>
+                    <MenuFlyoutItem Text="Flags" Command="{Binding FlagsCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
+                </MenuFlyout>
+            </Button.Flyout>
+        </Button>
+    </Grid>
+</UserControl>
+    

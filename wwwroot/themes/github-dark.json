@@ -1,0 +1,20 @@
+﻿{
+  "active": "github-dark",
+  "native": { "titleBarText": "#c9d1d9", "titleBarIconHover": "#58a6ff" },
+  "colors": { "bgApp": "#0d1117", "bgTitlebar": "#0d1117", "bgTab": "transparent", "bgTabHover": "#161b22", "bgTabActive": "#21262d", "bgInput": "#010409", "textMain": "#c9d1d9", "textMuted": "#8b949e", "textSubtle": "#484f58", "accent": "#58a6ff", "accentSecondary": "#d2a8ff", "accentPress": "#1f6feb", "success": "#3fb950", "danger": "#f85149", "borderCrisp": "#30363d", "borderActive": "#58a6ff" }
+}
+"
+
+
+@
+    "github-light" = @"
+{
+  "active": "github-light",
+  "native": { "titleBarText": "#24292f", "titleBarIconHover": "#0969da" },
+ 
+
+
+
+
+ "colors": { "bgApp": "#ffffff", "bgTitlebar": "#f6f8fa", "bgTab": "transparent", "bgTabHover": "#eaeef2", "bgTabActive": "#ffffff", "bgInput": "#f6f8fa", "textMain": "#24292f", "textMuted": "#57606a", "textSubtle": "#8c959f", "accent": "#0969da", "accentSecondary": "#8250df", "accentPress": "#0550ae", "success": "#1a7f37", "danger": "#cf222e", "borderCrisp": "#d0d7de", "borderActive": "#0969da" }
+}

@@ -1,0 +1,5 @@
+﻿{
+  "active": "catppuccin-mocha",
+  "native": { "titleBarText": "#cdd6f4", "titleBarIconHover": "#cba6f7" },
+  "colors": { "bgApp": "#1e1e2e", "bgTitlebar": "#1e1e2e", "bgTab": "transparent", "bgTabHover": "#313244", "bgTabActive": "#45475a", "bgInput": "#181825", "textMain": "#cdd6f4", "textMuted": "#a6adc8", "textSubtle": "#6c7086", "accent": "#cba6f7", "accentSecondary": "#b4befe", "accentPress": "#f5c2e7", "success": "#a6e3a1", "danger": "#f38ba8", "borderCrisp": "#45475a", "borderActive": "#cba6f7" }
+}

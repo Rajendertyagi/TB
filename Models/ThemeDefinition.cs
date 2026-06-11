@@ -1,54 +1,52 @@
+using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using TB.Helpers;
-using Windows.UI;
 
 namespace TB.Models;
 
 public class ThemeDefinition
 {
-    public string Active { get; set; } = "github-dark";
+    [JsonPropertyName("active")]
+    public string Active { get; set; } = Defaults.Theme;
+
+    [JsonPropertyName("native")]
     public NativeTheme Native { get; set; } = new();
+
+    [JsonPropertyName("colors")]
     public Dictionary<string, string> Colors { get; set; } = new();
-    public Dictionary<string, double> Sizes { get; set; } = new();
-
-    public class NativeTheme
-    {
-        public string TitleBarText { get; set; } = "#FFFFFF";
-        public string TitleBarIconHover { get; set; } = "#A855F7";
-
-        public Color TitleBarTextColor => ColorExtensions.ParseHex(TitleBarText);
-        public Color TitleBarIconHoverColor => ColorExtensions.ParseHex(TitleBarIconHover);
-    }
 
     public static ThemeDefinition Load(string json)
     {
-        var doc = JsonDocument.Parse(json);
-        var root = doc.RootElement;
+        if (string.IsNullOrWhiteSpace(json))
+            return new ThemeDefinition();
 
-        var active = root.TryGetProperty("active", out var activeEl)
-            ? activeEl.GetString() ?? "github-dark" : "github-dark";
-
-        var native = new NativeTheme();
-        if (root.TryGetProperty("native", out var nativeEl))
+        var options = new JsonSerializerOptions
         {
-            native.TitleBarText = nativeEl.TryGetProperty("titleBarText", out var tbt) ? tbt.GetString() ?? "#FFFFFF" : "#FFFFFF";
-            native.TitleBarIconHover = nativeEl.TryGetProperty("titleBarIconHover", out var tih) ? tih.GetString() ?? "#A855F7" : "#A855F7";
-        }
+            PropertyNameCaseInsensitive = true,
+            ReadCommentHandling = JsonCommentHandling.Skip,
+            AllowTrailingCommas = true
+        };
 
-        var colors = new Dictionary<string, string>();
-        if (root.TryGetProperty("colors", out var colorsEl))
+        try
         {
-            foreach (var prop in colorsEl.EnumerateObject())
-                colors[prop.Name] = prop.Value.GetString() ?? "";
+            return JsonSerializer.Deserialize<ThemeDefinition>(json, options) ?? new ThemeDefinition();
         }
-
-        var sizes = new Dictionary<string, double>();
-        if (root.TryGetProperty("sizes", out var sizesEl))
+        catch (JsonException ex)
         {
-            foreach (var prop in sizesEl.EnumerateObject())
-                sizes[prop.Name] = prop.Value.GetDouble();
+            TB.Infrastructure.Logger.Error($"Failed to parse theme.json: {ex.Message}");
+            return new ThemeDefinition();
         }
-
-        return new ThemeDefinition { Active = active, Native = native, Colors = colors, Sizes = sizes };
     }
 }
+
+public class NativeTheme
+{
+    // Nullable: If null, ThemeService will fallback to the main "colors" dictionary
+    [JsonPropertyName("titleBarText")]
+    public string? TitleBarText { get; set; }
+
+    [JsonPropertyName("titleBarIconHover")]
+    public string? TitleBarIconHover { get; set; }
+}
+
