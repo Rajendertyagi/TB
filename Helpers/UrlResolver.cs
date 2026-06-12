@@ -1,3 +1,6 @@
+using System;
+using System.Text.RegularExpressions;
+
 namespace TB.Helpers;
 
 public static class UrlResolver
@@ -19,19 +22,6 @@ public static class UrlResolver
         };
     }
 
-    public static string ResolveOmnibar(string input)
-    {
-        var val = input.Trim();
-        if (string.IsNullOrWhiteSpace(val))
-            return string.Empty;
-        if (Uri.TryCreate(val, UriKind.Absolute, out var uri) &&
-            (uri.Scheme == "http" || uri.Scheme == "https"))
-            return val;
-        if (val.Contains('.') || val.Equals("localhost", StringComparison.OrdinalIgnoreCase))
-            return "https://" + val;
-        return Defaults.SearchEngine + Uri.EscapeDataString(val);
-    }
-
     public static string GetTabTitle(string url)
     {
         return url.ToLowerInvariant() switch
@@ -41,5 +31,36 @@ public static class UrlResolver
             Routes.Flags => "Flags",
             _ => "New Tab"
         };
+    }
+
+    /// <summary>
+    /// Omnibox Parser — converts raw user input into a valid navigable URI.
+    /// </summary>
+    public static string ParseInput(string input)
+    {
+        if (string.IsNullOrWhiteSpace(input)) return Defaults.HomeUrl;
+
+        input = input.Trim();
+
+        if (input.StartsWith("tb://", StringComparison.OrdinalIgnoreCase))
+            return input;
+
+        if (input.StartsWith("file:///", StringComparison.OrdinalIgnoreCase))
+            return input;
+
+        if (input.Length > 2 && input[1] == ':' && (input[2] == '\\' || input[2] == '/'))
+            return $"file:///{input.Replace('\\', '/')}";
+
+        if (input.Contains("://"))
+            return input;
+
+        bool hasSpaces = input.Contains(' ');
+        bool hasDots = input.Contains('.');
+        bool isIpAddress = Regex.IsMatch(input, @"^\d{1,3}(\.\d{1,3}){3}(:\d+)?$");
+
+        if (hasSpaces || (!hasDots && !isIpAddress))
+            return $"{Defaults.SearchEngine}{Uri.EscapeDataString(input)}";
+
+        return $"https://{input}";
     }
 }

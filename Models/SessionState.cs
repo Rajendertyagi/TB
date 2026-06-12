@@ -2,7 +2,7 @@ namespace TB.Models;
 
 public class SessionState
 {
-    public List<TabEntry> Tabs { get; set; } = new();
+    public List<TabEntry> Tabs { get; set; } = [];
     public int ActiveTabIndex { get; set; } = -1;
 }
 

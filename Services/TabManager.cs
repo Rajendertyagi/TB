@@ -1,3 +1,4 @@
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
@@ -5,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using TB.Features.Downloads;
+using TB.Services.Downloads;
 using TB.Helpers;
 using TB.Infrastructure;
 using TB.Input;
@@ -19,6 +20,7 @@ public partial class TabManager : ITabManager
 {
     private Grid? _contentGrid;
     private CoreWebView2Environment? _env;
+    private readonly DispatcherQueue _dispatcherQueue;
     private readonly string _wwwrootPath;
     private readonly string _sessionPath;
 
@@ -27,16 +29,16 @@ public partial class TabManager : ITabManager
     private readonly IDownloadService _downloads;
     private readonly KeyboardShortcutHandler _keyboardHandler;
 
-    internal readonly Dictionary<int, WebView2> _webViews = new();
-    internal readonly Dictionary<int, double> _zoomLevels = new();
-    internal readonly List<TabItem> _tabs = new();
-    internal readonly HashSet<int> _internalPageTabs = new();
-    internal readonly Dictionary<int, int> _downloadOwners = new();
-    internal readonly Dictionary<int, TypedEventHandler<CoreWebView2, CoreWebView2WebMessageReceivedEventArgs>> _ipcHandlers = new();
-    internal readonly Dictionary<int, IDisposable> _acceleratorSubscriptions = new();
-    internal readonly Dictionary<int, WebView2EventHandlers> _wvHandlers = new();
-    internal readonly Dictionary<int, long> _lastFaviconTimestamp = new();
-    internal readonly List<string> _lastClosedUrls = new();
+    internal readonly Dictionary<int, WebView2> _webViews = [];
+    internal readonly Dictionary<int, double> _zoomLevels = [];
+    internal readonly List<TabItem> _tabs = [];
+    internal readonly HashSet<int> _internalPageTabs = [];
+    internal readonly Dictionary<int, int> _downloadOwners = [];
+    internal readonly Dictionary<int, TypedEventHandler<CoreWebView2, CoreWebView2WebMessageReceivedEventArgs>> _ipcHandlers = [];
+    internal readonly Dictionary<int, IDisposable> _acceleratorSubscriptions = [];
+    internal readonly Dictionary<int, WebView2EventHandlers> _wvHandlers = [];
+    internal readonly Dictionary<int, long> _lastFaviconTimestamp = [];
+    internal readonly List<string> _lastClosedUrls = [];
 
     internal int _nextId = 1;
     internal int _activeId = -1;
@@ -48,6 +50,8 @@ public partial class TabManager : ITabManager
     internal CancellationTokenSource? _saveCts;
     internal readonly object _saveLock = new();
     internal readonly Lazy<string> _findBarScript;
+    internal readonly Lazy<string> _crashPage;
+    internal readonly Lazy<string> _bridgeScript;
 
     public int ActiveTabId => _activeId;
     public int TabCount => _tabs.Count;
@@ -68,6 +72,7 @@ public partial class TabManager : ITabManager
 
     public TabManager(string basePath, IThemeService themeService, ISettingsService settingsService, IDownloadService downloads, KeyboardShortcutHandler keyboardHandler)
     {
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread()!;
         _wwwrootPath = Path.Combine(basePath, "wwwroot");
         var appDataFolder = Path.Combine(basePath, "AppData");
         Directory.CreateDirectory(appDataFolder);
@@ -82,6 +87,18 @@ public partial class TabManager : ITabManager
         {
             var path = Path.Combine(_wwwrootPath, "js", "find-bar.js");
             return File.Exists(path) ? File.ReadAllText(path) : "console.error('find-bar.js missing');";
+        });
+
+        _crashPage = new Lazy<string>(() =>
+        {
+            var path = Path.Combine(_wwwrootPath, "crash.html");
+            return File.Exists(path) ? File.ReadAllText(path) : "";
+        });
+
+        _bridgeScript = new Lazy<string>(() =>
+        {
+            var path = Path.Combine(_wwwrootPath, "js", "bridge.js");
+            return File.Exists(path) ? File.ReadAllText(path) : "";
         });
 
         _downloads.OnProgress += OnDownloadProgress;

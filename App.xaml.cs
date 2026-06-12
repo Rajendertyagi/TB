@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using TB.Features.Downloads;
+using TB.Services.Downloads;
 using TB.Helpers;
 using TB.Infrastructure;
 using TB.Input;
@@ -100,7 +100,9 @@ public partial class App : Application
 
             if (window.Content is FrameworkElement root)
             {
-                root.RequestedTheme = ElementTheme.Default;
+                var settings = _services.GetRequiredService<ISettingsService>();
+                var themeMode = settings.Get("theme-mode", "dark") ?? "dark";
+                root.RequestedTheme = themeMode == "light" ? ElementTheme.Light : ElementTheme.Dark;
             }
 
             themeService.NotifyThemeChanged();
@@ -174,6 +176,7 @@ public partial class App : Application
 
         services.AddSingleton<ChromeViewModel>();
         services.AddSingleton<MainViewModel>();
+        services.AddTransient<TabItemViewModel>();
 
         services.AddTransient<MainWindow>();
     }

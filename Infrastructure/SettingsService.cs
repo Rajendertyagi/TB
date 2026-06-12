@@ -58,14 +58,7 @@ public class SettingsService : ISettingsService
             {
                 try
                 {
-                    // System.Text.Json deserializes 'object' as JsonElement. 
-                    // We must explicitly unwrap it to prevent InvalidCastException.
-                    if (val is JsonElement element)
-                    {
-                        return element.Deserialize<T>() ?? defaultValue;
-                    }
-
-                    return (T)Convert.ChangeType(val, typeof(T));
+                    return val is JsonElement element ? element.Deserialize<T>() ?? defaultValue : (T)Convert.ChangeType(val, typeof(T));
                 }
                 catch
                 {

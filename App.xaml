@@ -5,6 +5,16 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
+            <!-- Stable brush singletons — created once, never replaced, only mutated by ThemeService -->
+            <SolidColorBrush x:Key="bgAppBrush" Color="#121212"/>
+            <SolidColorBrush x:Key="textMainBrush" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="textMutedBrush" Color="#888888"/>
+            <SolidColorBrush x:Key="bgInputBrush" Color="#2A2A2A"/>
+            <SolidColorBrush x:Key="borderCrispBrush" Color="#333333"/>
+            <SolidColorBrush x:Key="bgTabBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="bgTabActiveBrush" Color="#2A2A2A"/>
+            <SolidColorBrush x:Key="bgTabHoverBrush" Color="#2A2A2A"/>
+
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Dark">
                 </ResourceDictionary>
@@ -15,6 +25,7 @@
             </ResourceDictionary.ThemeDictionaries>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
+                <ResourceDictionary Source="/Views/Themes/Themes.xaml"/>
                 <ResourceDictionary Source="/Styles/ChromeResources.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

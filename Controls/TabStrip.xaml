@@ -33,12 +33,11 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
 
-                                <Border Grid.Column="0" 
-                                        Width="16" Height="16" 
-                                        VerticalAlignment="Center" 
-                                        Background="{ThemeResource textMutedBrush}"
-                                        Opacity="0.85" 
-                                        CornerRadius="3"/>
+                                <Image Grid.Column="0" 
+                                       Width="16" Height="16" 
+                                       VerticalAlignment="Center"
+                                       Source="{Binding Favicon}"
+                                       Stretch="Uniform"/>
 
                                 <TextBlock Grid.Column="1" 
                                            Margin="6,0,6,0"

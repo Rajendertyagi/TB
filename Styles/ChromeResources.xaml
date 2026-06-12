@@ -9,16 +9,6 @@
     <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     <helpers:BoolToActiveBgConverter x:Key="BoolToActiveBgConverter"/>
 
-    <!-- Fallback theme brushes (overridden by ThemeService from theme.json) -->
-    <SolidColorBrush x:Key="bgAppBrush">#1a0f1a</SolidColorBrush>
-    <SolidColorBrush x:Key="bgInputBrush">#120912</SolidColorBrush>
-    <SolidColorBrush x:Key="bgTabBrush">Transparent</SolidColorBrush>
-    <SolidColorBrush x:Key="bgTabHoverBrush">#2a152a</SolidColorBrush>
-    <SolidColorBrush x:Key="bgTabActiveBrush">#3a1f3a</SolidColorBrush>
-    <SolidColorBrush x:Key="textMainBrush">#f0e0f0</SolidColorBrush>
-    <SolidColorBrush x:Key="textMutedBrush">#b89cb8</SolidColorBrush>
-    <SolidColorBrush x:Key="borderCrispBrush">#3a223a</SolidColorBrush>
-
     <!-- Fallback size/length resources (overridden by ThemeService from theme.json) -->
     <x:Double x:Key="navHeightLength">34</x:Double>
     <x:Double x:Key="tabbarHeightLength">34</x:Double>
@@ -31,8 +21,8 @@
     <x:Double x:Key="tabMinWidthLength">32</x:Double>
     <x:Double x:Key="tabMaxWidthLength">180</x:Double>
 
-    <!-- Helium-style context menu presenter (used by ShowTabContextMenu) -->
-    <Style x:Key="HeliumMenuFlyoutPresenterStyle" TargetType="MenuFlyoutPresenter">
+    <!-- TB-style context menu presenter (used by ShowTabContextMenu) -->
+    <Style x:Key="TbMenuFlyoutPresenterStyle" TargetType="MenuFlyoutPresenter">
         <Setter Property="Background" Value="{ThemeResource bgAppBrush}"/>
         <Setter Property="BorderBrush" Value="{ThemeResource borderCrispBrush}"/>
         <Setter Property="BorderThickness" Value="1"/>
@@ -41,8 +31,8 @@
         <Setter Property="MinWidth" Value="160"/>
     </Style>
 
-    <!-- Helium-style context menu item -->
-    <Style x:Key="HeliumMenuFlyoutItemStyle" TargetType="MenuFlyoutItem">
+    <!-- TB-style context menu item -->
+    <Style x:Key="TbMenuFlyoutItemStyle" TargetType="MenuFlyoutItem">
         <Setter Property="FontFamily" Value="ms-appx:///Assets/Fonts/OpenSans-Regular.ttf#Open Sans"/>
         <Setter Property="FontSize" Value="13"/>
         <Setter Property="Foreground" Value="{ThemeResource textMainBrush}"/>

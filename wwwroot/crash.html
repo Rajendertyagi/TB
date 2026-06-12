@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<style>
+  :root { --bg: #13141a; --text: #c8cdd8; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; flex-direction: column; gap: 12px; }
+  h2 { font-size: 24px; font-weight: 600; }
+  p { font-size: 14px; opacity: 0.8; cursor: pointer; text-decoration: underline; }
+</style>
+</head>
+<body>
+<h2>Crashed</h2>
+<p onclick="window.location='{{URL}}'">Reload</p>
+</body>
+</html>

@@ -1,0 +1,25 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="bgAppBrush">#1a0f1a</SolidColorBrush>
+            <SolidColorBrush x:Key="bgInputBrush">#120912</SolidColorBrush>
+            <SolidColorBrush x:Key="bgTabBrush">Transparent</SolidColorBrush>
+            <SolidColorBrush x:Key="bgTabHoverBrush">#2a152a</SolidColorBrush>
+            <SolidColorBrush x:Key="bgTabActiveBrush">#3a1f3a</SolidColorBrush>
+            <SolidColorBrush x:Key="textMainBrush">#f0e0f0</SolidColorBrush>
+            <SolidColorBrush x:Key="textMutedBrush">#b89cb8</SolidColorBrush>
+            <SolidColorBrush x:Key="borderCrispBrush">#3a223a</SolidColorBrush>
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="bgAppBrush">#1a0f1a</SolidColorBrush>
+            <SolidColorBrush x:Key="bgInputBrush">#120912</SolidColorBrush>
+            <SolidColorBrush x:Key="bgTabBrush">Transparent</SolidColorBrush>
+            <SolidColorBrush x:Key="bgTabHoverBrush">#2a152a</SolidColorBrush>
+            <SolidColorBrush x:Key="bgTabActiveBrush">#3a1f3a</SolidColorBrush>
+            <SolidColorBrush x:Key="textMainBrush">#f0e0f0</SolidColorBrush>
+            <SolidColorBrush x:Key="textMutedBrush">#b89cb8</SolidColorBrush>
+            <SolidColorBrush x:Key="borderCrispBrush">#3a223a</SolidColorBrush>
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+</ResourceDictionary>

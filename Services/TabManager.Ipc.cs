@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using TB.Features.Downloads;
+using TB.Services.Downloads;
 using TB.Helpers;
 using TB.Infrastructure;
 using Windows.Foundation;
@@ -28,6 +28,8 @@ public static class IpcActions
     public const string ThemeUpdate = "THEME_UPDATE";
     public const string SettingsData = "SETTINGS_DATA";
     public const string DownloadsList = "DOWNLOADS_LIST";
+    public const string GetThemes = "GET_THEMES";
+    public const string ThemesList = "THEMES_LIST";
 }
 
 public partial class TabManager
@@ -37,7 +39,6 @@ public partial class TabManager
         TypedEventHandler<CoreWebView2, CoreWebView2WebMessageReceivedEventArgs> handler = async (s, e) =>
         {
             if (!_internalPageTabs.Contains(tabId)) return;
-            if (!(e.Source ?? "").StartsWith("tb://", StringComparison.OrdinalIgnoreCase)) return;
 
             try
             {
@@ -58,27 +59,55 @@ public partial class TabManager
         {
             case IpcActions.SettingsReady:
                 var settingsJson = _settingsService.GetAllJson();
-                await wv.CoreWebView2.ExecuteScriptAsync($"window.dispatchEvent(new MessageEvent('message', {{ data: {{ action: '{IpcActions.SettingsData}', settings: {settingsJson} }} }}))");
+                var themes = _themeService.GetAvailableThemes().Select(t => new { id = t.Id, name = t.Name }).ToList();
+                var settingsDict = JsonSerializer.Deserialize<Dictionary<string, object>>(settingsJson) ?? new Dictionary<string, object>();
+
+                // FIX 1: Flat payload via PostWebMessageAsJson (Matches JS chrome.webview listener)
+                var settingsResponse = new { action = IpcActions.SettingsData, settings = settingsDict, themes = themes };
+                wv.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(settingsResponse));
                 break;
+
+            case IpcActions.GetThemes:
+                var availableThemes = _themeService.GetAvailableThemes().Select(t => new { id = t.Id, name = t.Name }).ToList();
+                var themesResponse = new { action = IpcActions.ThemesList, themes = availableThemes };
+                wv.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(themesResponse));
+                break;
+
             case IpcActions.SaveSetting:
                 if (root.TryGetProperty("key", out var k) && root.TryGetProperty("value", out var v))
                 {
                     var key = k.GetString() ?? "";
-                    if (v.ValueKind == JsonValueKind.True || v.ValueKind == JsonValueKind.False) _settingsService.Set(key, v.GetBoolean());
-                    else if (v.ValueKind == JsonValueKind.Number) _settingsService.Set(key, v.GetInt32());
-                    else if (v.ValueKind == JsonValueKind.String) _settingsService.Set(key, v.GetString() ?? "");
+                    var valStr = v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : v.ToString();
+                    _settingsService.Set(key, valStr);
+
+                    if (key == "theme-name" && !string.IsNullOrEmpty(valStr))
+                        _ = _themeService.SetThemeAsync(valStr);
                 }
                 break;
+
             case IpcActions.GetDownloads:
                 var list = _downloads.Downloads.Select(DownloadViewModel.FromItem).ToList();
-                var json = JsonSerializer.Serialize(new { action = IpcActions.DownloadsList, downloads = list });
-                await wv.CoreWebView2.ExecuteScriptAsync($"window.dispatchEvent(new MessageEvent('message', {{ data: {json} }}))");
+                // FIX 2: Flat payload (Removed the nested "dispatchIpc" wrapper)
+                var dlResponse = new { action = IpcActions.DownloadsList, downloads = list };
+                wv.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(dlResponse));
                 break;
+
             case IpcActions.RemoveDownload:
-                if (root.TryGetProperty("id", out var rmId)) { _downloadOwners.Remove(rmId.GetInt32()); _downloads.RemoveDownload(rmId.GetInt32()); }
+                if (root.TryGetProperty("id", out var rmId))
+                {
+                    _downloadOwners.Remove(rmId.GetInt32());
+                    _downloads.RemoveDownload(rmId.GetInt32());
+                }
                 break;
-            case IpcActions.ClearDownloads: _downloadOwners.Clear(); _downloads.ClearAll(); break;
-            case IpcActions.CloseSettings: CloseTab(tabId); break;
+
+            case IpcActions.ClearDownloads:
+                _downloadOwners.Clear();
+                _downloads.ClearAll();
+                break;
+
+            case IpcActions.CloseSettings:
+                CloseTab(tabId);
+                break;
         }
     }
 
@@ -123,40 +152,54 @@ public partial class TabManager
 
     private void SendToDownloadOwner(int downloadId, object data)
     {
-        Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(() =>
+        if (!_dispatcherQueue.HasThreadAccess)
         {
-            var json = JsonSerializer.Serialize(data);
-            var targetIds = new HashSet<int>();
-            if (_downloadOwners.TryGetValue(downloadId, out var ownerId)) targetIds.Add(ownerId);
-            foreach (var id in _internalPageTabs) { if (_tabs.Any(t => t.Id == id && t.Url == "tb://downloads")) targetIds.Add(id); }
+            var dId = downloadId;
+            var d = data;
+            _dispatcherQueue.TryEnqueue(() => SendToDownloadOwner(dId, d));
+            return;
+        }
 
-            foreach (var id in targetIds)
+        var json = JsonSerializer.Serialize(data);
+        HashSet<int> targetIds = [];
+        if (_downloadOwners.TryGetValue(downloadId, out var ownerId)) targetIds.Add(ownerId);
+        foreach (var id in _internalPageTabs) { if (_tabs.Any(t => t.Id == id && t.Url == Routes.Downloads)) targetIds.Add(id); }
+
+        foreach (var id in targetIds)
+        {
+            if (_webViews.TryGetValue(id, out var wv))
             {
-                if (_webViews.TryGetValue(id, out var wv))
-                {
-                    try { wv.CoreWebView2?.PostWebMessageAsJson(json); } catch { }
-                }
+                try { wv.CoreWebView2?.PostWebMessageAsJson(json); }
+                catch (Exception ex) { Logger.Warning($"PostWebMessageAsJson failed: {ex.Message}"); }
             }
-        });
+        }
     }
 
     private void OnThemeChanged()
     {
-        Microsoft.UI.Dispatching.DispatcherQueue.GetForCurrentThread()?.TryEnqueue(async () =>
+        if (!_dispatcherQueue.HasThreadAccess)
         {
-            foreach (var id in _internalPageTabs)
-            {
-                if (_webViews.TryGetValue(id, out var wv)) await InjectThemeVariablesAsync(wv);
-            }
-        });
-    }
+            _dispatcherQueue.TryEnqueue(OnThemeChanged);
+            return;
+        }
 
-    internal async Task InjectThemeVariablesAsync(WebView2 wv)
-    {
-        if (wv.CoreWebView2 == null) return;
         var themeVars = _themeService.GetCssVariables();
-        var varsJson = JsonSerializer.Serialize(themeVars);
-        await wv.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.__themeVariables = {varsJson};");
+        var flatJson = JsonSerializer.Serialize(new { action = IpcActions.ThemeUpdate, variables = themeVars });
+        var initScript = $"window.__themeVariables = {JsonSerializer.Serialize(themeVars)};";
+
+        foreach (var id in _internalPageTabs)
+        {
+            if (_webViews.TryGetValue(id, out var wv) && wv.CoreWebView2 != null)
+            {
+                try
+                {
+                    // Inject for future navigations/reloads
+                    _ = wv.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(initScript);
+                    // Broadcast to currently loaded DOM
+                    wv.CoreWebView2.PostWebMessageAsJson(flatJson);
+                }
+                catch (Exception ex) { Logger.Warning($"Theme broadcast failed: {ex.Message}"); }
+            }
+        }
     }
 }
-

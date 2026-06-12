@@ -14,7 +14,7 @@ public class ThemeDefinition
     public NativeTheme Native { get; set; } = new();
 
     [JsonPropertyName("colors")]
-    public Dictionary<string, string> Colors { get; set; } = new();
+    public Dictionary<string, string> Colors { get; set; } = [];
 
     public static ThemeDefinition Load(string json)
     {
@@ -34,7 +34,7 @@ public class ThemeDefinition
         }
         catch (JsonException ex)
         {
-            TB.Infrastructure.Logger.Error($"Failed to parse theme.json: {ex.Message}");
+            TB.Infrastructure.Logger.Error("Failed to parse theme.json", ex);
             return new ThemeDefinition();
         }
     }

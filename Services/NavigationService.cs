@@ -39,6 +39,6 @@ public class NavigationService : INavigationService
 
     public string ResolveUrl(string input)
     {
-        return UrlResolver.ResolveOmnibar(input);
+        return UrlResolver.ParseInput(input);
     }
 }

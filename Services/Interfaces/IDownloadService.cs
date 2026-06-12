@@ -1,4 +1,4 @@
-using TB.Features.Downloads;
+using TB.Services.Downloads;
 
 namespace TB.Services.Interfaces;
 

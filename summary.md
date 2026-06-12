@@ -1,5 +1,5 @@
 ## Goal
-- Rewrite TB browser chrome from HTML/WebView2 to native XAML/WinUI 3 with MVVM, Helium violet theme, DI, production-grade code.
+- Rewrite TB browser chrome from HTML/WebView2 to native XAML/WinUI 3 with MVVM, TB violet theme, DI, production-grade code.
 
 ## Constraints & Preferences
 - **No hardcoding** — constants classes (Routes, Actions, Defaults), no magic strings/colors.
@@ -9,7 +9,7 @@
 - **MVVM** — CommunityToolkit.Mvvm (ObservableObject, RelayCommand), proper async/await, IAsyncDisposable.
 - **No hacks** — no Win32 hooks, no IPC for chrome, no async void.
 - **Production ready** — nullable enabled, disposal patterns, error handling, session restore capability.
-- **Helium violet theme** — #1C1130 deep violet background, #A855F7 accent, #E8D5F5 text, flat opaque backgrounds (no Mica/Acrylic).
+- **TB violet theme** — #1C1130 deep violet background, #A855F7 accent, #E8D5F5 text, flat opaque backgrounds (no Mica/Acrylic).
 - **Keep theme.json** as sole source for colors/layout constants.
 - **Keep internal pages** (settings.html, downloads.html) in tab WebView2s with IPC.
 - **Delete obsolete files**: index.html, styles.css, app.js, icons.js, ipc.js.

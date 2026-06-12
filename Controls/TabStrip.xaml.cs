@@ -58,17 +58,11 @@ public sealed partial class TabStrip : UserControl
             };
             btn.PointerPressed += (_, e) =>
             {
-                try
-                {
-                    var pt = e.GetCurrentPoint(btn);
-                    if (pt.Properties.IsRightButtonPressed)
-                    {
-                        e.Handled = true;
-                        if (btn.DataContext is TabItemViewModel tabVm && DataContext is ChromeViewModel chromeVm)
-                            ShowTabContextMenu(btn, tabVm, chromeVm, pt.Position);
-                    }
-                }
-                catch (Exception ex) { Logger.Warning($"Tab pointer handler: {ex.Message}"); }
+                var pt = e.GetCurrentPoint(btn);
+                if (!pt.Properties.IsRightButtonPressed) return;
+                e.Handled = true;
+                if (btn.DataContext is TabItemViewModel tabVm && DataContext is ChromeViewModel chromeVm)
+                    ShowTabContextMenu(btn, tabVm, chromeVm, pt.Position);
             };
         }
     }
@@ -77,8 +71,8 @@ public sealed partial class TabStrip : UserControl
     {
         try
         {
-            var presenterStyle = (Style)Application.Current.Resources["HeliumMenuFlyoutPresenterStyle"];
-            var itemStyle = (Style)Application.Current.Resources["HeliumMenuFlyoutItemStyle"];
+            var presenterStyle = (Style)Application.Current.Resources["TbMenuFlyoutPresenterStyle"];
+            var itemStyle = (Style)Application.Current.Resources["TbMenuFlyoutItemStyle"];
             var flyout = new MenuFlyout { MenuFlyoutPresenterStyle = presenterStyle };
             flyout.Items.Add(new MenuFlyoutItem { Text = "New Tab", Command = vm.NewTabCommand, Style = itemStyle });
             flyout.Items.Add(new MenuFlyoutItem { Text = "Duplicate Tab", Command = vm.DuplicateCommand, Style = itemStyle });

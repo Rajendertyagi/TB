@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Markup;
 using Microsoft.UI.Xaml.Media;
 using System;
+using TB.Helpers;
 using TB.ViewModels;
 using Windows.System;
 using Windows.UI.Core;
@@ -54,7 +55,7 @@ public sealed partial class NavigationBar : UserControl
             SecurityIcon.Data = GetGeometry("IconInfoData");
             SecurityIcon.Stroke = GetBrush("dangerBrush");
         }
-        else if (url.StartsWith("tb://", StringComparison.OrdinalIgnoreCase))
+        else if (UrlResolver.IsInternalUrl(url))
         {
             SecurityIcon.Data = GetGeometry("IconSettingsGearData");
             SecurityIcon.Stroke = GetBrush("accentBrush");
@@ -85,7 +86,7 @@ public sealed partial class NavigationBar : UserControl
 
     private void OnUrlInputGotFocus(object sender, RoutedEventArgs e)
     {
-        if (sender is TextBox tb && tb.Parent is Grid grid && grid.Parent is Border border)
+        if (sender is TextBox { Parent: Grid { Parent: Border border } } tb)
         {
             var themeKey = Application.Current.RequestedTheme == ApplicationTheme.Light ? "Light" : "Dark";
             var dict = Application.Current.Resources.ThemeDictionaries[themeKey] as ResourceDictionary;
@@ -105,7 +106,7 @@ public sealed partial class NavigationBar : UserControl
         if (sender is TextBox tb)
         {
             tb.GetBindingExpression(TextBox.TextProperty)?.UpdateSource();
-            if (tb.Parent is Grid grid && grid.Parent is Border border)
+            if (tb.Parent is Grid { Parent: Border border })
             {
                 var themeKey = Application.Current.RequestedTheme == ApplicationTheme.Light ? "Light" : "Dark";
                 var dict = Application.Current.Resources.ThemeDictionaries[themeKey] as ResourceDictionary;

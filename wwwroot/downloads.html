@@ -4,26 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Downloads - TB</title>
+
+    <!-- Preload fonts to prevent FOUT -->
+    <link rel="preload" href="Fonts/OpenSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="Fonts/OpenSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="Fonts/OpenSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="Fonts/OpenSans-Bold.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- Unified Stylesheet -->
     <link rel="stylesheet" href="css/tb.css">
+
+    <!-- Theme Bridge -->
     <script src="js/theme-sync.js"></script>
 </head>
 <body>
-    <main class="demo-shell glass-children">
-        <div class="showcase-section">
-            <div class="section-heading">
-                <h1>Downloads</h1>
-                <p>Manage your downloaded files</p>
-            </div>
-            <div class="row" style="justify-content:space-between;align-items:center;width:100%">
-                <label class="input-field small" style="flex:1;max-width:360px">
-                    <input type="text" id="search-downloads" placeholder="Search downloads...">
-                </label>
-                <button class="button" id="clear-all" style="--size:34px;min-height:34px;padding:6px 14px;font-size:13px">Clear all</button>
-            </div>
+    <main style="padding:24px">
+        <div class="section-heading" style="margin-bottom:20px">
+            <h1>Downloads</h1>
+            <p>Manage your downloaded files</p>
+        </div>
+        <div class="row" style="justify-content:space-between;align-items:center;width:100%;margin-bottom:16px">
+            <label class="input-field small" style="flex:1;max-width:360px">
+                <input type="text" id="search-downloads" placeholder="Search downloads...">
+            </label>
+            <button class="button" id="clear-all" style="--size:34px;min-height:34px;padding:6px 14px;font-size:13px">Clear all</button>
         </div>
 
-        <div class="showcase-section" id="downloads-list">
-            <div class="section-heading" id="empty-state" style="text-align:center;max-width:100%;width:100%;padding:48px 0;display:none">
+        <div id="downloads-list">
+            <div id="empty-state" style="text-align:center;max-width:100%;width:100%;padding:48px 0;display:none">
                 <p style="font-size:18px;color:var(--secondary);margin:0">No downloads yet</p>
                 <p style="color:var(--tertiary);margin:0">Downloaded files will appear here</p>
             </div>
@@ -65,7 +73,7 @@
 
                 const icon = document.createElement('div');
                 icon.className = 'download-icon';
-                icon.textContent = item.state === 'completed' ? '✓' : '↻';
+                icon.textContent = item.state === 'completed' ? '\u2713' : '\u21BB';
 
                 const info = document.createElement('div');
                 info.className = 'download-info';
@@ -80,7 +88,7 @@
                 if (item.totalBytes > 0) parts.push(formatSize(item.totalBytes));
                 if (item.state === 'completed' && item.endTime) parts.push(formatDate(item.endTime));
                 if (item.state === 'in_progress') parts.push(Math.round(item.receivedBytes / item.totalBytes * 100) + '%');
-                meta.textContent = parts.join(' · ');
+                meta.textContent = parts.join(' \u00B7 ');
 
                 const progress = document.createElement('div');
                 progress.className = 'download-progress';

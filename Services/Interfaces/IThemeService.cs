@@ -9,6 +9,7 @@ public interface IThemeService
     string ActiveThemeName { get; }
     event Action? ThemeChanged;
     void NotifyThemeChanged();
+    IReadOnlyList<ThemeInfo> GetAvailableThemes();
     void ApplyNativeTheme(AppWindow appWindow);
     void ApplyXamlResources();
     void CycleTheme();

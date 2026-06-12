@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace TB.Infrastructure;
 
@@ -33,4 +34,17 @@ public static class Logger
     public static void Warn(string msg) => Write("WARN", msg);
     public static void Warning(string msg) => Warn(msg);
     public static void Error(string msg) => Write("ERROR", msg);
+
+    // ===============================================================================
+    // 🛡️ MODERN EXCEPTION OVERLOADS: Formats the entire diagnostic stack trace
+    // ===============================================================================
+    public static void Debug(string context, Exception ex) => Write("DEBUG", FormatException(context, ex));
+    public static void Warn(string context, Exception ex) => Write("WARN", FormatException(context, ex));
+    public static void Error(string context, Exception ex) => Write("ERROR", FormatException(context, ex));
+
+    private static string FormatException(string context, Exception ex)
+    {
+        if (ex == null) return context;
+        return $"{context} -> Failure: {ex.Message}{Environment.NewLine}Stack Trace:{Environment.NewLine}{ex.StackTrace}";
+    }
 }

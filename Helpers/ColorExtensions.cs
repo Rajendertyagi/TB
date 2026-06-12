@@ -1,3 +1,4 @@
+using System;
 using Windows.UI;
 
 namespace TB.Helpers;
@@ -20,20 +21,5 @@ public static class ColorExtensions
                 Convert.ToByte(hex[6..8], 16)),
             _ => throw new ArgumentException($"Invalid hex color: {hex}")
         };
-    }
-}
-
-public static class TaskExtensions
-{
-    public static async void FireAndForget(this Task task, Action<Exception>? onError = null)
-    {
-        try
-        {
-            await task.ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            onError?.Invoke(ex);
-        }
     }
 }

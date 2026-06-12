@@ -4,52 +4,62 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flags - TB</title>
+
+    <!-- Preload fonts to prevent FOUT -->
+    <link rel="preload" href="Fonts/OpenSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="Fonts/OpenSans-Medium.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="Fonts/OpenSans-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="Fonts/OpenSans-Bold.woff2" as="font" type="font/woff2" crossorigin>
+
+    <!-- Unified Stylesheet -->
     <link rel="stylesheet" href="css/tb.css">
+
+    <!-- Theme Bridge -->
     <script src="js/theme-sync.js"></script>
 </head>
 <body>
-    <main class="demo-shell glass-children">
-        <div class="section-heading intro">
+    <main class="demo-shell glass-children" style="padding:24px">
+        <div class="section-heading intro" style="margin-bottom:20px">
             <h1>Flags</h1>
             <p>Experimental browser features. Use with caution.</p>
         </div>
 
-        <div class="wide-stack">
-            <button class="toggle-button card" data-toggle="split-view">
-                <div class="toggle-text">
+        <div style="display:flex;flex-direction:column;gap:6px;max-width:560px">
+            <button class="flag-card" data-flag="split-view">
+                <div class="flag-card-text">
                     <h4>Split-View</h4>
                     <p>Split the tab content area into two resizable panes side by side</p>
                 </div>
-                <div class="toggle" id="split-view"><div class="runner"></div></div>
+                <span class="toggle-switch" id="split-view"><span class="knob"></span></span>
             </button>
 
-            <button class="toggle-button card" data-toggle="omni-bangs">
-                <div class="toggle-text">
+            <button class="flag-card" data-flag="omni-bangs">
+                <div class="flag-card-text">
                     <h4>Omni Bangs</h4>
                     <p>DuckDuckGo-style bang shortcuts in the address bar (e.g. !w Wikipedia)</p>
                 </div>
-                <div class="toggle" id="omni-bangs"><div class="runner"></div></div>
+                <span class="toggle-switch" id="omni-bangs"><span class="knob"></span></span>
             </button>
 
-            <button class="toggle-button card" data-toggle="gradient-shimmer">
-                <div class="toggle-text">
+            <button class="flag-card" data-flag="gradient-shimmer">
+                <div class="flag-card-text">
                     <h4>Gradient Shimmer</h4>
                     <p>Animated canvas-based shimmer effect on the new tab page background</p>
                 </div>
-                <div class="toggle" id="gradient-shimmer"><div class="runner"></div></div>
+                <span class="toggle-switch" id="gradient-shimmer"><span class="knob"></span></span>
             </button>
 
-            <button class="toggle-button card" data-toggle="hardware-acceleration">
-                <div class="toggle-text">
+            <button class="flag-card" data-flag="hardware-acceleration">
+                <div class="flag-card-text">
                     <h4>Hardware Acceleration</h4>
                     <p>Use GPU to render web content when available (requires restart)</p>
                 </div>
-                <div class="toggle enabled" id="hardware-acceleration"><div class="runner"></div></div>
+                <span class="toggle-switch on" id="hardware-acceleration"><span class="knob"></span></span>
             </button>
         </div>
 
-        <div class="row">
-            <button class="button primary" id="back-to-browser" style="gap:6px">
+        <div style="margin-top:20px">
+            <button class="button primary" style="gap:6px" onclick="window.chrome.webview.postMessage({action:'CLOSE_SETTINGS'})">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 Back to browsing
             </button>
@@ -69,21 +79,17 @@
             toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
         }
 
-        document.querySelectorAll('.toggle-button.card[data-toggle]').forEach(card => {
-            const toggle = card.querySelector('.toggle');
+        // Flag toggle via card click
+        document.querySelectorAll('.flag-card').forEach(card => {
+            const toggle = card.querySelector('.toggle-switch');
             if (!toggle) return;
             card.addEventListener('click', () => {
-                toggle.classList.toggle('enabled');
-                const flag = card.dataset.toggle;
-                const value = toggle.classList.contains('enabled');
+                toggle.classList.toggle('on');
+                const flag = card.dataset.flag;
+                const value = toggle.classList.contains('on');
                 showToast(flag + ' ' + (value ? 'enabled' : 'disabled'));
                 window.chrome.webview.postMessage({ action: 'TOGGLE_FLAG', flag, value });
             });
-        });
-
-        document.getElementById('back-to-browser').addEventListener('click', (e) => {
-            e.preventDefault();
-            window.chrome.webview.postMessage({ action: 'CLOSE_SETTINGS' });
         });
 
         window.chrome.webview.postMessage({ action: 'FLAGS_READY' });
@@ -94,7 +100,7 @@
                 for (const [key, value] of Object.entries(msg.flags)) {
                     const toggle = document.getElementById(key);
                     if (!toggle) continue;
-                    toggle.classList.toggle('enabled', value);
+                    toggle.classList.toggle('on', value);
                 }
             }
         });

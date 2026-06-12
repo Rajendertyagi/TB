@@ -1,13 +1,13 @@
-#pragma warning disable CS8601, CS8602, CS8603, CS8604 // Disable WinRT projection nullable quirks
+#pragma warning disable CS8601, CS8602, CS8603, CS8604
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Microsoft.UI;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
@@ -19,10 +19,11 @@ using Windows.UI;
 
 namespace TB.Services;
 
-public class ThemeService : IThemeService
+public class ThemeService : IThemeService, IDisposable
 {
     private readonly string _themesDirectory;
     private readonly ISettingsService _settings;
+    private readonly DispatcherQueue _dispatcherQueue;
 
     private ThemeDefinition _theme = new();
     private FileSystemWatcher? _watcher;
@@ -36,6 +37,7 @@ public class ThemeService : IThemeService
     {
         _themesDirectory = Path.Combine(basePath, "wwwroot", "themes");
         _settings = settings;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread()!;
 
         Directory.CreateDirectory(_themesDirectory);
         SetupFileWatcher();
@@ -59,9 +61,9 @@ public class ThemeService : IThemeService
                 _ = ReloadAndApplyAsync();
             }
 
-            _watcher.Changed += (_, _) => OnFileChanged();
-            _watcher.Created += (_, _) => OnFileChanged();
-            _watcher.Renamed += (_, _) => OnFileChanged();
+            _watcher.Changed += (_, _) => _dispatcherQueue.TryEnqueue(() => OnFileChanged());
+            _watcher.Created += (_, _) => _dispatcherQueue.TryEnqueue(() => OnFileChanged());
+            _watcher.Renamed += (_, _) => _dispatcherQueue.TryEnqueue(() => OnFileChanged());
             _watcher.EnableRaisingEvents = true;
         }
         catch (Exception ex) { Logger.Warning($"Theme watcher failed: {ex.Message}"); }
@@ -71,20 +73,30 @@ public class ThemeService : IThemeService
     {
         try
         {
-            await Task.Delay(100);
+            await Task.Delay(100); // Debounce file watcher events
             await ReloadThemeAsync();
-            ApplyXamlResources();
 
-            if (App.MainWindow?.Content is FrameworkElement root)
+            _dispatcherQueue.TryEnqueue(() =>
             {
-                var current = root.RequestedTheme;
-                root.RequestedTheme = current == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
-                root.RequestedTheme = current;
-            }
+                try
+                {
+                    ApplyXamlResources();
 
-            NotifyThemeChanged();
+                    if (App.MainWindow != null)
+                        ApplyNativeTheme(App.MainWindow.AppWindow);
+
+                    NotifyThemeChanged();
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error("Theme apply failed", ex);
+                }
+            });
         }
-        catch (Exception ex) { Logger.Error($"Theme reload failed: {ex.Message}"); }
+        catch (Exception ex)
+        {
+            Logger.Error("Theme Hot Reload Engine", ex);
+        }
     }
 
     public async Task ReloadThemeAsync()
@@ -114,7 +126,7 @@ public class ThemeService : IThemeService
         }
         catch (Exception ex)
         {
-            Logger.Error($"Failed to parse {themePath}: {ex.Message}");
+            Logger.Error($"Failed to parse theme file", ex);
             _theme = new ThemeDefinition();
         }
     }
@@ -123,15 +135,21 @@ public class ThemeService : IThemeService
     {
         try
         {
-            var textHex = _theme.Native.TitleBarText ?? _theme.Colors.GetValueOrDefault("textMain");
-            var hoverHex = _theme.Native.TitleBarIconHover ?? _theme.Colors.GetValueOrDefault("accent");
-            var accentHex = _theme.Colors.GetValueOrDefault("accent");
-            var borderHex = _theme.Colors.GetValueOrDefault("borderCrisp");
+            var textHex = _theme.Native.TitleBarText;
+            if (string.IsNullOrEmpty(textHex))
+                _theme.Colors.TryGetValue("textMain", out textHex);
 
-            var textColor = !string.IsNullOrEmpty(textHex) ? ColorExtensions.ParseHex(textHex) : Colors.White;
-            var hoverColor = !string.IsNullOrEmpty(hoverHex) ? ColorExtensions.ParseHex(hoverHex) : Colors.White;
-            var accentColor = !string.IsNullOrEmpty(accentHex) ? ColorExtensions.ParseHex(accentHex) : Colors.Transparent;
-            var borderColor = !string.IsNullOrEmpty(borderHex) ? ColorExtensions.ParseHex(borderHex) : Colors.Transparent;
+            var hoverHex = _theme.Native.TitleBarIconHover;
+            if (string.IsNullOrEmpty(hoverHex))
+                _theme.Colors.TryGetValue("accent", out hoverHex);
+
+            _theme.Colors.TryGetValue("accent", out var accentHex);
+            _theme.Colors.TryGetValue("borderCrisp", out var borderHex);
+
+            var textColor = textHex != null ? ColorExtensions.ParseHex(textHex) : Colors.White;
+            var hoverColor = hoverHex != null ? ColorExtensions.ParseHex(hoverHex) : Colors.White;
+            var accentColor = accentHex != null ? ColorExtensions.ParseHex(accentHex) : Colors.Transparent;
+            var borderColor = borderHex != null ? ColorExtensions.ParseHex(borderHex) : Colors.Transparent;
 
             appWindow.TitleBar.ButtonForegroundColor = textColor;
             appWindow.TitleBar.ButtonBackgroundColor = Colors.Transparent;
@@ -142,80 +160,37 @@ public class ThemeService : IThemeService
             appWindow.TitleBar.ButtonPressedBackgroundColor = accentColor;
             appWindow.TitleBar.ButtonPressedForegroundColor = Colors.White;
         }
-        catch (Exception ex) { Logger.Error($"Native theme failed: {ex.Message}"); }
+        catch (Exception ex) { Logger.Error("Native theme failed", ex); }
     }
 
     public void ApplyXamlResources()
     {
-        var themeDict = Application.Current.Resources.ThemeDictionaries;
-        var dark = GetOrCreateDict(themeDict, "Dark");
-        var light = GetOrCreateDict(themeDict, "Light");
-
         foreach (var (key, value) in _theme.Colors)
         {
             if (string.IsNullOrEmpty(value)) continue;
 
+            Color color;
             if (value.Equals("transparent", StringComparison.OrdinalIgnoreCase))
-            {
-                SetBrushResource(dark, $"{key}Brush", Colors.Transparent);
-                SetBrushResource(light, $"{key}Brush", Colors.Transparent);
-                dark[$"{key}Color"] = Colors.Transparent;
-                light[$"{key}Color"] = Colors.Transparent;
+                color = Colors.Transparent;
+            else if (!value.StartsWith("#") || value.Length < 4)
                 continue;
-            }
-
-            if (!value.StartsWith("#") || value.Length < 4) continue;
-
-            try
-            {
-                var color = ColorExtensions.ParseHex(value);
-                dark[$"{key}Color"] = color;
-                SetBrushResource(dark, $"{key}Brush", color);
-                light[$"{key}Color"] = color;
-                SetBrushResource(light, $"{key}Brush", color);
-            }
-            catch (Exception ex) { Logger.Error($"Parse color '{key}' failed: {ex.Message}"); }
-        }
-
-        var layoutMap = new Dictionary<string, double>
-        {
-            { "tabbarHeight", Layout.TabbarHeight }, { "navHeight", Layout.NavHeight },
-            { "tabHeight", Layout.TabHeight }, { "urlbarHeight", Layout.UrlbarHeight },
-            { "radiusSm", Layout.RadiusSm }, { "radiusMd", Layout.RadiusMd }, { "radiusLg", Layout.RadiusLg },
-            { "tabInterTabGap", Layout.TabInterTabGap }, { "tabMinWidth", Layout.TabMinWidth }, { "tabMaxWidth", Layout.TabMaxWidth }
-        };
-
-        foreach (var (key, value) in layoutMap)
-        {
-            if (key.StartsWith("radius"))
-            {
-                var cr = new CornerRadius(value);
-                dark[$"{key}Length"] = cr; light[$"{key}Length"] = cr;
-            }
             else
             {
-                dark[$"{key}Length"] = value; dark[$"{key}Thickness"] = new Thickness(value);
-                light[$"{key}Length"] = value; light[$"{key}Thickness"] = new Thickness(value);
+                try { color = ColorExtensions.ParseHex(value); }
+                catch (Exception ex) { Logger.Error($"Parse color '{key}'", ex); continue; }
             }
+
+            SetBrushResource(key, color);
         }
     }
 
-    private static void SetBrushResource(IDictionary<object, object> dict, string key, Color color)
+    private static void SetBrushResource(string key, Color color)
     {
-        if (dict.TryGetValue(key, out var existing) && existing is SolidColorBrush brush)
+        var brushKey = $"{key}Brush";
+        if (Application.Current.Resources.TryGetValue(brushKey, out var resource) && resource is SolidColorBrush brush)
             brush.Color = color;
         else
-            dict[key] = new SolidColorBrush(color);
-    }
-
-    private static ResourceDictionary GetOrCreateDict(IDictionary<object, object> themeDict, string key)
-    {
-        if (themeDict.TryGetValue(key, out var existing) && existing is ResourceDictionary dict)
-            return dict;
-
-        var newDict = new ResourceDictionary();
-        themeDict[key] = newDict;
-        return newDict;
+            Logger.Warning($"Theme brush not found: {brushKey}");
     }
 
     public async Task SetThemeAsync(string themeName)
@@ -226,7 +201,7 @@ public class ThemeService : IThemeService
 
     public Dictionary<string, string> GetCssVariables()
     {
-        var vars = new Dictionary<string, string>();
+        Dictionary<string, string> vars = [];
 
         foreach (var (key, value) in _theme.Colors)
         {
@@ -247,17 +222,62 @@ public class ThemeService : IThemeService
         return vars;
     }
 
-    private static string ToKebabCase(string str) => string.Concat(str.Select((c, i) => char.IsUpper(c) && i > 0 ? "-" + char.ToLowerInvariant(c).ToString() : char.ToLowerInvariant(c).ToString()));
+    private static string ToKebabCase(string str) =>
+        string.Concat(str.Select((c, i) =>
+            char.IsUpper(c) && i > 0
+                ? "-" + char.ToLowerInvariant(c).ToString()
+                : char.ToLowerInvariant(c).ToString()));
+
+    public IReadOnlyList<ThemeInfo> GetAvailableThemes()
+    {
+        try
+        {
+            if (!Directory.Exists(_themesDirectory)) return [new ThemeInfo(Defaults.Theme, ToDisplayName(Defaults.Theme))];
+            return Directory.EnumerateFiles(_themesDirectory, "*.json")
+                .Select(Path.GetFileNameWithoutExtension)
+                .Where(x => !string.IsNullOrEmpty(x))
+                .Distinct()
+                .OrderBy(x => x)
+                .Select(x => new ThemeInfo(x!, ToDisplayName(x!)))
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            Logger.Warning($"Failed to enumerate themes: {ex.Message}");
+            return [new ThemeInfo(Defaults.Theme, ToDisplayName(Defaults.Theme))];
+        }
+    }
+
+    private static string ToDisplayName(string id)
+    {
+        if (string.IsNullOrEmpty(id)) return "Unknown";
+        return string.Join(' ', id.Split('-', '_').Select(w =>
+            w.Length > 0 ? char.ToUpper(w[0]) + w[1..] : w));
+    }
+
+    public void Dispose()
+    {
+        if (_watcher != null)
+        {
+            _watcher.EnableRaisingEvents = false;
+            _watcher.Dispose();
+            _watcher = null;
+        }
+    }
 
     public void NotifyThemeChanged() => ThemeChanged?.Invoke();
 
     public void CycleTheme()
     {
+        var current = _settings.Get("theme-mode", "dark") ?? "dark";
+        var next = current == "dark" ? "light" : "dark";
+        _settings.Set("theme-mode", next);
+
         if (App.MainWindow is Window window && window.Content is FrameworkElement root)
         {
-            root.RequestedTheme = root.RequestedTheme == ElementTheme.Dark ? ElementTheme.Light : ElementTheme.Dark;
+            root.RequestedTheme = next == "light" ? ElementTheme.Light : ElementTheme.Dark;
         }
+
         NotifyThemeChanged();
     }
 }
-

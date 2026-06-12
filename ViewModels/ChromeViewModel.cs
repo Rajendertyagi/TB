@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Dispatching;
 using System.Collections.ObjectModel;
 using System.Linq;
 using TB.Helpers;
@@ -10,6 +12,8 @@ namespace TB.ViewModels;
 public partial class ChromeViewModel : ObservableObject
 {
     private readonly ITabManager _tabManager;
+    private readonly IServiceProvider _serviceProvider;
+    private readonly DispatcherQueue _dispatcherQueue;
 
     [ObservableProperty]
     private string urlText = "";
@@ -19,35 +23,62 @@ public partial class ChromeViewModel : ObservableObject
 
     public ObservableCollection<TabItemViewModel> Tabs { get; } = new();
 
-    public ChromeViewModel(ITabManager tabManager)
+    public ChromeViewModel(ITabManager tabManager, IServiceProvider serviceProvider)
     {
         _tabManager = tabManager;
+        _serviceProvider = serviceProvider;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread()!;
 
         _tabManager.TabCreated += (_, e) =>
         {
-            var tabVm = new TabItemViewModel(e.Id, e.Title, e.Url, _tabManager);
-            Tabs.Add(tabVm);
+            var tabVm = ActivatorUtilities.CreateInstance<TabItemViewModel>(_serviceProvider, e.Id, e.Title, e.Url);
+            MutateTabs(() => Tabs.Add(tabVm));
         };
 
         _tabManager.TabClosed += (_, e) =>
         {
             var tabVm = Tabs.FirstOrDefault(t => t.Id == e.Id);
             if (tabVm != null)
-                Tabs.Remove(tabVm);
+                MutateTabs(() => Tabs.Remove(tabVm));
         };
 
         _tabManager.TabSwitched += (_, e) =>
         {
-            UrlText = e.Url;
-
-            foreach (var tab in Tabs)
-                tab.IsActive = tab.Id == e.Id;
+            DispatchUI(() =>
+            {
+                UrlText = e.Url;
+                foreach (var tab in Tabs)
+                    tab.IsActive = tab.Id == e.Id;
+            });
         };
 
         _tabManager.UrlChanged += (_, e) =>
         {
-            UrlText = e.Url;
+            DispatchUI(() => UrlText = e.Url);
         };
+
+        _tabManager.FaviconUpdated += (_, e) =>
+        {
+            var tabVm = Tabs.FirstOrDefault(t => t.Id == e.TabId);
+            if (tabVm != null)
+                DispatchUI(() => tabVm.Favicon = e.Favicon);
+        };
+    }
+
+    private void MutateTabs(DispatcherQueueHandler action)
+    {
+        if (_dispatcherQueue.HasThreadAccess)
+            action();
+        else
+            _dispatcherQueue.TryEnqueue(action);
+    }
+
+    private void DispatchUI(DispatcherQueueHandler action)
+    {
+        if (_dispatcherQueue.HasThreadAccess)
+            action();
+        else
+            _dispatcherQueue.TryEnqueue(action);
     }
 
     [RelayCommand]
@@ -71,7 +102,7 @@ public partial class ChromeViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(UrlText))
             return;
 
-        _tabManager.NavigateActiveTab(UrlText);
+        _tabManager.NavigateActiveTab(UrlResolver.ParseInput(UrlText));
     }
 
     [RelayCommand]

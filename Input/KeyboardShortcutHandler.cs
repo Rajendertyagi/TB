@@ -11,7 +11,7 @@ namespace TB.Input;
 public class KeyboardShortcutHandler
 {
     private readonly CommandRegistry _registry;
-    private static readonly HashSet<VirtualKey> _destructiveKeys = new() { VirtualKey.W, VirtualKey.F4 };
+    private static readonly HashSet<VirtualKey> _destructiveKeys = [VirtualKey.W, VirtualKey.F4];
 
     // FIX 1: Thread-safe dictionary to prevent crashes if events fire off the UI thread
     private readonly ConcurrentDictionary<VirtualKey, long> _lastDestructiveHit = new();

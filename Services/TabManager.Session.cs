@@ -94,8 +94,8 @@ public partial class TabManager
             if (_webViews.TryGetValue(id, out var wv))
             {
                 DetachAndCleanState(id, wv);
-                try { wv.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed; } catch { }
-                try { wv.Close(); } catch { }
+                try { wv.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed; } catch (Exception ex) { Logger.Debug("Collapse visibility on restore cleanup", ex); }
+                try { wv.Close(); } catch (Exception ex) { Logger.Debug("Close on restore cleanup", ex); }
             }
         }
 

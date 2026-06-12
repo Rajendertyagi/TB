@@ -1,4 +1,6 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Diagnostics;
@@ -36,7 +38,7 @@ public partial class TabManager
             NavigationStarting = (s, args) => HandleNavigationStarting(id, args),
             NavigationCompleted = (s, args) => HandleNavigationCompleted(id),
             DocumentTitleChanged = (s, args) => HandleDocumentTitleChanged(id, webView),
-            SourceChanged = (s, args) => HandleSourceChanged(id, webView),
+            SourceChanged = (s, args) => HandleSourceChanged(id),
             FaviconChanged = async (s, args) => await HandleFaviconChanged(id, webView),
             ContextMenuRequested = (s, args) => HandleContextMenuRequested(id, args)
         };
@@ -65,7 +67,7 @@ public partial class TabManager
             {
                 var crashUrl = _tabs.FirstOrDefault(t => t.Id == id)?.Url ?? "";
                 var safeUrl = JsonSerializer.Serialize(crashUrl);
-                var html = $@"<html><body style='background:#13141a;color:#c8cdd8;display:flex;align-items:center;justify-content:center;font-family:sans-serif;'><h2>Crashed</h2><p onclick='window.location={safeUrl}'>Reload</p></body></html>";
+                var html = _crashPage.Value.Replace("{{URL}}", safeUrl);
                 wv.CoreWebView2?.NavigateToString(html);
             }
             catch (Exception ex) { Logger.Error($"Crash page render failed: {ex.Message}"); }
@@ -81,11 +83,30 @@ public partial class TabManager
 
     private void HandleNavigationStarting(int id, CoreWebView2NavigationStartingEventArgs args)
     {
-        if (!_webViews.ContainsKey(id)) return;
-        if (id == _activeId)
+        var tab = _tabs.FirstOrDefault(t => t.Id == id);
+        if (tab == null) return;
+
+        // 🛡️ SECURITY & STATE MANAGEMENT
+        // If the user clicks a standard web link INSIDE an internal page (e.g., clicking "Chromium" in the About page),
+        // we must downgrade the tab from "Internal" to "Standard Web" so it behaves normally.
+        if (tab.IsInternalPage && !UrlResolver.IsInternalUrl(args.Uri) && !args.Uri.StartsWith("file:///"))
         {
-            UrlChanged?.Invoke(this, new UrlEventArgs { Url = args.Uri });
-            NavigationStarted?.Invoke(this, EventArgs.Empty);
+            tab.IsInternalPage = false;
+            _internalPageTabs.Remove(id);
+
+            // Unregister internal IPC handlers since it's now a public web page
+            if (_ipcHandlers.TryGetValue(id, out var handler))
+            {
+                if (_webViews.TryGetValue(id, out var wv))
+                    wv.CoreWebView2.WebMessageReceived -= handler;
+                _ipcHandlers.Remove(id);
+            }
+        }
+
+        // Optional Security: Block users from manually typing file:/// paths in the Omnibox
+        if (args.Uri.StartsWith("file:///") && !tab.IsInternalPage)
+        {
+            args.Cancel = true;
         }
     }
 
@@ -113,41 +134,123 @@ public partial class TabManager
         }
     }
 
-    private void HandleSourceChanged(int id, WebView2 webView)
+    private void HandleSourceChanged(int id)
     {
-        if (!_webViews.ContainsKey(id)) return;
-        var src = webView.CoreWebView2?.Source?.ToString() ?? "";
-        if (id == _activeId && !string.IsNullOrEmpty(src)) UrlChanged?.Invoke(this, new UrlEventArgs { Url = src });
-        var srcTab = _tabs.FirstOrDefault(t => t.Id == id);
-        if (srcTab != null && !string.IsNullOrEmpty(src) && src != srcTab.Url)
+        if (!_webViews.TryGetValue(id, out var wv)) return;
+        var tab = _tabs.FirstOrDefault(t => t.Id == id);
+        if (tab == null) return;
+
+        var physicalUrl = wv.Source?.OriginalString ?? "";
+
+        if (tab.IsInternalPage)
         {
-            srcTab.Url = src;
-            ScheduleSaveSession();
+            UrlChanged?.Invoke(this, new UrlEventArgs { Url = tab.Url });
         }
+        else
+        {
+            tab.Url = physicalUrl;
+            UrlChanged?.Invoke(this, new UrlEventArgs { Url = physicalUrl });
+        }
+
+        FireNavState(id);
     }
 
     private async Task HandleFaviconChanged(int id, WebView2 webView)
     {
         if (!_webViews.ContainsKey(id)) return;
+
+        // 🛡️ Thread marshalling: BitmapImage is a DependencyObject, must be created on UI thread
+        if (!_dispatcherQueue.HasThreadAccess)
+        {
+            _dispatcherQueue.TryEnqueue(async () => await HandleFaviconChanged(id, webView));
+            return;
+        }
+
+        // Rate limit: Max 1 update per second per tab
         var now = Stopwatch.GetTimestamp();
         if (now - _lastFaviconTimestamp.GetValueOrDefault(id) < Stopwatch.Frequency) return;
         _lastFaviconTimestamp[id] = now;
+
         try
         {
             using var stream = await webView.CoreWebView2.GetFaviconAsync(CoreWebView2FaviconImageFormat.Png);
             if (stream == null) return;
+
             var bitmap = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage();
             await bitmap.SetSourceAsync(stream);
+
             FaviconUpdated?.Invoke(this, new FaviconEventArgs { TabId = id, Favicon = bitmap });
         }
-        catch (Exception ex) { Logger.Warning($"Failed loading favicon: {ex.Message}"); }
+        catch (Exception ex)
+        {
+            Logger.Warning($"Failed loading favicon for tab {id}: {ex.Message}");
+        }
     }
 
     private void HandleContextMenuRequested(int id, CoreWebView2ContextMenuRequestedEventArgs args)
     {
         if (!_webViews.ContainsKey(id)) return;
-        var deferral = args.GetDeferral();
-        try { /* Custom menu logic here */ } finally { deferral.Complete(); }
+
+        args.Handled = true;
+
+        var presenterStyle = (Style)Application.Current.Resources["TbMenuFlyoutPresenterStyle"];
+        var itemStyle = (Style)Application.Current.Resources["TbMenuFlyoutItemStyle"];
+        var flyout = new MenuFlyout { MenuFlyoutPresenterStyle = presenterStyle };
+
+        var target = args.ContextMenuTarget;
+
+        if (target.HasLinkUri)
+        {
+            var linkUri = target.LinkUri;
+            flyout.Items.Add(new MenuFlyoutItem
+            {
+                Text = "Open link in new tab",
+                Style = itemStyle,
+                Command = new RelayCommand(() => _ = CreateTabAsync(linkUri))
+            });
+            flyout.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        if (target.Kind == CoreWebView2ContextMenuTargetKind.Image)
+        {
+                var src = target.SourceUri;
+            flyout.Items.Add(new MenuFlyoutItem
+            {
+                Text = "Copy image address",
+                Style = itemStyle,
+                Command = new RelayCommand(() =>
+                {
+                    if (!string.IsNullOrEmpty(src))
+                    {
+                        var pkg = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                        pkg.SetText(src);
+                        Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(pkg);
+                    }
+                })
+            });
+            flyout.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        flyout.Items.Add(new MenuFlyoutItem { Text = "Back", Command = new RelayCommand(Back), Style = itemStyle });
+        flyout.Items.Add(new MenuFlyoutItem { Text = "Forward", Command = new RelayCommand(Forward), Style = itemStyle });
+        flyout.Items.Add(new MenuFlyoutItem { Text = "Reload", Command = new RelayCommand(Reload), Style = itemStyle });
+        flyout.Items.Add(new MenuFlyoutSeparator());
+        flyout.Items.Add(new MenuFlyoutItem
+        {
+            Text = "Inspect Element",
+            Style = itemStyle,
+            Command = new RelayCommand(() =>
+            {
+                if (_webViews.TryGetValue(id, out var wv))
+                    wv.CoreWebView2?.OpenDevToolsWindow();
+            })
+        });
+
+        if (_webViews.TryGetValue(id, out var wv))
+        {
+            var pt = new Point(args.Location.X, args.Location.Y);
+            flyout.ShowAt(wv, pt);
+        }
     }
 
     internal void FireNavState(int id)
@@ -158,7 +261,7 @@ public partial class TabManager
             var core = wv.CoreWebView2;
             NavStateChanged?.Invoke(this, new NavStateEventArgs { CanGoBack = core?.CanGoBack ?? false, CanGoForward = core?.CanGoForward ?? false, Title = _tabs.FirstOrDefault(t => t.Id == id)?.Title ?? "" });
         }
-        catch { }
+        catch (Exception ex) { Logger.Warn("FireNavState failed", ex); }
     }
 }
 

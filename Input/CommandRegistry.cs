@@ -13,10 +13,10 @@ public class CommandRegistry
     private readonly Lazy<INavigationService> _navigationService;
 
     // OPTIMIZATION: Use a Dictionary for O(1) instant lookups instead of a List foreach loop
-    private readonly Dictionary<(VirtualKey Key, bool Ctrl, bool Alt, bool Shift), ShortcutBinding> _bindingMap = new();
+    private readonly Dictionary<(VirtualKey Key, bool Ctrl, bool Alt, bool Shift), ShortcutBinding> _bindingMap = [];
 
     // Keep the list for UI binding displays (e.g., if you build a Settings -> Shortcuts page later)
-    private readonly List<ShortcutBinding> _bindings = new();
+    private readonly List<ShortcutBinding> _bindings = [];
 
     public IReadOnlyList<ShortcutBinding> Bindings => _bindings;
 

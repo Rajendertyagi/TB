@@ -64,19 +64,30 @@
             </Grid>
         </Border>
 
-        <Button Grid.Column="2" Style="{StaticResource NavButtonStyle}" VerticalAlignment="Center">
-            <Path Data="{StaticResource IconMenuData}" Style="{StaticResource NavIconPathStyle}"/>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding DownloadsCommand}">
+                <Path Data="{StaticResource IconDownloadData}" Style="{StaticResource NavIconPathStyle}"/>
+            </Button>
+            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding SettingsCommand}">
+                <Path Data="{StaticResource IconSettingsGearData}" Style="{StaticResource NavIconPathStyle}"/>
+            </Button>
+            <Button Style="{StaticResource NavButtonStyle}" Command="{Binding FlagsCommand}">
+                <Path Data="{StaticResource IconFlagData}" Style="{StaticResource NavIconPathStyle}"/>
+            </Button>
+            <Button Style="{StaticResource NavButtonStyle}" VerticalAlignment="Center">
+                <Path Data="{StaticResource IconMenuData}" Style="{StaticResource NavIconPathStyle}"/>
 
-            <Button.Flyout>
-                <MenuFlyout Placement="BottomEdgeAlignedRight" MenuFlyoutPresenterStyle="{StaticResource HeliumMenuFlyoutPresenterStyle}">
-                    <MenuFlyoutItem Text="Downloads" Command="{Binding DownloadsCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
-                    <MenuFlyoutItem Text="History" Command="{Binding HistoryCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
-                    <MenuFlyoutItem Text="Settings" Command="{Binding SettingsCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
-                    <MenuFlyoutSeparator/>
-                    <MenuFlyoutItem Text="Flags" Command="{Binding FlagsCommand}" Style="{StaticResource HeliumMenuFlyoutItemStyle}"/>
-                </MenuFlyout>
-            </Button.Flyout>
-        </Button>
+                <Button.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight" MenuFlyoutPresenterStyle="{StaticResource TbMenuFlyoutPresenterStyle}">
+                        <MenuFlyoutItem Text="Downloads" Command="{Binding DownloadsCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
+                        <MenuFlyoutItem Text="History" Command="{Binding HistoryCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
+                        <MenuFlyoutItem Text="Settings" Command="{Binding SettingsCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
+                        <MenuFlyoutSeparator/>
+                        <MenuFlyoutItem Text="Flags" Command="{Binding FlagsCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
+                    </MenuFlyout>
+                </Button.Flyout>
+            </Button>
+        </StackPanel>
     </Grid>
 </UserControl>
     

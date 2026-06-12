@@ -1,6 +1,6 @@
-using ABI.System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.UI.Xaml.Media;
 using TB.Services.Interfaces;
 
 namespace TB.ViewModels;
@@ -25,6 +25,9 @@ public partial class TabItemViewModel : ObservableObject
 
     [ObservableProperty]
     private bool isSquashed;
+
+    [ObservableProperty]
+    private ImageSource? favicon;
 
     public TabItemViewModel(int id, string title, string url, ITabManager tabManager)
     {
