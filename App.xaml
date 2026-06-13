@@ -1,19 +1,33 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Application
     x:Class="TB.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <!-- Stable brush singletons — created once, never replaced, only mutated by ThemeService -->
-            <SolidColorBrush x:Key="bgAppBrush" Color="#121212"/>
-            <SolidColorBrush x:Key="textMainBrush" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="textMutedBrush" Color="#888888"/>
-            <SolidColorBrush x:Key="bgInputBrush" Color="#2A2A2A"/>
-            <SolidColorBrush x:Key="borderCrispBrush" Color="#333333"/>
-            <SolidColorBrush x:Key="bgTabBrush" Color="Transparent"/>
-            <SolidColorBrush x:Key="bgTabActiveBrush" Color="#2A2A2A"/>
-            <SolidColorBrush x:Key="bgTabHoverBrush" Color="#2A2A2A"/>
+            <!-- Brush singletons — keys only, Transparent placeholders.
+                 ThemeService mutates .Color before window.Activate().
+                 Single source of truth: wwwroot/themes/<name>.json -->
+            <SolidColorBrush x:Key="bgAppBrush"            Color="Transparent"/>
+            <SolidColorBrush x:Key="bgInputBrush"          Color="Transparent"/>
+            <SolidColorBrush x:Key="bgTabBrush"            Color="Transparent"/>
+            <SolidColorBrush x:Key="bgTabHoverBrush"       Color="Transparent"/>
+            <SolidColorBrush x:Key="bgTabActiveBrush"      Color="Transparent"/>
+            <SolidColorBrush x:Key="textMainBrush"         Color="Transparent"/>
+            <SolidColorBrush x:Key="textMutedBrush"        Color="Transparent"/>
+            <SolidColorBrush x:Key="textSubtleBrush"       Color="Transparent"/>
+            <SolidColorBrush x:Key="accentBrush"           Color="Transparent"/>
+            <SolidColorBrush x:Key="accentSecondaryBrush"  Color="Transparent"/>
+            <SolidColorBrush x:Key="accentPressBrush"      Color="Transparent"/>
+            <SolidColorBrush x:Key="successBrush"          Color="Transparent"/>
+            <SolidColorBrush x:Key="dangerBrush"           Color="Transparent"/>
+            <SolidColorBrush x:Key="borderCrispBrush"      Color="Transparent"/>
+            <SolidColorBrush x:Key="borderActiveBrush"     Color="Transparent"/>
+            <SolidColorBrush x:Key="whiteBrush"            Color="Transparent"/>
+            <SolidColorBrush x:Key="commandPaletteBackdropBrush" Color="Transparent" Opacity="0.5"/>
+            <SolidColorBrush x:Key="commandPaletteCardBgBrush"   Color="Transparent" Opacity="0.95"/>
+            <SolidColorBrush x:Key="commandPaletteBorderBrush"   Color="Transparent" Opacity="0.2"/>
+            <SolidColorBrush x:Key="commandPaletteShortcutBgBrush" Color="Transparent" Opacity="0.15"/>
 
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Dark">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flags - TB</title>
+    <title>Experiments - TB</title>
 
     <!-- Preload fonts to prevent FOUT -->
     <link rel="preload" href="Fonts/OpenSans-Regular.woff2" as="font" type="font/woff2" crossorigin>
@@ -18,92 +18,309 @@
     <script src="js/theme-sync.js"></script>
 </head>
 <body>
-    <main class="demo-shell glass-children" style="padding:24px">
-        <div class="section-heading intro" style="margin-bottom:20px">
-            <h1>Flags</h1>
-            <p>Experimental browser features. Use with caution.</p>
+    <div class="flags-page">
+        <!-- Top Search Row -->
+        <div class="top-row">
+            <div class="search-box-container">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="search-input" placeholder="Search flags" onkeyup="filterFlags()">
+            </div>
+            <button id="reset-all-btn" onclick="resetAllFlags()">Reset all</button>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:6px;max-width:560px">
-            <button class="flag-card" data-flag="split-view">
-                <div class="flag-card-text">
-                    <h4>Split-View</h4>
-                    <p>Split the tab content area into two resizable panes side by side</p>
-                </div>
-                <span class="toggle-switch" id="split-view"><span class="knob"></span></span>
-            </button>
+        <!-- Header block -->
+        <header class="header-section">
+            <h1>Experiments</h1>
+            <div class="version-info" id="version-text">1.0.0</div>
+        </header>
 
-            <button class="flag-card" data-flag="omni-bangs">
-                <div class="flag-card-text">
-                    <h4>Omni Bangs</h4>
-                    <p>DuckDuckGo-style bang shortcuts in the address bar (e.g. !w Wikipedia)</p>
-                </div>
-                <span class="toggle-switch" id="omni-bangs"><span class="knob"></span></span>
-            </button>
-
-            <button class="flag-card" data-flag="gradient-shimmer">
-                <div class="flag-card-text">
-                    <h4>Gradient Shimmer</h4>
-                    <p>Animated canvas-based shimmer effect on the new tab page background</p>
-                </div>
-                <span class="toggle-switch" id="gradient-shimmer"><span class="knob"></span></span>
-            </button>
-
-            <button class="flag-card" data-flag="hardware-acceleration">
-                <div class="flag-card-text">
-                    <h4>Hardware Acceleration</h4>
-                    <p>Use GPU to render web content when available (requires restart)</p>
-                </div>
-                <span class="toggle-switch on" id="hardware-acceleration"><span class="knob"></span></span>
-            </button>
+        <!-- Warning text -->
+        <div class="warning-block">
+            <strong>WARNING: EXPERIMENTAL FEATURES AHEAD!</strong> By enabling these features, you could lose browser data or compromise your security or privacy. Enabled features apply to all users of this browser. If you are an enterprise admin you should not be using these flags in production.
         </div>
 
-        <div style="margin-top:20px">
-            <button class="button primary" style="gap:6px" onclick="window.chrome.webview.postMessage({action:'CLOSE_SETTINGS'})">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-                Back to browsing
-            </button>
-        </div>
-    </main>
+        <!-- Tabs -->
+        <nav class="tab-nav" role="tablist">
+            <button class="tab-btn active" id="btn-available" role="tab" aria-selected="true" onclick="switchTab('available')">Available</button>
+            <button class="tab-btn" id="btn-unavailable" role="tab" aria-selected="false" onclick="switchTab('unavailable')">Unavailable</button>
+        </nav>
 
-    <div class="toast" id="toast"></div>
+        <!-- Container for cards -->
+        <main id="flags-container" class="flag-list">
+            <!-- Dynamically populated -->
+        </main>
+    </div>
+
+    <!-- Relaunch footer banner -->
+    <div class="relaunch-banner" id="relaunch-banner">
+        <span class="relaunch-text">Your changes will take effect the next time you relaunch TB.</span>
+        <button class="relaunch-btn" onclick="relaunchBrowser()">Relaunch</button>
+    </div>
 
     <script>
-        const toast = document.getElementById('toast');
-        let toastTimeout;
+        let currentTab = 'available';
+        let allFlags = [];
+        let runningPlatform = 'Windows';
+        let initialStates = {};
+        let currentStates = {};
 
-        function showToast(msg) {
-            toast.textContent = msg;
-            toast.classList.add('show');
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => toast.classList.remove('show'), 2000);
+        function setupIpc() {
+            if (window.chrome && window.chrome.webview) {
+                window.chrome.webview.addEventListener('message', event => {
+                    const msg = event.data;
+                    if (msg && msg.action === 'FLAGS_DATA' && msg.data) {
+                        runningPlatform = msg.data.platform || 'Windows';
+                        allFlags = msg.data.flags || [];
+                        
+                        // Set up initial and current states
+                        allFlags.forEach(f => {
+                            if (!(f.id in initialStates)) {
+                                initialStates[f.id] = f.value;
+                            }
+                            currentStates[f.id] = f.value;
+                        });
+
+                        renderFlags();
+                        checkRelaunchBanner();
+                        handleHashLink();
+                    }
+                });
+                window.chrome.webview.postMessage({ action: 'FLAGS_READY' });
+            } else {
+                setTimeout(setupIpc, 50);
+            }
+
+            // Extract real Chrome version from user agent dynamically
+            const ua = navigator.userAgent;
+            const match = ua.match(/Chrome\/([0-9.]+)/);
+            if (match) {
+                document.getElementById('version-text').textContent = match[1];
+            }
         }
 
-        // Flag toggle via card click
-        document.querySelectorAll('.flag-card').forEach(card => {
-            const toggle = card.querySelector('.toggle-switch');
-            if (!toggle) return;
-            card.addEventListener('click', () => {
-                toggle.classList.toggle('on');
-                const flag = card.dataset.flag;
-                const value = toggle.classList.contains('on');
-                showToast(flag + ' ' + (value ? 'enabled' : 'disabled'));
-                window.chrome.webview.postMessage({ action: 'TOGGLE_FLAG', flag, value });
+        function switchTab(tabName) {
+            currentTab = tabName;
+            document.getElementById('btn-available').classList.toggle('active', tabName === 'available');
+            document.getElementById('btn-available').setAttribute('aria-selected', tabName === 'available');
+            document.getElementById('btn-unavailable').classList.toggle('active', tabName === 'unavailable');
+            document.getElementById('btn-unavailable').setAttribute('aria-selected', tabName === 'unavailable');
+            renderFlags();
+        }
+
+        function renderFlags() {
+            const container = document.getElementById('flags-container');
+            container.innerHTML = '';
+
+            const searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+
+            // Filter flags by platform and tab
+            let filtered = allFlags.filter(f => {
+                const matchesPlatform = f.platforms.includes(runningPlatform);
+                return currentTab === 'available' ? matchesPlatform : !matchesPlatform;
             });
-        });
 
-        window.chrome.webview.postMessage({ action: 'FLAGS_READY' });
+            // Filter flags by search query
+            if (searchQuery) {
+                filtered = filtered.filter(f => {
+                    return f.name.toLowerCase().includes(searchQuery) ||
+                           f.description.toLowerCase().includes(searchQuery) ||
+                           (f.id && `#${f.id}`.includes(searchQuery));
+                });
+            }
 
-        window.chrome.webview.addEventListener('message', event => {
-            const msg = event.data;
-            if (msg.action === 'FLAGS_DATA' && msg.flags) {
-                for (const [key, value] of Object.entries(msg.flags)) {
-                    const toggle = document.getElementById(key);
-                    if (!toggle) continue;
-                    toggle.classList.toggle('on', value);
+            // Sort modified (applied) flags to the top
+            filtered.sort((a, b) => {
+                const aModified = (currentStates[a.id] || 'default') !== 'default';
+                const bModified = (currentStates[b.id] || 'default') !== 'default';
+                if (aModified && !bModified) return -1;
+                if (!aModified && bModified) return 1;
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="text-align:center;color:var(--secondary);margin-top:40px;font-size:14px">No experiments found.</div>`;
+                return;
+            }
+
+            // Helium lists flags sequentially with no box cards
+            filtered.forEach(f => {
+                container.appendChild(createFlagItem(f, currentTab === 'unavailable'));
+            });
+        }
+
+        function createFlagItem(flag, isUnavailable) {
+            const item = document.createElement('div');
+            const isModified = flag.value !== 'default';
+            item.className = `flag-card${isUnavailable ? ' disabled' : ''}${isModified ? ' modified' : ''}`;
+            item.id = `card-${flag.id}`;
+
+            const info = document.createElement('div');
+            info.className = 'flag-info';
+
+            // Dot placeholder/element
+            const dot = document.createElement('span');
+            dot.className = 'modified-dot';
+            info.appendChild(dot);
+
+            const titleRow = document.createElement('div');
+            titleRow.className = 'flag-title-row';
+
+            const title = document.createElement('h4');
+            title.className = 'flag-title';
+            title.textContent = flag.name;
+            titleRow.appendChild(title);
+
+            info.appendChild(titleRow);
+
+            const desc = document.createElement('p');
+            desc.className = 'flag-description';
+            desc.textContent = flag.description;
+            info.appendChild(desc);
+
+            const hashtag = document.createElement('a');
+            hashtag.className = 'flag-hashtag';
+            hashtag.href = `#${flag.id}`;
+            hashtag.textContent = `#${flag.id}`;
+            info.appendChild(hashtag);
+
+            item.appendChild(info);
+
+            // Control (Select dropdown)
+            const controlContainer = document.createElement('div');
+            controlContainer.className = 'control-container';
+
+            const selectContainer = document.createElement('div');
+            selectContainer.className = `helium-select-container${isModified ? ' modified' : ''}`;
+            selectContainer.id = `select-container-${flag.id}`;
+
+            const select = document.createElement('select');
+            select.id = `select-${flag.id}`;
+            if (isUnavailable) select.disabled = true;
+
+            const choices = [
+                { value: 'default', label: 'Default' },
+                { value: 'enabled', label: 'Enabled' },
+                { value: 'disabled', label: 'Disabled' }
+            ];
+
+            choices.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.value;
+                opt.textContent = c.label;
+                if (flag.value === c.value) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            select.addEventListener('change', (e) => {
+                updateFlag(flag.id, e.target.value);
+            });
+
+            selectContainer.appendChild(select);
+
+            const arrowIcon = document.createElement('div');
+            arrowIcon.className = 'helium-select-icon';
+            arrowIcon.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:12px;height:12px"><polyline points="6 9 12 15 18 9"/></svg>`;
+            selectContainer.appendChild(arrowIcon);
+
+            controlContainer.appendChild(selectContainer);
+            item.appendChild(controlContainer);
+
+            return item;
+        }
+
+        function updateFlag(id, value) {
+            currentStates[id] = value;
+            
+            // Update UI styling for modified state
+            const card = document.getElementById(`card-${id}`);
+            const selectContainer = document.getElementById(`select-container-${id}`);
+            const isModified = value !== 'default';
+
+            if (card) card.classList.toggle('modified', isModified);
+            if (selectContainer) selectContainer.classList.toggle('modified', isModified);
+
+            window.chrome.webview.postMessage({
+                action: 'SAVE_SETTING',
+                key: `flag-${id}`,
+                value: value
+            });
+            checkRelaunchBanner();
+        }
+
+        function checkRelaunchBanner() {
+            let needsRelaunch = false;
+            for (const f of allFlags) {
+                if (f.requiresRestart) {
+                    const current = currentStates[f.id] || 'default';
+                    const initial = initialStates[f.id] || 'default';
+                    if (current !== initial) {
+                        needsRelaunch = true;
+                        break;
+                    }
                 }
             }
-        });
+            document.getElementById('relaunch-banner').classList.toggle('show', needsRelaunch);
+        }
+
+        function resetAllFlags() {
+            allFlags.forEach(f => {
+                if (currentStates[f.id] !== 'default') {
+                    updateFlag(f.id, 'default');
+                    const select = document.getElementById(`select-${f.id}`);
+                    if (select) select.value = 'default';
+                    
+                    // Force UI class updates
+                    const card = document.getElementById(`card-${f.id}`);
+                    const selectContainer = document.getElementById(`select-container-${f.id}`);
+                    if (card) card.classList.remove('modified');
+                    if (selectContainer) selectContainer.classList.remove('modified');
+                }
+            });
+            checkRelaunchBanner();
+        }
+
+        function relaunchBrowser() {
+            window.chrome.webview.postMessage({ action: 'RELAUNCH_BROWSER' });
+        }
+
+        function filterFlags() {
+            renderFlags();
+        }
+
+        function handleHashLink() {
+            const hash = window.location.hash;
+            if (hash) {
+                const flagId = hash.substring(1);
+                const card = document.getElementById(`card-${flagId}`);
+                if (card) {
+                    const flag = allFlags.find(f => f.id === flagId);
+                    if (flag) {
+                        const isAvailable = flag.platforms.includes(runningPlatform);
+                        const targetTab = isAvailable ? 'available' : 'unavailable';
+                        if (currentTab !== targetTab) {
+                            switchTab(targetTab);
+                            setTimeout(() => {
+                                const newCard = document.getElementById(`card-${flagId}`);
+                                if (newCard) {
+                                    newCard.classList.add('highlighted-card');
+                                    newCard.scrollIntoView({ behavior: 'smooth' });
+                                }
+                            }, 50);
+                            return;
+                        }
+                    }
+                    card.classList.add('highlighted-card');
+                    card.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        }
+
+        window.addEventListener('hashchange', handleHashLink);
+
+        setupIpc();
     </script>
 </body>
 </html>

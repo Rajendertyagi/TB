@@ -106,6 +106,10 @@ MainWindow           → resolved from container                                
 
 | Issue | Fix | File |
 |---|---|---|
+| Offline Startup Timeout (EnsureCoreWebView2Async null) | Added `CoreWebView2EnvironmentOptions` to disable background networking, SmartScreen, and CRL checks | `MainWindow.xaml.cs` |
+| Stale Process Locks & NullReferenceException | Terminated lingering `msedgewebview2.exe` processes, added defensive null check on `CoreWebView2` in tab instantiation | `WebViewRegistry.cs`, `TabManager.Lifecycle.cs` |
+| F3/Ctrl+F and Find-in-page not working | Bound message listener to `window.chrome.webview` in `bridge.js`, exposed global `__findOpen` hook, resolved shadow DOM input query | `bridge.js`, `find-bar.js` |
+| Command Palette XamlParseException | Declare brushes in App.xaml, mutate dynamically in ThemeService, use {ThemeResource} | `MainWindow.xaml`, `App.xaml`, `ThemeService.cs` |
 | XAML parse crash 0xc000027b | Registered BoolToVisibilityConverter in resources | `App.xaml.cs:41` |
 | `[ObservableProperty]` MVVMTK0045 | Manual `SetProperty` replacements | `TabItemViewModel.cs`, `ChromeViewModel.cs` |
 | Circular DI KeyboardShortcutHandler | `IServiceProvider` lazy resolution | `KeyboardShortcutHandler.cs` |

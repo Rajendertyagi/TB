@@ -72,6 +72,17 @@
                         <button class="toggle-switch settings-row-control" id="show-bookmarks-bar" role="switch" onclick="toggleSetting(this)"><span class="knob"></span></button>
                     </div>
                 </div>
+
+                <div class="settings-card">
+                    <div class="settings-group-title">Keyboard Shortcuts</div>
+                    <div class="settings-row">
+                        <div>
+                            <div class="settings-row-label">Excluded Domains</div>
+                            <div class="settings-row-desc">Comma-separated domains to bypass browser hotkeys</div>
+                        </div>
+                        <input type="text" id="excluded-domains" style="width: 280px;" onchange="saveSetting(this.id, this.value)">
+                    </div>
+                </div>
             </div>
 
             <!-- Search Section -->

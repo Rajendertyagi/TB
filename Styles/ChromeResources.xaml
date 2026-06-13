@@ -10,10 +10,11 @@
     <helpers:BoolToActiveBgConverter x:Key="BoolToActiveBgConverter"/>
 
     <!-- Fallback size/length resources (overridden by ThemeService from theme.json) -->
-    <x:Double x:Key="navHeightLength">34</x:Double>
-    <x:Double x:Key="tabbarHeightLength">34</x:Double>
+    <x:Double x:Key="navHeightLength">36</x:Double>
+    <x:Double x:Key="tabbarHeightLength">32</x:Double>
     <x:Double x:Key="tabHeightLength">28</x:Double>
     <x:Double x:Key="urlbarHeightLength">28</x:Double>
+    <CornerRadius x:Key="radiusXsLength">4</CornerRadius>
     <CornerRadius x:Key="radiusSmLength">6</CornerRadius>
     <CornerRadius x:Key="radiusMdLength">8</CornerRadius>
     <CornerRadius x:Key="radiusLgLength">20</CornerRadius>
@@ -46,11 +47,105 @@
     <Style TargetType="TextBlock">
         <Setter Property="FontFamily" Value="ms-appx:///Assets/Fonts/OpenSans-Regular.ttf#Open Sans"/>
     </Style>
-    <Style TargetType="TextBox">
+    <Style x:Key="BaseTextBoxStyle" TargetType="TextBox">
         <Setter Property="FontFamily" Value="ms-appx:///Assets/Fonts/OpenSans-Regular.ttf#Open Sans"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="BorderThickness" Value="0"/>
     </Style>
+    <Style TargetType="TextBox" BasedOn="{StaticResource BaseTextBoxStyle}"/>
     <Style TargetType="Button">
         <Setter Property="FontFamily" Value="ms-appx:///Assets/Fonts/OpenSans-Regular.ttf#Open Sans"/>
+    </Style>
+
+    <!-- UI Component Styling (Centralized & Compliant) -->
+    <Style x:Key="CommandPaletteOverlayStyle" TargetType="Grid">
+        <Setter Property="Background" Value="{ThemeResource commandPaletteBackdropBrush}"/>
+    </Style>
+
+    <Style x:Key="CommandPaletteCardStyle" TargetType="Border">
+        <Setter Property="Width" Value="460"/>
+        <Setter Property="Height" Value="380"/>
+        <Setter Property="VerticalAlignment" Value="Top"/>
+        <Setter Property="Margin" Value="0,60,0,0"/>
+        <Setter Property="CornerRadius" Value="{ThemeResource radiusMdLength}"/>
+        <Setter Property="Background" Value="{ThemeResource commandPaletteCardBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource commandPaletteBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="12"/>
+    </Style>
+
+    <Style x:Key="CommandPaletteInputStyle" TargetType="TextBox" BasedOn="{StaticResource BaseTextBoxStyle}">
+        <Setter Property="Background" Value="{ThemeResource bgInputBrush}"/>
+        <Setter Property="Foreground" Value="{ThemeResource textMainBrush}"/>
+    </Style>
+
+    <Style x:Key="CommandPaletteItemNameStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource textMainBrush}"/>
+        <Setter Property="FontSize" Value="13"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <Style x:Key="CommandPaletteItemDescriptionStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource textMutedBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+    </Style>
+
+    <Style x:Key="CommandPaletteShortcutContainerStyle" TargetType="Border">
+        <Setter Property="Background" Value="{ThemeResource commandPaletteShortcutBgBrush}"/>
+        <Setter Property="CornerRadius" Value="{ThemeResource radiusXsLength}"/>
+        <Setter Property="Padding" Value="6,2"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="CommandPaletteItemShortcutStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource accentBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
+    <Style x:Key="TabItemHeaderStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="{ThemeResource textMainBrush}"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="FontWeight" Value="Normal"/>
+    </Style>
+
+    <Style x:Key="UrlBarBorderStyle" TargetType="Border">
+        <Setter Property="Height" Value="{ThemeResource urlbarHeightLength}"/>
+        <Setter Property="Background" Value="{ThemeResource bgInputBrush}"/>
+        <Setter Property="CornerRadius" Value="{ThemeResource radiusXsLength}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource textSubtleBrush}"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="UrlBarInputStyle" TargetType="TextBox" BasedOn="{StaticResource BaseTextBoxStyle}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{ThemeResource textMainBrush}"/>
+        <Setter Property="Padding" Value="4,0,8,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    </Style>
+
+    <Style x:Key="FindBarCardStyle" TargetType="Border">
+        <Setter Property="Width" Value="340"/>
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="CornerRadius" Value="{ThemeResource radiusMdLength}"/>
+        <Setter Property="Background" Value="{ThemeResource commandPaletteCardBgBrush}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource commandPaletteBorderBrush}"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="Padding" Value="12,0"/>
+    </Style>
+
+    <Style x:Key="FindBarInputStyle" TargetType="TextBox" BasedOn="{StaticResource BaseTextBoxStyle}">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{ThemeResource textMainBrush}"/>
+        <Setter Property="Padding" Value="0,0,8,0"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
     </Style>
 
 </ResourceDictionary>

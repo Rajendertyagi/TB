@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Collections.Generic;
@@ -30,6 +30,9 @@ public static class IpcActions
     public const string DownloadsList = "DOWNLOADS_LIST";
     public const string GetThemes = "GET_THEMES";
     public const string ThemesList = "THEMES_LIST";
+    public const string FlagsReady = "FLAGS_READY";
+    public const string FlagsData = "FLAGS_DATA";
+    public const string RelaunchBrowser = "RELAUNCH_BROWSER";
 }
 
 public partial class TabManager
@@ -108,6 +111,23 @@ public partial class TabManager
             case IpcActions.CloseSettings:
                 CloseTab(tabId);
                 break;
+
+            case IpcActions.FlagsReady:
+                var payload = _flagService.GetFlagsDataPayload();
+                var flagsResponse = new { action = IpcActions.FlagsData, data = payload };
+                var serializeOptions = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+                wv.CoreWebView2.PostWebMessageAsJson(JsonSerializer.Serialize(flagsResponse, serializeOptions));
+                break;
+
+            case IpcActions.RelaunchBrowser:
+                var exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule?.FileName;
+                if (!string.IsNullOrEmpty(exePath))
+                {
+                    System.Diagnostics.Process.Start(exePath);
+                    if (_dispatcherQueue.HasThreadAccess) Microsoft.UI.Xaml.Application.Current.Exit();
+                    else _dispatcherQueue.TryEnqueue(Microsoft.UI.Xaml.Application.Current.Exit);
+                }
+                break;
         }
     }
 
@@ -167,7 +187,7 @@ public partial class TabManager
 
         foreach (var id in targetIds)
         {
-            if (_webViews.TryGetValue(id, out var wv))
+            var wv = GetWebView(id); if (wv != null)
             {
                 try { wv.CoreWebView2?.PostWebMessageAsJson(json); }
                 catch (Exception ex) { Logger.Warning($"PostWebMessageAsJson failed: {ex.Message}"); }
@@ -187,9 +207,10 @@ public partial class TabManager
         var flatJson = JsonSerializer.Serialize(new { action = IpcActions.ThemeUpdate, variables = themeVars });
         var initScript = $"window.__themeVariables = {JsonSerializer.Serialize(themeVars)};";
 
-        foreach (var id in _internalPageTabs)
+        foreach (var tab in _tabs)
         {
-            if (_webViews.TryGetValue(id, out var wv) && wv.CoreWebView2 != null)
+            var id = tab.Id;
+            var wv = GetWebView(id); if (wv != null && wv.CoreWebView2 != null)
             {
                 try
                 {

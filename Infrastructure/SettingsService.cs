@@ -15,11 +15,7 @@ public class SettingsService : ISettingsService
 
     public SettingsService(string basePath)
     {
-        // PORTABLE MODE: Keep settings in the same folder as the .exe
-        var appDataFolder = Path.Combine(basePath, "AppData");
-        Directory.CreateDirectory(appDataFolder);
-
-        _dataFile = Path.Combine(appDataFolder, "settings.json");
+        _dataFile = Paths.SettingsFile;
 
         // INDUSTRY STANDARD DEFAULTS
         _settings = new Dictionary<string, object>
@@ -40,6 +36,7 @@ public class SettingsService : ISettingsService
             ["block-cookies"] = false,
             ["https-only"] = false,
             ["do-not-track"] = true,
+            ["excluded-domains"] = "docs.google.com,sheets.google.com,slides.google.com,vscode.dev,github.dev,figma.com,miro.com,photopea.com",
 
             // Downloads (Standard: OS User Downloads folder, not hidden AppData)
             ["download-path"] = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),

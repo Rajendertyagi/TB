@@ -5,18 +5,19 @@ plan status: active
 ---
 
 ## Idea
-A comprehensive TB project implementing native Windows desktop application using WinUI 3 for modern UI/UX and WebView2 for web content integration, enabling cross-platform thermal/biological sensor data visualization and analysis.
+A comprehensive TB project implementing a native Windows desktop application using WinUI 3 for modern UI/UX and WebView2 for web content integration, enabling cross-platform thermal/biological sensor data visualization and analysis.
 
 ## Implementation
 - WinUI 3 + WebView2 integration ✅
 - MVVM + DI with CommunityToolkit.Mvvm + MS.Ext.DependencyInjection ✅
-- Keyboard shortcuts (4-layer intercept) ✅
+- Keyboard shortcuts (4-layer intercept + Win32 P/Invoke) ✅
 - TB squashed tab layout ✅
 - Theme system (theme.json single source of truth) ✅
 - Internal pages (settings, downloads, flags) ✅
 - GoF Command Pattern for shortcuts ✅
 - File-based logging ✅
 - Download tracking with routing ✅
+- **Milestone 32: Browser Surface Infrastructure (WebViewRegistry)** ✅
 
 ## Status Summary
 **PROGRESS: 100% COMPLETE — violet-dark theme | glass/slick UI | TB-style translucency**
@@ -34,25 +35,25 @@ A comprehensive TB project implementing native Windows desktop application using
 - ✅ WinUI 3 + WebView2 integration
 - ✅ MVVM + DI (CommunityToolkit.Mvvm 8.4, MS.Ext.DI 9.0)
 - ✅ Circular DI fix: KeyboardShortcutHandler lazy-resolves ITabManager via IServiceProvider
+- ✅ **Milestone 32: WebViewRegistry** — Strict "Persistent Surface" hosting model. `TabManager` is now a pure state machine; `WebViewRegistry` owns all Grid attachments, lifecycle, and visibility.
+- ✅ **0x0 Viewport Fix** — `UpdateLayout()` + `MinHeight/MinWidth` safeguards prevent Chromium renderer blank pages on cold boot.
+- ✅ **CollapsedVisibilityStrategy** — Benchmark proven: hidden tabs throttle CPU/GPU automatically without breaking the DirectX swap chain.
+- ✅ **Win32 Keyboard P/Invoke** — `GetAsyncKeyState` bypasses XAML's blind spot when the Chromium HWND steals focus. Global shortcuts work flawlessly.
 - ✅ **Single source of truth**: theme.json drives both XAML chrome and internal-page CSS
 - ✅ **No hardcoded colors**: all themed values from theme.json only
 - ✅ Chrome-parity keyboard shortcuts — 63 total, 4-layer intercept
 - ✅ TB squashed tab layout (32px floor, equal-width allocation)
 - ✅ Hover opacity pipeline (0.40/0.85/1.0) + anti-jiggle deferred recalc
 - ✅ Close button trap at 36px
-- ✅ Keyboard shortcut handling: live GetAsyncKeyState P/Invoke polling
 - ✅ Win32 WndProc subclass for chrome focus interception
 - ✅ WH_KEYBOARD_LL hook for WebView2 focus interception (process-ID guard)
-- ✅ webView.KeyDown routed event (redundant guard)
 - ✅ **CoreWebView2Controller.AcceleratorKeyPressed** via COM interop
 - ✅ 150ms Stopwatch debounce for destructive hotkeys
-- ✅ Process-ID guard in LLKBHook
 - ✅ Favicon support + internal page IPC
 - ✅ Production-ready patterns (nullable, async, IAsyncDisposable)
 - ✅ Alt+D (focus URL bar + select all), Ctrl+Enter (wrap www.+.com)
 - ✅ Custom find bar (340×48px, theme-colored via GetCssVariables())
 - ✅ Internal pages: settings.html, downloads.html, flags.html, 404.html
-- ✅ Runtime testing: tabs, navigation, zoom, downloads
 - ✅ Minimum window (400×300) via WM_GETMINMAXINFO
 - ✅ ThemeDictionaries declared in App.xaml (Option A — WinUI Gallery pattern)
 - ✅ Theme persistence: ActiveThemeName + SetThemeAsync() via ISettingsService
@@ -64,29 +65,23 @@ A comprehensive TB project implementing native Windows desktop application using
 - ✅ ThemeService.ApplyNativeTheme(): uses _theme.Colors directly, no fallback hexes
 - ✅ Crash page + find bar colors from GetCssVariables(), no hardcoded hexes
 - ✅ All 4 intercept layers active: AcceleratorKeyPressed + WndProc + LLKBHook + KeyDown
-- ✅ Bug fixes: _internalPageTabs.Add(id), NavigationStarted/Completed guards, _lastClosedUrls, CycleTheme
 - ✅ DispatcherQueue.TryEnqueue in ChromeViewModel event handlers
-- ✅ Find bar auto-focus fixed (inline focus in IIFE)
 - ✅ Prism UI: pages.css with --tb-elevated color-mix, all design token classes
 - ✅ GoF Command Pattern: ShortcutCommand.cs + CommandRegistry.cs (63 binding map)
 - ✅ KeyboardShortcutHandler refactored to registry dispatch (removed 330 if-else lines)
-- ✅ ChromeViewModel cleanup: named event methods, DispatcherQueue alias
 - ✅ Logger: file-based logs/tb-YYYY-MM-DD.log, all Console.WriteLine removed
-- ✅ Dead code deleted: Features/Tabs/, Features/Bookmarks/
 - ✅ Theme pipeline: InjectThemeToWebView removed → theme-sync.js + postMessage
 - ✅ Download routing: _downloadOwners + SendToDownloadOwner
 - ✅ COM interop isolated: WebView2ControllerAccessor in Input/
-- ✅ Converters.cs: BoolToActiveBgConverter simplified (no fallback chain), extra parens fixed
-- ✅ wwwroot/themes/github-dark.css deleted (no more separate CSS theme files)
 - ✅ Build: 0 errors, 0 warnings
 
 **ACTUAL PROJECT STRUCTURE (C:\Users\RTPC\Documents\TB):**
 
-```
+```text
 C:\Users\RTPC\Documents\TB\
 ├── App.xaml                                    // DI + ThemeDictionaries[Dark/Light/HighContrast]
-├── App.xaml.cs                                 // 3 global handlers, DI registration (8 singleton + 1 transient)
-├── MainWindow.xaml                             // Window chrome XAML
+├── App.xaml.cs                                 // 3 global handlers, DI registration (Lazy<T> fixes)
+├── MainWindow.xaml                             // Window chrome XAML + BrowserSurfaceGrid
 ├── MainWindow.xaml.cs                          // AppWindow, drag regions, keyboard hooks, InitializeAsync
 ├── AGENTS.md                                   // OpenCode automation rules
 ├── MEMORY.md                                   // Context checkpoint
@@ -95,101 +90,62 @@ C:\Users\RTPC\Documents\TB\
 ├── TB.csproj                                   // .NET 10, WinAppSDK 2.1.3, WebView2 1.0.3967.48
 ├── TB.slnx                                     // Solution file
 │
-├── Controls\                                   // [ACTIVE] Decomposed XAML user controls
-│   ├── NavigationBar.xaml                      // URL bar + nav button layout
-│   ├── NavigationBar.xaml.cs                   // URL focus, security icon, Ctrl+Enter, border theming
-│   ├── TabStrip.xaml                           // ItemsRepeater tab list + new-tab button
-│   ├── TabStrip.xaml.cs                        // Tab widths, hover, right-click context menu
-│   └── TabStripLayout.cs                       // Custom NonVirtualizingLayout, width clamping, IsSquashed
+├── Core\Browser\                               // [MILESTONE 32] Hosting Infrastructure
+│   ├── WebViewHost.cs                          // Encapsulates WebView2 + Mask, tracks State
+│   ├── WebViewRegistry.cs                      // Single Source of Truth for lifecycle & activation
+│   ├── IHostVisibilityStrategy.cs              // Abstraction for hiding inactive tabs
+│   └── CollapsedVisibilityStrategy.cs          // Implementation: Visibility.Collapsed (throttles GPU)
 │
-├── Views\                                      // [EXISTING / ACTIVE] View pages and menu dictionaries
-│   └── Menus\                                  // [EXISTING / ACTIVE] Catppuccin-themed context menu definitions
+├── Controls\                                   // Decomposed XAML user controls
+│   ├── NavigationBar.xaml / .cs                // URL bar + nav button layout
+│   ├── TabStrip.xaml / .cs                     // ItemsRepeater tab list + new-tab button
+│   ├── TabStripLayout.cs                       // Custom NonVirtualizingLayout, width clamping
+│   └── FindBar.xaml / .cs                      // Native Find-in-page overlay
 │
-├── ViewModels\                                 // MVVM layer (CommunityToolkit.Mvvm 8.4 source generators)
+├── ViewModels\                                 // MVVM layer (CommunityToolkit.Mvvm 8.4)
 │   ├── ChromeViewModel.cs                      // Tabs OC, UrlText/TabWidth, 8 RelayCommands
 │   ├── TabItemViewModel.cs                     // Per-tab props, 6 RelayCommands + Switch
 │   └── MainViewModel.cs                        // WindowTitle, NewWindow() process spawn
 │
 ├── Services\                                   // Business logic — TabManager split across 6 partials
-│   ├── TabManager.cs                           // PARTIAL 1/6: fields (10 dicts), events (11), ctor, Init
+│   ├── TabManager.cs                           // PARTIAL 1/6: fields, events, ctor, Init
 │   ├── TabManager.Commands.cs                  // PARTIAL 2/6: 40+ command methods
-│   ├── TabManager.Events.cs                    // PARTIAL 3/6: WebView2EventHandlers, 8 events + handlers
+│   ├── TabManager.Events.cs                    // PARTIAL 3/6: WebView2EventHandlers
 │   ├── TabManager.Ipc.cs                       // PARTIAL 4/6: IpcActions, WebMessageReceived routing
-│   ├── TabManager.Lifecycle.cs                 // PARTIAL 5/6: Create, Switch, Close, DetachAndCleanState
+│   ├── TabManager.Lifecycle.cs                 // PARTIAL 5/6: Create, Switch, Close (Delegates to Registry)
 │   ├── TabManager.Session.cs                   // PARTIAL 6/6: Session save/load, DisposeAsync
 │   ├── NavigationService.cs                    // Thin 5-method facade over ITabManager
-│   ├── ThemeService.cs                         // theme.json loader, XAML dicts, native title bar, CSS vars
-│   │
+│   ├── ThemeService.cs                         // theme.json loader, XAML dicts, native title bar
 │   ├── Downloads\                              // Downloads feature module
-│   │   ├── DownloadItem.cs                     // Id, Name, Url, Bytes, ProgressPercent, Status
-│   │   ├── DownloadService.cs                  // List<DownloadItem> → downloads.json, 3 events
-│   │   └── DownloadViewModel.cs                // JSON DTO for IPC, FromItem() factory
-│   │
 │   └── Interfaces\                             // DI contracts
-│       ├── ITabManager.cs                      // 11 events, 4 props, 50+ methods
-│       ├── IThemeService.cs                    // CurrentTheme, ApplyXamlResources, GetCssVariables, CycleTheme
-│       ├── INavigationService.cs               // 5-method slice: Navigate, Back, Forward, Reload, Stop
-│       ├── ISettingsService.cs                 // Get<T>/Set/GetAll/GetAllJson
-│       └── IDownloadService.cs                 // Download CRUD + 3 events
 │
 ├── Input\                                      // Keyboard interception + GoF Command Pattern
 │   ├── CommandRegistry.cs                      // O(1) Dictionary of ~50 ShortcutBinding entries
-│   ├── KeyboardShortcutHandler.cs              // 4-layer intercept, 150ms debounce
+│   ├── KeyboardShortcutHandler.cs              // 4-layer intercept, Win32 GetAsyncKeyState P/Invoke
 │   ├── ShortcutCommand.cs                      // IShortcutCommand + ShortcutBinding readonly struct
 │   └── WebView2ControllerAccessor.cs           // COM interop → AcceleratorKeyPressed
 │
 ├── Infrastructure\                             // Foundation services
-│   ├── Logger.cs                               // Static file logger + Error(string, Exception) stack trace overload
+│   ├── Logger.cs                               // Static file logger
 │   └── SettingsService.cs                      // Thread-safe JSON key-value store
 │
 ├── Models\                                     // Pure data objects
-│   ├── TabItem.cs                              // Id, Url, Title, Zoom, CreatedAt, IsInternalPage
-│   ├── ThemeDefinition.cs                      // Active, Native, Colors dict + Load() parser
-│   ├── SessionState.cs                         // Tabs (List<TabEntry>), ActiveTabIndex
-│   └── Events.cs                               // TabEventArgs, UrlEventArgs, FaviconEventArgs, NavStateEventArgs, TabMovedEventArgs
+│   ├── TabItem.cs, ThemeDefinition.cs, SessionState.cs, Events.cs, ThemeInfo.cs
 │
 ├── Helpers\                                    // Shared utilities
-│   ├── Constants.cs                            // Routes, Actions, Defaults, Layout (px constants)
-│   ├── Converters.cs                           // BoolToActiveBg, BoolToVisibility (with invert)
-│   ├── Extensions.cs                           // ColorExtensions.ParseHex, TaskExtensions.FireAndForget
-│   ├── Paths.cs                                // Static readonly paths (BaseDir, AppData, Cache, etc.)
-│   └── UrlResolver.cs                          // IsInternalUrl, Resolve, ResolveOmnibar, GetTabTitle
+│   ├── Constants.cs (Routes, Actions, Defaults, Layout)
+│   ├── Converters.cs, Extensions.cs, Paths.cs, UrlResolver.cs
 │
 ├── Styles\                                     // XAML resource dictionaries
 │   ├── ChromeResources.xaml                    // Fallback brushes, layout doubles, CornerRadii, Open Sans
 │   └── Icons.xaml                              // Segoe Fluent Icon path geometries
 │
-├── Assets\Fonts\                               // App fonts
-│   ├── OpenSans-Bold.ttf
-│   ├── OpenSans-Medium.ttf
-│   ├── OpenSans-Regular.ttf
-│   └── OpenSans-SemiBold.ttf
-│
-    └── wwwroot\                                    // Internal page web assets
-        ├── theme.json                              // Active: "violet-dark", colors dict
-        ├── 404.html                                // Not-found page (tb.css + theme-sync.js + font preloads)
-        ├── crash.html                              // Crash page (inline style, no theme deps)
-        ├── downloads.html                          // Download manager page (tb.css + theme-sync.js + font preloads)
-        ├── flags.html                              // Experimental flags page (tb.css + theme-sync.js + font preloads, .toggle-switch + .flag-card)
-        ├── settings.html                           // Settings page (tb.css + theme-sync.js + font preloads, 4 sections)
-        ├── Fonts\                                  // Web fonts (4 Open Sans WOFF2 variants)
-        │   ├── OpenSans-Bold.woff2
-        │   ├── OpenSans-Medium.woff2
-        │   ├── OpenSans-Regular.woff2
-        │   └── OpenSans-SemiBold.woff2
-        ├── css\                                    // Style sheets (1 file)
-        │   └── tb.css                              // UNIFIED: @font-face, theme vars, fallbacks, Prism, all layouts
-        ├── js\                                     // JavaScript files
-        │   ├── find-bar.js                         // Custom find-in-page overlay (340×48px)
-        │   ├── gradient-shimmer.js                 // Prism canvas gradient animation
-        │   └── theme-sync.js                       // Pure JS bridge: applies __themeVariables + THEME_UPDATE listener
-        └── themes\                                 // Theme packs (switchable via ISettingsService)
-        ├── catppuccin-mocha.json
-        ├── dracula.json
-        ├── github-dark.json
-        ├── gruvbox-dark.json
-        ├── nord.json
-        └── tokyo-night.json
+└── wwwroot\                                    // Internal page web assets
+    ├── theme.json, 404.html, crash.html, downloads.html, flags.html, settings.html
+    ├── Fonts\                                  // Web fonts (4 Open Sans WOFF2 variants)
+    ├── css\tb.css                              // UNIFIED: @font-face, theme vars, Prism, all layouts
+    ├── js\                                     // find-bar.js, gradient-shimmer.js, theme-sync.js
+    └── themes\                                 // Theme packs (catppuccin, dracula, nord, etc.)
 ```
 
 ## Blocked Items
@@ -205,7 +161,71 @@ C:\Users\RTPC\Documents\TB\
 - [FIXED] `CoreWebView2.Controller` not projected: COM QI workaround via Marshal.GetIUnknownForObject
 - [FIXED] wwwroot/flags.html created for tb://flags route
 
+## Completed This Session (Latest — 2026-06-13)
+- ✅ **Created Local Flag Registry (`flags-registry.json`)**:
+  - Defined a static configuration file at [flags-registry.json](file:///c:/Users/RTPC/Documents/anti/wwwroot/flags-registry.json) inside `wwwroot/` mapping experimental feature properties, descriptive details, anchor hashtags, and Chromium command-line switches.
+  - Consolidated the complete list of all 25 available WebView2 and Chromium flags (such as Smooth Scrolling, Auto Dark Mode, Site Isolation, WebGL controls, and Incognito Mode) entirely in `flags-registry.json` as the Single Source of Truth (SSOT), and eliminated the separate `FlagMappings.cs` C# class.
+  - Implemented client-side sorting in `flags.html` to keep all applied/modified flags grouped at the top of the list, matching native Chromium behaviour.
+- ✅ **Dynamic Tab Title Synchronization**:
+  - Added the `TabTitleChanged` event to the `ITabManager` interface and implemented its propagation inside the `TabManager` events handler pipeline.
+  - Subscribed to this event in both `ChromeViewModel` and `MainViewModel` to ensure the tab strip items and window frame title dynamically update to match the active document's web page title upon navigation completed/document title changes.
+- ✅ **Keyboard Shortcut Auto-Repeat Filtering**:
+  - Subscribed to `WM_KEYUP` and `WM_SYSKEYUP` low-level Win32 messages in the global keyboard hook callback in [KeyboardShortcutHandler.cs](file:///c:/Users/RTPC/Documents/anti/Input/KeyboardShortcutHandler.cs).
+  - Maintained a thread-safe `HashSet<VirtualKey>` of currently pressed keys to detect hardware auto-repeat trigger sequences.
+  - Added a defensive self-correcting state safeguard that automatically clears the pressed keys set whenever the foreground active window changes.
+  - Implemented auto-repeat suppression for browser commands (e.g., opening/closing tabs, switching tabs, toggling overlays) to prevent unintended duplicate runs, while allowing repeating modifiers for zoom keys (`ZoomIn`/`ZoomOut`) and letting standard typing characters propagate normally to document text inputs.
+- ✅ **Configurable Domain Exclusions**:
+  - Added the default settings key `"excluded-domains"` to the industry-standard defaults in [SettingsService.cs](file:///c:/Users/RTPC/Documents/anti/Infrastructure/SettingsService.cs).
+  - Injected `ISettingsService` in the constructor of [KeyboardShortcutHandler.cs](file:///c:/Users/RTPC/Documents/anti/Input/KeyboardShortcutHandler.cs) and refactored the domain check in `IsActiveTabDomainExcluded()` to evaluate parsed domains dynamically at runtime instead of relying on a hardcoded static list.
+  - Added a "Keyboard Shortcuts" section with an "Excluded Domains" text input card in [settings.html](file:///c:/Users/RTPC/Documents/anti/wwwroot/settings.html), allowing users to view and customize websites that bypass standard browser shortcuts.
+- ✅ **Native Find-in-page & Highlight Theme Routing (No JS Search)**:
+  - Transitioned the search system to the native `CoreWebView2Find` API with `SuppressDefaultFindDialog = true`.
+  - Removed all legacy Javascript-based DOM-traversal walker and highlight-rendering logic, deleting `find-bar.js` completely.
+  - Implemented a custom visual search overlay as a modular WinUI 3 user control in [FindBar.xaml](file:///c:/Users/RTPC/Documents/anti/Controls/FindBar.xaml) and [FindBar.xaml.cs](file:///c:/Users/RTPC/Documents/anti/Controls/FindBar.xaml.cs), integrated into [MainWindow.xaml](file:///c:/Users/RTPC/Documents/anti/MainWindow.xaml).
+  - Styled visual properties in [ChromeResources.xaml](file:///c:/Users/RTPC/Documents/anti/Styles/ChromeResources.xaml) (`FindBarCardStyle` and `FindBarInputStyle`) using `{ThemeResource}` brushes.
+  - Routed search highlight colors through the theme system by injecting `::search-text` and `::search-text:current` rules in [theme-sync.js](file:///c:/Users/RTPC/Documents/anti/wwwroot/js/theme-sync.js), which is injected globally on document created and maps variables dynamically.
+  - Declared native events (`FindResultReceived`, `FindBarOpenRequested`, `FindBarCloseRequested`) and methods (`StartFindAsync`, `StopFindAsync`) on [ITabManager](file:///c:/Users/RTPC/Documents/anti/Services/Interfaces/ITabManager.cs) and implemented them in [TabManager.Commands.cs](file:///c:/Users/RTPC/Documents/anti/Services/TabManager.Commands.cs) and [TabManager.Events.cs](file:///c:/Users/RTPC/Documents/anti/Services/TabManager.Events.cs).
+- ✅ **Fixed Find Bar Overflow & Tab Focus Visuals on Escape**:
+  - Replaced low-fidelity Unicode text arrows (`▲`, `▼`, `✕`) in the Find Bar UI with high-quality SVG vector paths using the `NavIconPathStyle` design tokens.
+  - Set the Find Bar buttons to `Style="{StaticResource NavButtonStyle}"` to match the native theme layout and keep the control contained safely within the 340px card boundary.
+  - Resolved the dotted/square focus outline appearing around tab buttons on pressing `Esc` by setting `UseSystemFocusVisuals="False"`, `FocusVisualPrimaryThickness="0"`, and `FocusVisualSecondaryThickness="0"` on both `TabItemButtonStyle` and `NavButtonStyle` in [Icons.xaml](file:///c:/Users/RTPC/Documents/anti/Styles/Icons.xaml).
+  - Adjusted the focus shift sequence inside `OnFindBarCloseRequested` in [FindBar.xaml.cs](file:///c:/Users/RTPC/Documents/anti/Controls/FindBar.xaml.cs) to programmatically transfer keyboard focus to the active tab web view *before* setting the Find Bar's visibility to `Collapsed`, preventing WinUI from falling back to auto-focusing the nearest visual sibling.
+- ✅ **Upgraded Ctrl+S Page Saving to Native WinUI 3 FileSavePicker**:
+  - Registered `BrowserCommand.SavePage` in the `BrowserCommand` enum inside [ShortcutCommand.cs](file:///c:/Users/RTPC/Documents/anti/Input/ShortcutCommand.cs).
+  - Mapped `Ctrl+S` to `BrowserCommand.SavePage` in [CommandRegistry.Mappings.cs](file:///c:/Users/RTPC/Documents/anti/Input/CommandRegistry.Mappings.cs).
+  - Bound `BrowserCommand.SavePage` to the `ITabManager.SavePageAsync()` action in [CommandRegistry.Actions.cs](file:///c:/Users/RTPC/Documents/anti/Input/CommandRegistry.Actions.cs).
+  - Declared `SavePageAsync` in [ITabManager.cs](file:///c:/Users/RTPC/Documents/anti/Services/Interfaces/ITabManager.cs) and implemented it in [TabManager.Commands.cs](file:///c:/Users/RTPC/Documents/anti/Services/TabManager.Commands.cs) using a native WinUI 3 `FileSavePicker` initialized with the main window's HWND handle. This prompts the user with a standard file-save dialog, sanitizes the page title for file name safety, and writes the retrieved document outerHTML string directly to disk, bypassing web page sandbox / Content Security Policy (CSP) download blocks.
+- ✅ **Fixed Theme Hot Reload on Internal Pages**:
+  - Upgraded [theme-sync.js](file:///c:/Users/RTPC/Documents/anti/wwwroot/js/theme-sync.js) to dynamically register the event listener for `'message'` by recursively checking/waiting for `window.chrome.webview` initialization, resolving the issue where the sync script was evaluated in the page `<head>` before the WebView2 runtime had initialized the bridge objects, which broke live hot reloading on `tb://settings`, `tb://downloads`, and `tb://flags`.
+- ✅ **Fixed F3 / Find Bar Transparency & Overlapping on Web Pages**:
+  - Broadcased active theme variables to all tabs (internal and external web pages) in [TabManager.Ipc.cs](file:///c:/Users/RTPC/Documents/anti/Services/TabManager.Ipc.cs) upon theme change.
+  - Refactored [find-bar.js](file:///c:/Users/RTPC/Documents/anti/wwwroot/js/find-bar.js) to retrieve `window.__themeVariables` on load and apply them directly to the page's document root (`document.documentElement`), so that both elements inside the shadow root and search highlight `mark` elements inside the main body correctly inherit active background (`--bg-tab-hover`), border (`--border-crisp`), and accent color (`--accent`) custom properties.
+  - Implemented a live listener on the page for `THEME_UPDATE` events to dynamically adjust the document root's theme style whenever the browser's theme changes.
+  - Assigned Open Sans as the default fallback font-family inside the shadow tree `:host` rule block.
+  - Fixed F3/Shift+F3 shortcuts (find next/prev) to automatically trigger `__findOpen()` when pressed while the search bar is closed or inactive.
+  - Restored search highlight rendering when the find bar is reopened with active input text.
+  - **Fixed Find-in-page Search Traversal**: Resolved the TreeWalker state corruption bug where replacing nodes inline during traversal caused `walker.nextNode()` to fail; now pre-collects text nodes before executing replacements. Created specific `tb-find-parent-wrap` wrapper class to safely clean up all highlights without double-replacement exceptions.
+- ✅ **Inline Fonts & Colors Purged (Compliance Audit)**:
+  - Audited XAML controls and removed all hardcoded inline styling attributes including `FontSize`, `FontWeight`, `FontFamily`, `Foreground`, `Background`, `BorderThickness`, and `Padding`.
+  - Defined centralized, reusable resource styles in [ChromeResources.xaml](file:///c:/Users/RTPC/Documents/anti/Styles/ChromeResources.xaml) for the URL Bar (`UrlBarBorderStyle`, `UrlBarInputStyle`, `BaseTextBoxStyle`), tab headers (`TabItemHeaderStyle`), and Command Palette layout elements (`CommandPaletteOverlayStyle`, `CommandPaletteCardStyle`, `CommandPaletteInputStyle`, `CommandPaletteItemNameStyle`, `CommandPaletteItemDescriptionStyle`, `CommandPaletteShortcutContainerStyle`, `CommandPaletteItemShortcutStyle`).
+  - Refactored [MainWindow.xaml](file:///c:/Users/RTPC/Documents/anti/MainWindow.xaml), [TabStrip.xaml](file:///c:/Users/RTPC/Documents/anti/Controls/TabStrip.xaml), and [NavigationBar.xaml](file:///c:/Users/RTPC/Documents/anti/Controls/NavigationBar.xaml) to bind to these centralized resource style tokens instead of inline settings.
+- ✅ **Codebase Modularity & Centralization Rules**:
+  - Updated both [RULES.md](file:///c:/Users/RTPC/Documents/anti/RULES.md) and [AGENTS.md](file:///c:/Users/RTPC/Documents/anti/AGENTS.md) to explicitly require strict modularity (small files, separate folders/files for every service/feature), centralized styles/resources (zero inline styling metrics, colors, fonts, layout attributes), and a strict single source of truth (SSOT).
+- ✅ **Offline Durability & WebView2 Network Bypass Options**:
+  - Configured `CoreWebView2EnvironmentOptions` with `--disable-features=msSmartScreen,EdgeSmartScreen,msEdgeDefender --disable-background-networking --ignore-certificate-errors` to disable SmartScreen checks, certificate CRL checking, and background networking checks.
+  - This bypasses Microsoft network verification timeouts on startup when the system's internet connection is down or slow, preventing `EnsureCoreWebView2Async` from failing silently or timing out.
+- ✅ **Fixed Stale Process Locks & WebView2 NullReferenceException**:
+  - Terminated lingering background `msedgewebview2.exe` and `TB.exe` processes that were locking the user data cache directory, preventing new WebView2 instances from initializing.
+  - Added a defensive null check on `webView.CoreWebView2` in `CreateTabInternalAsync` to gracefully prevent `NullReferenceException` crashes if the WebView2 runtime fails to load or is locked.
+- ✅ **Fixed Find-in-page & F3/Ctrl+F Shortcut**:
+  - Fixed a bug in `bridge.js` where the message event listener was bound to `window` instead of `window.chrome.webview`, preventing host-to-page messages (like `findOpen`, `zoom`, `hardReload`, etc.) from being received.
+  - Corrected `find-bar.js` by defining the global `window.__findOpen` hook and implementing a deferred DOM creation/display pipeline, preventing the find bar from rendering layout components immediately on document created.
+  - Resolved shadow DOM query issue in `find-bar.js` where searching for the input via `document.getElementById` failed due to encapsulation; now queries the shadow root.
+  - **Cleaned Up Inline Styling Violation**: Removed all hardcoded fallback hex colors and inline system fonts from `find-bar.js` stylesheet to ensure compliance with the strict theme guidelines, routing all styles to the preloaded `var(--font)` and standard CSS custom properties.
+- ✅ **Fixed Command Palette XamlParseException**: Moved Command Palette backdrop, card background, border, and shortcut brushes to `App.xaml` to satisfy the single-creation rule. Mutated them dynamically in `ThemeService.ApplyXamlResources` via `SetBrushResource` using parsed `bgApp` and `accent` colors. Removed local `Grid.Resources` in `MainWindow.xaml` and changed all static references to `{ThemeResource}` references.
+
 ## Completed This Session (Latest — 2026-06-12)
+- ✅ **DI Circular Dependency Deadlock Fix**: Lazily resolved [ITabManager](file:///c:/Users/RTPC/Documents/anti/Services/Interfaces/ITabManager.cs) and [INavigationService](file:///c:/Users/RTPC/Documents/anti/Services/Interfaces/INavigationService.cs) via `IServiceProvider` in [KeyboardShortcutHandler](file:///c:/Users/RTPC/Documents/anti/Input/KeyboardShortcutHandler.cs) to resolve startup deadlock.
 - ✅ **Unified stylesheet**: `tb.css` now single file — `@font-face` (4 Open Sans WOFF2), merged fallback vars, all Prism/component/page styles
 - ✅ **Fonts consolidated**: TTF→WOFF2, moved from `Assets/Fonts/` to `wwwroot/Fonts/`, preloaded via `<link rel="preload">` in all internal pages
 - ✅ **Deleted 3 CSS files**: `internal.css`, `settings.css`, `prism-base.css` (all merged into `tb.css`)
@@ -289,6 +309,11 @@ C:\Users\RTPC\Documents\TB\
 - ✅ **Exception visibility — empty catch blocks**: All 10 `catch { }` in TabManager partials replaced with typed `catch (Exception ex)` + `Logger.Debug`/`Logger.Warn` per RULES.md §5 three-tier dispatch. Single intentional exception at `Logger.cs:28`.
 
 ## Next Steps (Priority Order)
+- [x] Command Palette UI overlay, website shortcut passthrough exclusions, and code-split CommandRegistry
+- [x] Keyboard shortcut audit fixes (validation, named event handlers, dead code deletion, hook lifecycle hardening)
+- [x] Chrome parity shortcuts mapped (Ctrl+J, Ctrl+H, Ctrl+Shift+O, Ctrl+Shift+B, Ctrl+Shift+Del, Ctrl+P, Ctrl+U, F12, Ctrl+Shift+I, Ctrl+F, F3, Shift+F3)
+- [x] Ctrl+N new window shortcut mapping
+- [x] Keyboard Shortcut Architecture Plan — refactored KeyboardShortcutHandler & CommandRegistry
 - [x] Theme pipeline — `GetAvailableThemes()` + `ThemeInfo` record + hot-reload broadcast
 - [x] Audit colors — `#ffffff` → `theme.json`, `#ee82ee` → `var(--accent)` at runtime
 - [x] Nav bar icons — Download, Settings, Flags buttons
@@ -404,9 +429,28 @@ Governance rules fully defined in `RULES.md` Section 1, including:
 - Centralized URI protocol registry — all `tb://` routes as `public const string` in `Helpers/Constants.cs`
 - Absolute DI singleton enforcement — no `new` for shared managers, all via `App.xaml.cs` container
 
-## 📐 MANDATORY HELIUM SQUASHING PHYSICS [ACTIVE]
+## 📐 MANDATORY HELIUM SQUASHING PHYSICS [COMPLETE ✅]
 - Linear Fractional Distribution: Tab sizing must shrink dynamically and fluidly without arbitrary minimum width walls (like 140px ceilings), layout jiggling, or hover expansions. 
 - Symmetrical Compression: As the user loads more sessions, all tab widths must scale down symmetrically and uniformly until they hit the absolute 32px baseline floor (housing only the dead-centered 16x16 favicon).
+
+### ✅ Phase 2 — Layout / Compression (DONE)
+- `TabStripLayout.cs`: Fixed bounds from `(40,220)` → `Layout.TabMinWidth=32`, `Layout.TabMaxWidth=180`; uses `LayoutConst` alias to avoid `TB.Helpers.Layout` vs `Microsoft.UI.Xaml.Controls.Layout` ambiguity
+- `Layout.cs`: Added `TabSquashThreshold=56` (title hidden below this width), `TabCloseHideThreshold=36`
+- `TabStrip.xaml.cs`: Sync'd squash threshold to `LayoutConst.TabSquashThreshold`; `OnSizeChanged` calls `RecalculateTabWidths()` directly
+
+### ✅ Phase 3 — Interaction (DONE)
+- Hover: `OnTabPointerEntered/Exited` named methods; `ElementClearing` unsubscribes to prevent leaks
+- Close button reveal: `IsCloseSquashedVisible` (squashed+hovered → col-0 over favicon) + `IsCloseNormalVisible` (not-squashed+hovered/active → col-2 right)
+- Favicon replacement: `IsFaviconVisible => !(IsSquashed && IsHovered)` — favicon hides when squashed+hovered, close button takes center slot
+- XAML: 3-column Grid `[24px|*|24px]` — col-0 for favicon/squashed-close, col-1 for title, col-2 for normal-close
+
+### ✅ Phase 4 — Polish (DONE)
+- Opacity pipeline: `TabOpacity => IsActive?1.0 : IsHovered?0.85 : 0.40` via `Button.Opacity` binding
+- Smooth fade: `Button.OpacityTransition` with `ScalarTransition Duration=0:0:0.12`
+- Close button fade: `ScalarTransition Duration=0:0:0.10` on both close buttons
+- Anti-jiggle: `TabStrip.IsMouseInChrome` property set from `MainWindow.ChromeContainer_PointerEntered/Exited`; `OnSizeChanged` defers recalc via `DispatcherQueuePriority.Low` while mouse is in chrome
+- Pixel-perfect centering: favicon `HorizontalAlignment=Center` in col-0; close button in squashed mode `HorizontalAlignment=Center` in same col-0
+
 
 ## 📐 Tab Right-Click Context Menu Specification [IMPLEMENTED]
 - **Issue:** Right-click on tabs in extended title bar shows native system menu (Restore/Move/Minimize/Close) instead of our custom menu.

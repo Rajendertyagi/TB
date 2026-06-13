@@ -1,4 +1,4 @@
-﻿<Window
+<Window
     x:Class="TB.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,8 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <!-- FIX: Removed FontFamily. Grid is a Panel, not a Control. 
-         The implicit styles in your ResourceDictionary will handle the font globally. -->
     <Grid x:Name="RootGrid" Background="{ThemeResource bgAppBrush}">
 
         <Grid.RowDefinitions>
@@ -32,9 +30,47 @@
             <controls:NavigationBar x:Name="NavBar" Grid.Row="1" DataContext="{Binding}" />
         </Grid>
 
-        <Grid x:Name="ContentGrid" Grid.Row="1" Background="{ThemeResource bgAppBrush}"/>
+        <!-- MILESTONE 32: Permanent Browser Surface -->
+        <!-- 🛡️ FIX: MinHeight/MinWidth prevents the 0x0 viewport race condition -->
+        <Grid x:Name="BrowserSurfaceGrid" Grid.Row="1" Background="{ThemeResource bgAppBrush}" MinHeight="100" MinWidth="100"/>
+
+        <!-- Native Find Bar Overlay -->
+        <controls:FindBar x:Name="FindBar" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,12,24,0" Visibility="Collapsed" />
+
+        <!-- Command Palette Overlay -->
+        <Grid x:Name="CommandPaletteOverlay" Grid.RowSpan="2" Style="{StaticResource CommandPaletteOverlayStyle}" Visibility="Collapsed" PointerPressed="CommandPaletteOverlay_PointerPressed">
+            <Border Style="{StaticResource CommandPaletteCardStyle}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBox x:Name="CommandPaletteInput" PlaceholderText="Search commands..." Style="{StaticResource CommandPaletteInputStyle}" TextChanged="CommandPaletteInput_TextChanged" KeyDown="CommandPaletteInput_KeyDown"/>
+                    
+                    <ListView x:Name="CommandPaletteList" Grid.Row="1" Margin="0,8,0,0" SelectionMode="Single" KeyDown="CommandPaletteList_KeyDown" DoubleTapped="CommandPaletteList_DoubleTapped" HorizontalAlignment="Stretch">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid HorizontalAlignment="Stretch" Margin="0,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="{Binding Name}" Style="{StaticResource CommandPaletteItemNameStyle}"/>
+                                        <TextBlock Text="{Binding Description}" Style="{StaticResource CommandPaletteItemDescriptionStyle}"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Style="{StaticResource CommandPaletteShortcutContainerStyle}">
+                                        <TextBlock Text="{Binding Shortcut}" Style="{StaticResource CommandPaletteItemShortcutStyle}"/>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+        </Grid>
 
     </Grid>
 </Window>
-
     

@@ -1,3 +1,4 @@
+using TB.Core.Browser;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -13,6 +14,7 @@ public interface ITabManager : IAsyncDisposable
     event EventHandler<TabEventArgs>? TabCreated;
     event EventHandler<TabEventArgs>? TabSwitched;
     event EventHandler<TabEventArgs>? TabClosed;
+    event EventHandler<TabEventArgs>? TabTitleChanged;
     event EventHandler<UrlEventArgs>? UrlChanged;
     event EventHandler? NavigationStarted;
     event EventHandler? NavigationCompleted;
@@ -21,13 +23,17 @@ public interface ITabManager : IAsyncDisposable
     event EventHandler? BeforeShutdown;
     event EventHandler<NavStateEventArgs>? NavStateChanged;
     event EventHandler<TabMovedEventArgs>? TabMoved;
+    event EventHandler<FindResultEventArgs>? FindResultReceived;
+    event EventHandler? FindBarOpenRequested;
+    event EventHandler? FindBarCloseRequested;
 
     int ActiveTabId { get; }
     int TabCount { get; }
     IReadOnlyList<TabItem> Tabs { get; }
     bool IsInitialized { get; }
+    bool IsFindBarOpen { get; }
 
-    Task InitializeAsync(Grid contentGrid, CoreWebView2Environment env);
+    Task InitializeAsync(WebViewRegistry registry);
     Task CreateTabAsync(string url = Defaults.HomeUrl);
     Task DuplicateTabAsync(int id);
     void SwitchTab(int id);
@@ -44,6 +50,7 @@ public interface ITabManager : IAsyncDisposable
     void Stop();
     void Back();
     void Forward();
+    void Home();
     Task SetZoomAsync(int tabId, double zoom);
     Task ZoomInAsync();
     Task ZoomOutAsync();
@@ -71,7 +78,10 @@ public interface ITabManager : IAsyncDisposable
     Task OpenFindBarAsync();
     Task FindNextAsync();
     Task FindPreviousAsync();
+    Task SavePageAsync();
     Task CloseFindBarAsync();
+    Task StartFindAsync(string text);
+    Task StopFindAsync();
     void AddressBarEnd();
     Task PageTopAsync();
     Task PageBottomAsync();

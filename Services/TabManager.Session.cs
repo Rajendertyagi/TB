@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -69,11 +69,11 @@ public partial class TabManager
     private void AssertConsistent()
     {
         var tabIds = new System.Collections.Generic.HashSet<int>(_tabs.Select(t => t.Id));
-        var viewIds = new System.Collections.Generic.HashSet<int>(_webViews.Keys);
+        var viewIds = new System.Collections.Generic.HashSet<int>(_tabs.Select(t => t.Id));
         var zoomIds = new System.Collections.Generic.HashSet<int>(_zoomLevels.Keys);
         Debug.Assert(tabIds.SetEquals(viewIds), $"Tab IDs and WebView IDs out of sync");
         Debug.Assert(tabIds.SetEquals(zoomIds), $"Tab IDs and zoom levels out of sync");
-        Debug.Assert(_activeId == -1 || _webViews.ContainsKey(_activeId), $"Active tab {_activeId} has no WebView");
+        Debug.Assert(_activeId == -1 || GetWebView(_activeId) != null, $"Active tab {_activeId} has no WebView");
     }
 
     public async ValueTask DisposeAsync()
@@ -91,7 +91,7 @@ public partial class TabManager
 
         foreach (var id in _tabs.Select(t => t.Id).ToList())
         {
-            if (_webViews.TryGetValue(id, out var wv))
+            var wv = GetWebView(id); if (wv != null)
             {
                 DetachAndCleanState(id, wv);
                 try { wv.Visibility = Microsoft.UI.Xaml.Visibility.Collapsed; } catch (Exception ex) { Logger.Debug("Collapse visibility on restore cleanup", ex); }
@@ -100,7 +100,7 @@ public partial class TabManager
         }
 
         _sessionSaveLock.Dispose();
-        _webViews.Clear(); _zoomLevels.Clear(); _internalPageTabs.Clear(); _ipcHandlers.Clear(); _acceleratorSubscriptions.Clear(); _wvHandlers.Clear(); _tabs.Clear();
+        _registry?.ClearAll(); _zoomLevels.Clear(); _internalPageTabs.Clear(); _ipcHandlers.Clear(); _acceleratorSubscriptions.Clear(); _wvHandlers.Clear(); _tabs.Clear();
     }
 }
 

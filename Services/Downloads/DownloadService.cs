@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using TB.Infrastructure;
 using TB.Services.Interfaces;
+using TB.Helpers;
 
 namespace TB.Services.Downloads;
 
@@ -22,7 +23,7 @@ public class DownloadService : IDownloadService
 
     public DownloadService(string basePath)
     {
-        _dataFile = Path.Combine(basePath, "AppData", "downloads.json");
+        _dataFile = Path.Combine(Paths.AppDataDir, "downloads.json");
         Load();
     }
 

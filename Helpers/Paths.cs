@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 
 namespace TB.Helpers;
@@ -10,8 +10,8 @@ public static class Paths
 
     // THE SINGLE LINE TO CHANGE:
     // Portable Mode: Path.Combine(BaseDir, "AppData")
-    // Installed Mode: Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "TB")
-    public static readonly string AppDataDir = Path.Combine(BaseDir, "AppData");
+    // Installed Mode: Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TB")
+    public static readonly string AppDataDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TB");
 
     // Centralized File & Folder Paths
     public static readonly string SettingsFile = Path.Combine(AppDataDir, "settings.json");

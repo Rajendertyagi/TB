@@ -182,6 +182,21 @@ public class ThemeService : IThemeService, IDisposable
 
             SetBrushResource(key, color);
         }
+
+        if (_theme.Colors.TryGetValue("bgApp", out var bgAppHex) && !string.IsNullOrEmpty(bgAppHex))
+        {
+            try { SetBrushResource("commandPaletteBackdrop", ColorExtensions.ParseHex(bgAppHex)); }
+            catch (Exception ex) { Logger.Error("Parse bgApp for commandPaletteBackdrop", ex); }
+            try { SetBrushResource("commandPaletteCardBg", ColorExtensions.ParseHex(bgAppHex)); }
+            catch (Exception ex) { Logger.Error("Parse bgApp for commandPaletteCardBg", ex); }
+        }
+        if (_theme.Colors.TryGetValue("accent", out var accentHex) && !string.IsNullOrEmpty(accentHex))
+        {
+            try { SetBrushResource("commandPaletteBorder", ColorExtensions.ParseHex(accentHex)); }
+            catch (Exception ex) { Logger.Error("Parse accent for commandPaletteBorder", ex); }
+            try { SetBrushResource("commandPaletteShortcutBg", ColorExtensions.ParseHex(accentHex)); }
+            catch (Exception ex) { Logger.Error("Parse accent for commandPaletteShortcutBg", ex); }
+        }
     }
 
     private static void SetBrushResource(string key, Color color)

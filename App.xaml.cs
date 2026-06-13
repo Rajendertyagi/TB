@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Threading.Tasks;
 using TB.Services.Downloads;
 using TB.Helpers;
 using TB.Infrastructure;
@@ -8,7 +10,8 @@ using TB.Input;
 using TB.Services;
 using TB.Services.Interfaces;
 using TB.ViewModels;
-using System.Threading.Tasks;
+
+using Application = Microsoft.UI.Xaml.Application;
 
 namespace TB;
 
@@ -26,50 +29,29 @@ public partial class App : Application
     {
         InitializeComponent();
 
-        // 1. UI Thread Exceptions
         UnhandledException += (_, e) =>
         {
             try
             {
-                Logger.Error($"[UI THREAD CRASH] {e.Exception?.GetType().FullName}: {e.Exception?.Message}\n{e.Exception?.StackTrace}");
-
-                // Prevent the app from silently crashing
+                Logger.Error(
+                    $"WinUI UnhandledException: {e.Exception?.GetType().FullName}: {e.Exception?.Message}\n{e.Exception?.StackTrace}");
                 e.Handled = true;
-
                 ShowCrashDialog("UI Error", e.Exception?.Message ?? "An unexpected UI error occurred.");
             }
-            catch
-            {
-            }
+            catch { }
         };
 
-        // 2. Background Thread Exceptions (Fatal, but we log it before the OS kills the app)
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
         {
-            try
-            {
-                Logger.Error($"[FATAL BACKGROUND CRASH] {e.ExceptionObject}");
-            }
-            catch
-            {
-            }
+            try { Logger.Error($"AppDomain UnhandledException: {e.ExceptionObject}"); }
+            catch { }
         };
 
-        // 3. Unobserved Async Task Exceptions (e.g., _ = SomeAsyncMethod())
         TaskScheduler.UnobservedTaskException += (_, e) =>
         {
-            try
-            {
-                Logger.Error($"[ASYNC TASK CRASH] {e.Exception?.InnerException?.Message ?? e.Exception?.Message}\n{e.Exception?.StackTrace}");
-
-                // Prevent the app from crashing
-                e.SetObserved();
-
-                ShowCrashDialog("Background Task Error", "A background process failed. Your data is safe, but some features may not have updated.");
-            }
-            catch
-            {
-            }
+            try { Logger.Error($"TaskScheduler UnobservedTaskException: {e.Exception}"); }
+            catch { }
+            e.SetObserved();
         };
     }
 
@@ -89,20 +71,17 @@ public partial class App : Application
             themeService.ApplyXamlResources();
 
             var appResources = Application.Current.Resources;
-            Logger.Info($"Theme loaded. bgAppBrush exists = {appResources.ContainsKey("bgAppBrush")}, Theme dictionaries = {appResources.ThemeDictionaries.Count}");
+            Logger.Info(
+                $"Theme loaded. bgAppBrush exists = {appResources.ContainsKey("bgAppBrush")}, Theme dictionaries = {appResources.ThemeDictionaries.Count}");
 
             var window = _services.GetRequiredService<MainWindow>();
 
-            // FIX: Assign MainWindow EARLY so crash handlers can use its XamlRoot if OnLaunched throws
             MainWindow = window;
-
             window.Activate();
 
             if (window.Content is FrameworkElement root)
             {
-                var settings = _services.GetRequiredService<ISettingsService>();
-                var themeMode = settings.Get("theme-mode", "dark") ?? "dark";
-                root.RequestedTheme = themeMode == "light" ? ElementTheme.Light : ElementTheme.Dark;
+                root.RequestedTheme = ElementTheme.Default;
             }
 
             themeService.NotifyThemeChanged();
@@ -116,7 +95,6 @@ public partial class App : Application
 
     private void ShowCrashDialog(string title, string message)
     {
-        // We must dispatch to the UI thread to show XAML dialogs
         MainWindow?.DispatcherQueue?.TryEnqueue(async () =>
         {
             try
@@ -126,7 +104,7 @@ public partial class App : Application
                     Title = title,
                     Content = $"TB Browser caught an error to prevent a crash.\n\nDetails: {message}",
                     CloseButtonText = "OK",
-                    XamlRoot = MainWindow?.Content?.XamlRoot // Required in WinUI 3
+                    XamlRoot = MainWindow?.Content?.XamlRoot
                 };
 
                 if (dialog.XamlRoot != null)
@@ -136,7 +114,6 @@ public partial class App : Application
             }
             catch (Exception dialogEx)
             {
-                // If the dialog itself fails to render, just log it
                 Logger.Warning($"Failed to show crash dialog: {dialogEx.Message}");
             }
         });
@@ -146,40 +123,37 @@ public partial class App : Application
     {
         var basePath = AppDomain.CurrentDomain.BaseDirectory;
 
-        services.AddSingleton<ISettingsService>(
-            _ => new SettingsService(basePath));
-
-        services.AddSingleton<IDownloadService>(
-            _ => new DownloadService(basePath));
+        services.AddSingleton<ISettingsService>(_ => new SettingsService(basePath));
+        services.AddSingleton<IDownloadService>(_ => new DownloadService(basePath));
+        services.AddSingleton<IFlagService>(
+            sp => new FlagService(sp.GetRequiredService<ISettingsService>()));
 
         services.AddSingleton<IThemeService>(
-            sp => new ThemeService(
-                basePath,
-                sp.GetRequiredService<ISettingsService>()));
+            sp => new ThemeService(basePath, sp.GetRequiredService<ISettingsService>()));
 
         services.AddSingleton<CommandRegistry>(
             sp => new CommandRegistry(
                 new Lazy<ITabManager>(() => sp.GetRequiredService<ITabManager>()),
                 new Lazy<INavigationService>(() => sp.GetRequiredService<INavigationService>())));
 
+        // ✅ Handler depends only on ITabManager and INavigationService (both registered)
         services.AddSingleton<KeyboardShortcutHandler>();
 
+        // ✅ TabManager must NOT depend on KeyboardShortcutHandler
         services.AddSingleton<ITabManager>(
-            sp => new TabManager(
-                basePath,
-                sp.GetRequiredService<IThemeService>(),
-                sp.GetRequiredService<ISettingsService>(),
-                sp.GetRequiredService<IDownloadService>(),
-                sp.GetRequiredService<KeyboardShortcutHandler>()));
+    sp => new TabManager(
+        basePath,
+        sp.GetRequiredService<IThemeService>(),
+        sp.GetRequiredService<ISettingsService>(),
+        sp.GetRequiredService<IDownloadService>(),
+        sp.GetRequiredService<KeyboardShortcutHandler>(),
+        sp.GetRequiredService<IFlagService>()));
 
         services.AddSingleton<INavigationService, NavigationService>();
 
         services.AddSingleton<ChromeViewModel>();
         services.AddSingleton<MainViewModel>();
-        services.AddTransient<TabItemViewModel>();
 
         services.AddTransient<MainWindow>();
     }
-
-
 }

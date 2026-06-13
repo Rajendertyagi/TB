@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
 using TB.Infrastructure;
 using Windows.Foundation;
+using Windows.System;
 
 namespace TB.Input;
 
@@ -22,13 +23,27 @@ public sealed class WebView2ControllerAccessor
     // This GUID is stable across WebView2 SDK versions as it refers to the base interface.
     private static readonly Guid ControllerIid = new("4D00C0D1-9434-4EB6-8078-8697A560334F");
 
+    // 🛡️ Win32 API to read keyboard state directly from the OS, bypassing XAML's blind spot
+    [DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
+
+    /// <summary>
+    /// Checks if a specific key is currently pressed at the OS level.
+    /// Use this instead of XAML's CoreWindow.GetKeyState when the WebView2 has focus.
+    /// </summary>
+    public static bool IsKeyDown(VirtualKey key) => (GetAsyncKeyState((int)key) & 0x8000) != 0;
+
+    public static bool IsCtrlPressed() => IsKeyDown(VirtualKey.Control);
+    public static bool IsShiftPressed() => IsKeyDown(VirtualKey.Shift);
+    public static bool IsAltPressed() => IsKeyDown(VirtualKey.Menu);
+
     private WebView2ControllerAccessor() { }
 
     /// <summary>
     /// Attempts to hook into the WebView2 Controller's AcceleratorKeyPressed event.
     /// </summary>
     /// <returns>An IDisposable that unsubscribes the event when disposed, or null if failed.</returns>
-    public static IDisposable? TrySubscribeAcceleratorKeyPressed(WebView2 webView, Func<Windows.System.VirtualKey, bool> handler)
+    public static IDisposable? TrySubscribeAcceleratorKeyPressed(WebView2 webView, Func<VirtualKey, bool> handler)
     {
         if (webView?.CoreWebView2 == null)
             return null;
@@ -62,7 +77,7 @@ public sealed class WebView2ControllerAccessor
             TypedEventHandler<CoreWebView2Controller, CoreWebView2AcceleratorKeyPressedEventArgs> acceleratorHandler = (_, e) =>
             {
                 // Pass the key to the handler. If it returns true, mark as handled to prevent the web page from seeing it.
-                if (handler((Windows.System.VirtualKey)e.VirtualKey))
+                if (handler((VirtualKey)e.VirtualKey))
                 {
                     e.Handled = true;
                 }
@@ -118,3 +133,4 @@ public sealed class WebView2ControllerAccessor
         }
     }
 }
+

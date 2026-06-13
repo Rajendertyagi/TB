@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Dispatching;
+using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
@@ -23,18 +23,18 @@ public partial class TabManager
         EnsureInitialized();
 
         int id = _nextId++;
-        var webView = new WebView2
-        {
-            HorizontalAlignment = HorizontalAlignment.Stretch,
-            VerticalAlignment = VerticalAlignment.Stretch,
-            Visibility = Visibility.Collapsed
-        };
 
-        _contentGrid!.Children.Add(webView);
+        
+        var host = await _registry!.CreateHostAsync(id);
+        var webView = host.WebView;
 
         try
         {
-            await webView.EnsureCoreWebView2Async(_env);
+            if (webView.CoreWebView2 == null)
+            {
+                Logger.Error($"CoreWebView2 is null for tab {id} after EnsureCoreWebView2Async. WebView2 runtime might be locked or uninstalled.");
+                return;
+            }
 
             if (!string.IsNullOrEmpty(_bridgeScript.Value))
                 await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_bridgeScript.Value);
@@ -43,8 +43,8 @@ public partial class TabManager
             var initThemeJson = JsonSerializer.Serialize(initThemeVars);
             await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync($"window.__themeVariables = {initThemeJson};");
 
-            if (!string.IsNullOrEmpty(_findBarScript.Value))
-                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_findBarScript.Value);
+            if (!string.IsNullOrEmpty(_themeSyncScript.Value))
+                await webView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(_themeSyncScript.Value);
 
             try { webView.CoreWebView2.Settings.IsZoomControlEnabled = false; } catch (Exception ex) { Logger.Debug("Disable zoom control failed", ex); }
             try { webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = true; } catch (Exception ex) { Logger.Debug("Enable context menus failed", ex); }
@@ -53,14 +53,11 @@ public partial class TabManager
             AttachCoreEvents(webView.CoreWebView2, handlers, id);
             _wvHandlers[id] = handlers;
 
-            var accelSub = WebView2ControllerAccessor.TrySubscribeAcceleratorKeyPressed(webView, key => _keyboardHandler.HandleKey(key));
-            if (accelSub != null) _acceleratorSubscriptions[id] = accelSub;
+            // Replaced by global WH_KEYBOARD_LL hook in KeyboardShortcutHandler.cs
 
-            // Note: In a strict enterprise app, you'd store this handler to unsubscribe it later.
-            // But since WebView2.Close() destroys the underlying COM object, the GC will clean this up safely.
             webView.KeyDown += (_, e) =>
             {
-                if (!_webViews.ContainsKey(id)) return;
+                if (GetWebView(id) == null) return;
                 if (_keyboardHandler.HandleKey((Windows.System.VirtualKey)e.Key)) e.Handled = true;
             };
 
@@ -87,7 +84,6 @@ public partial class TabManager
             }
 
             _tabs.Add(tabItem);
-            _webViews[id] = webView;
             _zoomLevels[id] = Defaults.DefaultZoom;
 
             TabCreated?.Invoke(this, new TabEventArgs { Id = id, Title = tabItem.Title, Url = url });
@@ -96,21 +92,21 @@ public partial class TabManager
         }
         catch
         {
-            _contentGrid?.Children.Remove(webView);
-            try { webView.Close(); } catch (Exception ex) { Logger.Debug("WebView close on init failure", ex); }
+            
+            _registry?.DestroyTab(id);
             throw;
         }
     }
 
     public void SwitchTab(int id)
     {
-        if (_disposed || !_webViews.ContainsKey(id)) return;
+        if (_disposed || GetWebView(id) == null) return;
 
-        foreach (var view in _webViews.Values) view.Visibility = Visibility.Collapsed;
-
-        var wv = _webViews[id];
-        wv.Visibility = Visibility.Visible;
+        _registry?.ActivateTab(id);
         _activeId = id;
+
+        var wv = GetWebView(id);
+        if (wv == null) return;
 
         var tab = _tabs.FirstOrDefault(t => t.Id == id);
 
@@ -152,9 +148,10 @@ public partial class TabManager
 
     public void CloseTab(int id)
     {
-        if (_disposed || !_webViews.TryGetValue(id, out var wv)) return;
+        if (_disposed) return;
+        var wv = GetWebView(id);
+        if (wv == null) return;
 
-        wv.Visibility = Visibility.Collapsed;
         var closedTab = _tabs.FirstOrDefault(t => t.Id == id);
 
         if (closedTab is not null && !string.IsNullOrEmpty(closedTab.Url))
@@ -164,6 +161,7 @@ public partial class TabManager
         }
 
         var closedIdx = _tabs.FindIndex(t => t.Id == id);
+
         DetachAndCleanState(id, wv);
         ScheduleSaveSession();
         TabClosed?.Invoke(this, new TabEventArgs { Id = id });
@@ -181,35 +179,7 @@ public partial class TabManager
             else _dispatcherQueue.TryEnqueue(Application.Current.Exit);
         }
 
-        // FIX: CoreWebView2 COM objects MUST be interacted with on the UI thread.
-        // Moved Stop() and Close() entirely inside the DispatcherQueue to prevent RPC_E_WRONG_THREAD crashes.
-        if (_dispatcherQueue.HasThreadAccess)
-        {
-            try
-            {
-                wv.CoreWebView2?.Stop();
-                wv.Close();
-            }
-            catch (Exception ex)
-            {
-                Logger.Warning($"Disposal error: {ex.Message}");
-            }
-        }
-        else
-        {
-            _dispatcherQueue.TryEnqueue(DispatcherQueuePriority.Low, () =>
-            {
-                try
-                {
-                    wv.CoreWebView2?.Stop();
-                    wv.Close();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warning($"Disposal error: {ex.Message}");
-                }
-            });
-        }
+
     }
 
     internal void DetachAndCleanState(int id, WebView2 wv)
@@ -243,9 +213,8 @@ public partial class TabManager
             _acceleratorSubscriptions.Remove(id);
         }
 
-        try { _contentGrid?.Children.Remove(wv); } catch (Exception ex) { Logger.Debug("ContentGrid remove failed", ex); }
+        _registry?.DestroyTab(id);
 
-        _webViews.Remove(id);
         _zoomLevels.Remove(id);
         _internalPageTabs.Remove(id);
         _lastFaviconTimestamp.Remove(id);

@@ -1,42 +1,87 @@
-﻿using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using System;
-using TB.ViewModels;
-using Windows.Foundation;
-
 namespace TB.Controls;
 
-public partial class TabStripLayout : NonVirtualizingLayout
+/// <summary>
+/// Pure tab-width calculator and compression-state engine.
+///
+/// Inputs:  Available width (from WindowChromeLayout), tab count.
+/// Outputs: TabWidth (logical px), CompressionState.
+///
+/// No UI references. No window/OS APIs. No ViewModel dependencies.
+/// Called exclusively by TabStrip.xaml.cs, which then applies the results to the UI.
+/// </summary>
+public static class TabStripLayout
 {
-    protected override Size MeasureOverride(NonVirtualizingLayoutContext context, Size availableSize)
+    /// <summary>Result returned by <see cref="Compute"/>.</summary>
+    public readonly struct Result
     {
-        int tabCount = context.Children.Count;
-        if (tabCount == 0) return new Size(0, 30);
+        /// <summary>Width every tab should be set to (logical pixels).</summary>
+        public double TabWidth { get; init; }
 
-        double totalGap = (tabCount - 1) * 2;
-        double spaceForTabs = availableSize.Width - 40 - totalGap;
-        double finalWidth = Math.Clamp(spaceForTabs / tabCount, 40, 220);
+        /// <summary>Compression state that applies to ALL tabs at this width.</summary>
+        public TabCompressionState CompressionState { get; init; }
 
-        foreach (var child in context.Children)
-        {
-            child.Measure(new Size(finalWidth, 30));
-        }
-        return new Size(availableSize.Width, 30);
+        /// <summary>True when tabs have hit MinTabWidth and overflow is imminent.</summary>
+        public bool IsOverflow { get; init; }
     }
 
-    protected override Size ArrangeOverride(NonVirtualizingLayoutContext context, Size finalSize)
+    /// <summary>
+    /// Computes tab width and compression state from the available strip width and tab count.
+    ///
+    /// Compression stages (in order):
+    ///   Stage 1: width between MaxTabWidth and SquashedTabWidth   → Normal / Compressed
+    ///   Stage 2: width between SquashedTabWidth and MinTabWidth   → Squashed (title hidden)
+    ///   Stage 3: width == MinTabWidth and tabs still don't fit    → Overflow (floor hit)
+    /// </summary>
+    /// <param name="availableWidth">
+    ///     Logical pixel width available to the tab strip.
+    ///     Must already exclude window controls and drag rail (from WindowChromeLayout).
+    /// </param>
+    /// <param name="tabCount">Number of tabs currently open.</param>
+    public static Result Compute(double availableWidth, int tabCount)
     {
-        double x = 0;
-        foreach (var child in context.Children)
+        if (tabCount <= 0 || availableWidth <= 0)
+            return new Result { TabWidth = LayoutConst.MaxTabWidth, CompressionState = TabCompressionState.Normal };
+
+        // Total gap between tabs (N-1 gaps for N tabs)
+        double totalGap = (tabCount - 1) * LayoutConst.TabGap;
+
+        // Space left for tabs after reserving the new-tab (+) button and gaps
+        double spaceForTabs = availableWidth - LayoutConst.NewTabButtonWidth - totalGap;
+
+        // Raw per-tab width before clamping
+        double rawWidth = spaceForTabs / tabCount;
+
+        // Clamp to [MinTabWidth, MaxTabWidth]
+        double tabWidth = System.Math.Clamp(rawWidth, LayoutConst.MinTabWidth, LayoutConst.MaxTabWidth);
+
+        // Determine compression state from the clamped width
+        TabCompressionState state;
+        bool isOverflow = false;
+
+        if (tabWidth >= LayoutConst.SquashedTabWidth)
         {
-            double width = child.DesiredSize.Width;
-            child.Arrange(new Rect(x, 0, width, 30));
-
-            if (child is FrameworkElement fe && fe.DataContext is TabItemViewModel tab)
-                tab.IsSquashed = width <= 40;
-
-            x += width + 2;
+            // Stage 1: Normal or shrinking — title still visible
+            state = tabWidth >= LayoutConst.MaxTabWidth
+                ? TabCompressionState.Normal
+                : TabCompressionState.Compressed;
         }
-        return finalSize;
+        else if (tabWidth > LayoutConst.MinTabWidth)
+        {
+            // Stage 2: Title hidden, favicon-only
+            state = TabCompressionState.Squashed;
+        }
+        else
+        {
+            // Stage 3: Hit the absolute floor — overflow begins
+            state = TabCompressionState.Overflow;
+            isOverflow = rawWidth < LayoutConst.MinTabWidth;   // true only when truly overflowing
+        }
+
+        return new Result
+        {
+            TabWidth         = tabWidth,
+            CompressionState = state,
+            IsOverflow       = isOverflow
+        };
     }
 }

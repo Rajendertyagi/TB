@@ -18,6 +18,9 @@
 		<WindowsSdkTargetPlatformVersion>10.0.26100.0</WindowsSdkTargetPlatformVersion>
 		<MinimumWindowsVersion>10.0.19041.0</MinimumWindowsVersion>
 		<RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+
+		<!-- 🛡️ Suppress MVVM Toolkit AOT Warning -->
+		<NoWarn>$(NoWarn);MVVMTK0045</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>

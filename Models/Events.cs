@@ -34,3 +34,9 @@ public class TabMovedEventArgs : EventArgs
     public int FromIndex { get; init; }
     public int ToIndex { get; init; }
 }
+
+public class FindResultEventArgs : EventArgs
+{
+    public int ActiveMatchIndex { get; init; }
+    public int MatchCount { get; init; }
+}

@@ -18,9 +18,6 @@ public partial class ChromeViewModel : ObservableObject
     [ObservableProperty]
     private string urlText = "";
 
-    [ObservableProperty]
-    private double tabWidth = 180;
-
     public ObservableCollection<TabItemViewModel> Tabs { get; } = new();
 
     public ChromeViewModel(ITabManager tabManager, IServiceProvider serviceProvider)
@@ -40,6 +37,13 @@ public partial class ChromeViewModel : ObservableObject
             var tabVm = Tabs.FirstOrDefault(t => t.Id == e.Id);
             if (tabVm != null)
                 MutateTabs(() => Tabs.Remove(tabVm));
+        };
+
+        _tabManager.TabTitleChanged += (_, e) =>
+        {
+            var tabVm = Tabs.FirstOrDefault(t => t.Id == e.Id);
+            if (tabVm != null)
+                DispatchUI(() => tabVm.Title = e.Title);
         };
 
         _tabManager.TabSwitched += (_, e) =>
@@ -116,19 +120,4 @@ public partial class ChromeViewModel : ObservableObject
 
     [RelayCommand]
     private void Flags() => _tabManager.NavigateActiveTab(Routes.Flags);
-
-    public void RecalculateTabWidth(double availableWidth)
-    {
-        if (Tabs.Count == 0)
-            return;
-
-        double maxWidth = Layout.TabMaxWidth;
-        double minWidth = Layout.TabMinWidth;
-        double gap = Layout.TabInterTabGap;
-
-        double totalGaps = (Tabs.Count - 1) * gap;
-        double spaceForTabs = availableWidth - totalGaps - 40;
-
-        TabWidth = System.Math.Clamp(spaceForTabs / Tabs.Count, minWidth, maxWidth);
-    }
 }

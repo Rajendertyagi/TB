@@ -27,6 +27,16 @@ public partial class MainViewModel : ObservableObject
                 : $"{e.Title} - TB Browser";
         };
 
+        tabManager.TabTitleChanged += (_, e) =>
+        {
+            if (e.Id == tabManager.ActiveTabId)
+            {
+                WindowTitle = string.IsNullOrEmpty(e.Title) || e.Title == "New Tab"
+                    ? "TB Browser"
+                    : $"{e.Title} - TB Browser";
+            }
+        };
+
         tabManager.TabCreated += (_, _) => { };
         tabManager.TabsCleared += (_, _) => WindowTitle = "TB Browser";
     }

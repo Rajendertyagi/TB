@@ -1,5 +1,1 @@
-﻿{
-  "active": "nord",
-  "native": { "titleBarText": "#eceff4", "titleBarIconHover": "#88c0d0" },
-  "colors": { "bgApp": "#2e3440", "bgTitlebar": "#2e3440", "bgTab": "transparent", "bgTabHover": "#3b4252", "bgTabActive": "#434c5e", "bgInput": "#272c36", "textMain": "#eceff4", "textMuted": "#d8dee9", "textSubtle": "#4c566a", "accent": "#88c0d0", "accentSecondary": "#81a1c1", "accentPress": "#5e81ac", "success": "#a3be8c", "danger": "#bf616a", "borderCrisp": "#3b4252", "borderActive": "#88c0d0" }
-}
+{ "active": "nord", "native": { "titleBarText": "#eceff4", "titleBarIconHover": "#88c0d0" }, "colors": { "bgApp": "#2e3440", "bgTitlebar": "#2e3440", "bgTab": "transparent", "bgTabHover": "#3b4252", "bgTabActive": "#434c5e", "bgInput": "#272c36", "textMain": "#eceff4", "textMuted": "#d8dee9", "textSubtle": "#4c566a", "accent": "#88c0d0", "accentSecondary": "#81a1c1", "accentPress": "#5e81ac", "success": "#a3be8c", "danger": "#bf616a", "borderCrisp": "#3b4252", "borderActive": "#88c0d0", "white": "#ffffff" } }

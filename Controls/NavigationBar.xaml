@@ -6,14 +6,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid x:Name="NavBarGrid" Padding="8,4,8,6">
+    <Grid x:Name="NavBarGrid" Padding="4,4,4,4">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+        <!-- Left: Back, Forward, Reload, Home — 24×24, 4px spacing -->
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
             <Button Style="{StaticResource NavButtonStyle}" Command="{Binding BackCommand}">
                 <Path Data="{StaticResource IconBackData}" Style="{StaticResource NavIconPathStyle}"/>
             </Button>
@@ -28,14 +29,11 @@
             </Button>
         </StackPanel>
 
+        <!-- Center: Omnibar — 4px radius, 1px visible border, 28px height -->
         <Border x:Name="UrlBarBorder"
                 Grid.Column="1"
-                Height="{ThemeResource urlbarHeightLength}"
-                Background="{ThemeResource bgInputBrush}"
-                CornerRadius="99"
-                BorderThickness="0"
-                Margin="12,0,12,0"
-                VerticalAlignment="Center">
+                Style="{StaticResource UrlBarBorderStyle}"
+                Margin="8,0,8,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -46,25 +44,23 @@
                       Grid.Column="0"
                       Data="{StaticResource IconLockData}"
                       Style="{StaticResource SmallIconPathStyle}"
-                      Margin="12,0,8,0"
+                      Margin="10,0,6,0"
                       VerticalAlignment="Center"
-                      Opacity="0.6"/>
+                      Opacity="0.5"/>
 
                 <TextBox x:Name="UrlInput"
                          Grid.Column="1"
                          Text="{Binding UrlText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         Foreground="{ThemeResource textMainBrush}"
-                         VerticalAlignment="Center"
-                         Padding="0,0,16,0"
+                         Style="{StaticResource UrlBarInputStyle}"
+                         PlaceholderText="Search or enter address"
                          GotFocus="OnUrlInputGotFocus"
                          LostFocus="OnUrlInputLostFocus"
                          KeyDown="OnUrlInputKeyDown"/>
             </Grid>
         </Border>
 
-        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="2" VerticalAlignment="Center">
+        <!-- Right: Downloads, Settings, Flags, Menu — 4px spacing, 4px end margin -->
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
             <Button Style="{StaticResource NavButtonStyle}" Command="{Binding DownloadsCommand}">
                 <Path Data="{StaticResource IconDownloadData}" Style="{StaticResource NavIconPathStyle}"/>
             </Button>
@@ -80,14 +76,13 @@
                 <Button.Flyout>
                     <MenuFlyout Placement="BottomEdgeAlignedRight" MenuFlyoutPresenterStyle="{StaticResource TbMenuFlyoutPresenterStyle}">
                         <MenuFlyoutItem Text="Downloads" Command="{Binding DownloadsCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
-                        <MenuFlyoutItem Text="History" Command="{Binding HistoryCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
-                        <MenuFlyoutItem Text="Settings" Command="{Binding SettingsCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
+                        <MenuFlyoutItem Text="History"   Command="{Binding HistoryCommand}"   Style="{StaticResource TbMenuFlyoutItemStyle}"/>
+                        <MenuFlyoutItem Text="Settings"  Command="{Binding SettingsCommand}"  Style="{StaticResource TbMenuFlyoutItemStyle}"/>
                         <MenuFlyoutSeparator/>
-                        <MenuFlyoutItem Text="Flags" Command="{Binding FlagsCommand}" Style="{StaticResource TbMenuFlyoutItemStyle}"/>
+                        <MenuFlyoutItem Text="Flags"     Command="{Binding FlagsCommand}"     Style="{StaticResource TbMenuFlyoutItemStyle}"/>
                     </MenuFlyout>
                 </Button.Flyout>
             </Button>
         </StackPanel>
     </Grid>
 </UserControl>
-    

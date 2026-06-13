@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.Web.WebView2.Core;
@@ -55,13 +55,44 @@ public partial class TabManager
         core.FaviconChanged += handlers.FaviconChanged;
         core.ContextMenuRequested += handlers.ContextMenuRequested;
         core.DownloadStarting += (s, args) => HandleDownloadStarting(s, args, tabId);
+
+        try
+        {
+            var find = core.Find;
+            find.MatchCountChanged += (s, args) =>
+            {
+                if (tabId == _activeId)
+                {
+                    FindResultReceived?.Invoke(this, new FindResultEventArgs
+                    {
+                        ActiveMatchIndex = find.ActiveMatchIndex,
+                        MatchCount = find.MatchCount
+                    });
+                }
+            };
+            find.ActiveMatchIndexChanged += (s, args) =>
+            {
+                if (tabId == _activeId)
+                {
+                    FindResultReceived?.Invoke(this, new FindResultEventArgs
+                    {
+                        ActiveMatchIndex = find.ActiveMatchIndex,
+                        MatchCount = find.MatchCount
+                    });
+                }
+            };
+        }
+        catch (Exception ex)
+        {
+            Logger.Warn($"Failed to subscribe to Find events for tab {tabId}", ex);
+        }
     }
 
     private void HandleProcessFailed(int id, CoreWebView2ProcessFailedEventArgs args)
     {
-        if (!_webViews.ContainsKey(id)) return;
+        if (GetWebView(id) == null) return;
         Logger.Error($"WebView process failed for tab {id}: {args.Reason}");
-        if (_webViews.TryGetValue(id, out var wv))
+        var wv = GetWebView(id); if (wv != null)
         {
             try
             {
@@ -76,7 +107,7 @@ public partial class TabManager
 
     private void HandleNewWindowRequested(int id, CoreWebView2NewWindowRequestedEventArgs args)
     {
-        if (!_webViews.ContainsKey(id)) return;
+        if (GetWebView(id) == null) return;
         args.Handled = true;
         if (!string.IsNullOrEmpty(args.Uri)) _ = CreateTabInternalAsync(args.Uri, false);
     }
@@ -86,7 +117,7 @@ public partial class TabManager
         var tab = _tabs.FirstOrDefault(t => t.Id == id);
         if (tab == null) return;
 
-        // 🛡️ SECURITY & STATE MANAGEMENT
+        // ??? SECURITY & STATE MANAGEMENT
         // If the user clicks a standard web link INSIDE an internal page (e.g., clicking "Chromium" in the About page),
         // we must downgrade the tab from "Internal" to "Standard Web" so it behaves normally.
         if (tab.IsInternalPage && !UrlResolver.IsInternalUrl(args.Uri) && !args.Uri.StartsWith("file:///"))
@@ -97,7 +128,7 @@ public partial class TabManager
             // Unregister internal IPC handlers since it's now a public web page
             if (_ipcHandlers.TryGetValue(id, out var handler))
             {
-                if (_webViews.TryGetValue(id, out var wv))
+                var wv = GetWebView(id); if (wv != null)
                     wv.CoreWebView2.WebMessageReceived -= handler;
                 _ipcHandlers.Remove(id);
             }
@@ -112,11 +143,22 @@ public partial class TabManager
 
     private void HandleNavigationCompleted(int id)
     {
-        if (!_webViews.ContainsKey(id)) return;
+        if (GetWebView(id) == null) return;
+        
+        var tab = _tabs.FirstOrDefault(t => t.Id == id);
+        if (tab != null && (GetWebView(id) is {} wv))
+        {
+            var oldTitle = tab.Title;
+            var newTitle = wv.CoreWebView2?.DocumentTitle ?? tab.Title;
+            if (oldTitle != newTitle)
+            {
+                tab.Title = newTitle;
+                TabTitleChanged?.Invoke(this, new TabEventArgs { Id = id, Title = newTitle, Url = tab.Url });
+            }
+        }
+
         if (id == _activeId && !_disposed)
         {
-            var tab = _tabs.FirstOrDefault(t => t.Id == id);
-            if (tab != null && _webViews.TryGetValue(id, out var wv)) tab.Title = wv.CoreWebView2?.DocumentTitle ?? tab.Title;
             NavigationCompleted?.Invoke(this, EventArgs.Empty);
         }
         FireNavState(id);
@@ -124,19 +166,26 @@ public partial class TabManager
 
     private void HandleDocumentTitleChanged(int id, WebView2 webView)
     {
-        if (!_webViews.ContainsKey(id)) return;
+        if (GetWebView(id) == null) return;
         var tab = _tabs.FirstOrDefault(t => t.Id == id);
         if (tab != null && !tab.IsInternalPage)
         {
-            tab.Title = webView.CoreWebView2?.DocumentTitle ?? tab.Title;
-            tab.Url = webView.CoreWebView2?.Source?.ToString() ?? tab.Url;
-            ScheduleSaveSession();
+            var oldTitle = tab.Title;
+            var newTitle = webView.CoreWebView2?.DocumentTitle ?? tab.Title;
+            if (oldTitle != newTitle)
+            {
+                tab.Title = newTitle;
+                tab.Url = webView.CoreWebView2?.Source?.ToString() ?? tab.Url;
+                TabTitleChanged?.Invoke(this, new TabEventArgs { Id = id, Title = newTitle, Url = tab.Url });
+                ScheduleSaveSession();
+            }
         }
     }
 
     private void HandleSourceChanged(int id)
     {
-        if (!_webViews.TryGetValue(id, out var wv)) return;
+        var wv = GetWebView(id);
+        if (wv == null) return;
         var tab = _tabs.FirstOrDefault(t => t.Id == id);
         if (tab == null) return;
 
@@ -157,9 +206,9 @@ public partial class TabManager
 
     private async Task HandleFaviconChanged(int id, WebView2 webView)
     {
-        if (!_webViews.ContainsKey(id)) return;
+        if (GetWebView(id) == null) return;
 
-        // 🛡️ Thread marshalling: BitmapImage is a DependencyObject, must be created on UI thread
+        // ??? Thread marshalling: BitmapImage is a DependencyObject, must be created on UI thread
         if (!_dispatcherQueue.HasThreadAccess)
         {
             _dispatcherQueue.TryEnqueue(async () => await HandleFaviconChanged(id, webView));
@@ -189,7 +238,7 @@ public partial class TabManager
 
     private void HandleContextMenuRequested(int id, CoreWebView2ContextMenuRequestedEventArgs args)
     {
-        if (!_webViews.ContainsKey(id)) return;
+        if (GetWebView(id) == null) return;
 
         args.Handled = true;
 
@@ -241,12 +290,12 @@ public partial class TabManager
             Style = itemStyle,
             Command = new RelayCommand(() =>
             {
-                if (_webViews.TryGetValue(id, out var wv))
+                var wv = GetWebView(id); if (wv != null)
                     wv.CoreWebView2?.OpenDevToolsWindow();
             })
         });
 
-        if (_webViews.TryGetValue(id, out var wv))
+        var wv = GetWebView(id); if (wv != null)
         {
             var pt = new Point(args.Location.X, args.Location.Y);
             flyout.ShowAt(wv, pt);
@@ -255,7 +304,7 @@ public partial class TabManager
 
     internal void FireNavState(int id)
     {
-        if (_disposed || !_webViews.TryGetValue(id, out var wv)) return;
+        if (_disposed) return; var wv = GetWebView(id); if (wv == null) return;
         try
         {
             var core = wv.CoreWebView2;

@@ -1,1 +1,55 @@
-(function(){var c={},r=function(n,f){c[n]=f},h=function(e){var m=typeof e.data==='string'?JSON.parse(e.data):e.data;if(m&&m.c&&c[m.c])c[m.c](m.a)};window.__tb={register:r};window.addEventListener('message',h);r('zoom',function(a){document.body.style.zoom=a.v});r('hardReload',function(){location.reload(true)});r('print',function(){window.print()});r('scrollTop',function(){window.scrollTo(0,0)});r('scrollBottom',function(){window.scrollTo(0,document.body.scrollHeight)});r('cursorWordPrev',function(){var s=window.getSelection(),r=s.getRangeAt(0),nr=document.createRange(),n=r.startContainer;while(n.previousSibling){nr.setStart(n.previousSibling,0);break}s.removeAllRanges();s.addRange(nr)});r('cursorWordNext',function(){var s=window.getSelection(),r=s.getRangeAt(0),nr=document.createRange(),n=r.startContainer;while(n.nextSibling){nr.setStart(n.nextSibling,0);break}s.removeAllRanges();s.addRange(nr)});r('deleteWordPrev',function(){var s=window.getSelection(),r=s.getRangeAt(0),n=r.startContainer;if(n.nodeType===Node.TEXT_NODE){var t=n.textContent,b=t.substring(0,r.startOffset-1),a=t.substring(r.startOffset);n.textContent=b+a;r.setStart(n,b.length);s.removeAllRanges();s.addRange(r)}});r('findOpen',function(){window.__findOpen&&window.__findOpen()});r('findNext',function(){window.__findNext&&window.__findNext()});r('findPrev',function(){window.__findPrev&&window.__findPrev()});r('findClose',function(){window.__closeFindBar&&window.__closeFindBar()});r('findBar',function(){window.__findBar&&window.__findBar()});r('theme',function(a){window.__themeVariables=a.v});r('dispatchIpc',function(a){window.dispatchEvent(new MessageEvent('message',{data:a.d}))});})();
+(function () {
+    var c = {},
+        r = function (n, f) { c[n] = f; },
+        h = function (e) {
+            var m = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+            if (m && m.c && c[m.c]) c[m.c](m.a);
+        };
+
+    window.__tb = { register: r };
+
+    if (window.chrome && window.chrome.webview) {
+        window.chrome.webview.addEventListener('message', h);
+    } else {
+        window.addEventListener('message', h);
+    }
+
+    r('zoom', function (a) { document.body.style.zoom = a.v; });
+    r('hardReload', function () { location.reload(true); });
+    r('print', function () { window.print(); });
+    r('scrollTop', function () { window.scrollTo(0, 0); });
+    r('scrollBottom', function () { window.scrollTo(0, document.body.scrollHeight); });
+    
+    r('cursorWordPrev', function () {
+        var s = window.getSelection(), r = s.getRangeAt(0), nr = document.createRange(), n = r.startContainer;
+        while (n.previousSibling) { nr.setStart(n.previousSibling, 0); break; }
+        s.removeAllRanges();
+        s.addRange(nr);
+    });
+    
+    r('cursorWordNext', function () {
+        var s = window.getSelection(), r = s.getRangeAt(0), nr = document.createRange(), n = r.startContainer;
+        while (n.nextSibling) { nr.setStart(n.nextSibling, 0); break; }
+        s.removeAllRanges();
+        s.addRange(nr);
+    });
+    
+    r('deleteWordPrev', function () {
+        var s = window.getSelection(), r = s.getRangeAt(0), n = r.startContainer;
+        if (n.nodeType === Node.TEXT_NODE) {
+            var t = n.textContent, b = t.substring(0, r.startOffset - 1), a = t.substring(r.startOffset);
+            n.textContent = b + a;
+            r.setStart(n, b.length);
+            s.removeAllRanges();
+            s.addRange(r);
+        }
+    });
+
+    r('findOpen', function () { window.__findOpen && window.__findOpen(); });
+    r('findNext', function () { window.__findNext && window.__findNext(); });
+    r('findPrev', function () { window.__findPrev && window.__findPrev(); });
+    r('findClose', function () { window.__closeFindBar && window.__closeFindBar(); });
+    r('findBar', function () { window.__findBar && window.__findBar(); });
+    r('theme', function (a) { window.__themeVariables = a.v; });
+    r('dispatchIpc', function (a) { window.dispatchEvent(new MessageEvent('message', { data: a.d })); });
+})();
